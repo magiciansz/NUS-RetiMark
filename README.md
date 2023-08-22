@@ -3,7 +3,7 @@
 ## About
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/24ad58ac-3699-440c-a1cf-691e94e679fe)
 
-Hi! We are a group of NUS Students working with Retimark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases.
+Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases.
 
 For continuous integration, a [Github Action](https://github.com/features/actions) configuration `.github/workflows/main.yml` is included.
 
