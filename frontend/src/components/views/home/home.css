@@ -1,0 +1,29 @@
+.home-page {
+    .title {
+        font-size: 32px;
+        font-weight: 600;
+        color: #e76d27;
+    }
+    .images {
+        display: flex;
+    }
+    .images img {
+        height: 100px;
+        margin: 10px;
+    }
+    .run-test {
+        border: 1px #e76d27 solid;
+        background-color: #e76d27;
+        color: white;
+        width: 120px;
+        padding: 10px;
+        border-radius: 8px; 
+        margin-top: 10px;
+        cursor: pointer;
+    }
+
+    .run-test label {
+        cursor: pointer;
+    }
+    
+}
