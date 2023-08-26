@@ -1,7 +1,28 @@
-.navi{
+.navi {
     background: #e76d27;
+    display: flex;
+    align-items: center;
+    color: white;
 }
 
+.logo-container {
+    margin: 5px 0 5px 20px;
+}
+
+.tabs {
+    display: flex;
+    margin-left: 50px;
+}
+
+.tab {
+    margin-right: 50px;
+}
+
+.logout {
+    margin-left: auto;
+    margin-right: 20px;
+}
 body {
     margin: 0;
+    font-family: "circular",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 }

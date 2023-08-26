@@ -4,6 +4,8 @@ import './home.css';
 
 // import Placeholder from './ai.png';
 import Placeholder from '../../../css/imgs/ai.png';
+import Placeholder2 from '../../../css/imgs/img2.jpg';
+import Placeholder3 from '../../../css/imgs/img3.png';
 
 
 function Home() {
@@ -24,61 +26,59 @@ function Home() {
 
   return (
     <div className='home-page'>
+      <div className='info'>
         <div className='title'>
-          Retimark Eye Disease Predictor
+          Eye Disease Predictor
         </div>
         <div className='description'>
           Description of the predictor
         </div>
-        <br/>
+      </div>
+      <hr class="horizontal-line"></hr>
         <div className='image-input'>
           <div className='image-requirements'>
-            These are the requirements for the image:
-            <br/>
-            1. The image should not be pixelated
-            <br/>
-            2. Input image should follow the following examples 
+            The uploaded image should be in line with the following examples: 
           </div>
           <div className='images'>
-            <div>
+            <div className='image'>
               <img src={Placeholder} alt="Example" /> 
-              <div>
-                req 1 
+              <div className='req'>
+                clear image
               </div>
             </div>
-            <div>
-              <img src={Placeholder} alt="Example" /> 
-              <div>
-                req 2
+            <div className='image'>
+              <img src={Placeholder2} alt="Example" /> 
+              <div className='req'>
+                the eye is in the center of the image
               </div>
             </div>
-            <div>
-              <img src={Placeholder} alt="Example" /> 
-              <div>
-                req 3
+            <div className='image'>
+              <img src={Placeholder3} alt="Example" /> 
+              <div className='req'>
+                picture is not pixelated
               </div>
             </div>
           </div>
           <div className='select-image'>
-            {/* <div>
-              Select Image
-            </div> */}
-            <div className="run-test">
-              <label className="add-button">
-                <input type="file" style={{display:'none'}} accept=".jpg, .png" onChange={handleFileChange} />
-                <div className="text">
-                  Select Image
-                </div>
-              </label>
+   
+            <div className='buttons'>
+              <div className="run-test">
+                <label className="add-button">
+                  <input type="file" style={{display:'none'}} accept=".jpg, .png" onChange={handleFileChange} />
+                  <div className="text">
+                    Select Image
+                  </div>
+                </label>
+              </div>
+                {/* {previewImage && <div className='run-test'>
+                Run predictor
+              </div>} */}
             </div>
-            {previewImage && <img src={previewImage} alt="Preview" />}
+            {previewImage && <img src={previewImage} className='preview' alt="Preview" />}
           </div>
-          
-
-
-          <div className='run-test'>
+          {previewImage && <div className='run-test'>
             Run predictor
-          </div>
+          </div>}
         </div>
     </div>
   );

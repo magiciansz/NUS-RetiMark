@@ -11,9 +11,11 @@ const Navi = () => {
             className="logo"
         />
         </div>
-
-      Past reports
-      Logout
+      <div className='tabs'>
+        <div className='tab'>Predictor</div>
+        <div className='tab'>Past reports</div>
+      </div>
+      <div className="logout">Logout</div>
     </div>
   )
 }
