@@ -1,0 +1,26 @@
+name: Release
+
+on:
+# if its just a fix, we dont need to release a version.
+  workflow_dispatch:
+
+jobs:
+  release:
+  # specify permissions, allow the actions to write. the permissions are attached to the token, which is given to the semantic-versioning.
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run build
+      - run: npx semantic-release
+      # npx semantic release - triggers binaries within our node_modules, so we put a binary in the node_modules. 
+      # It needs permission to push and comment on pull requests / issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
