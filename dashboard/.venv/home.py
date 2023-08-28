@@ -41,6 +41,23 @@ with st.expander(label="Search and Filter", expanded=True):
 info, body = st.columns([0.2,0.8])
 with info:
     st.subheader("Patient Details")
+    st.text("Patient ID: " + selected_patient_id)
+    #query patient's age
+    temp_age = fundus_data[fundus_data['patient-id'] == selected_patient_id]['age'].to_string(index=False)
+    st.text("Age: " + temp_age)
+    #query patient's sex
+    temp_sex = fundus_data[fundus_data['patient-id'] == selected_patient_id]['sex'].to_string(index=False)
+    st.text("Sex: " + temp_sex)
+    #query symptoms
+    temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['symptoms'].to_string(index=False)
+    st.text("Observed Symptoms: \n" + temp_symptoms)
+    left, right = st.columns(2)
+    with left:
+        temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
+        st.text("Left Fundus")
+        st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", width=200)
+        st.text("Right Fundus")
+        st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", width=200)
 with body:
     tab1, tab2, tab3 = st.tabs(stages)
     with tab1:
