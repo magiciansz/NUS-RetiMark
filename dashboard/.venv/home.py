@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import random
 # import matplotlib.pyplot as plt
 
 # Create some sample data
@@ -11,11 +12,24 @@ data = pd.DataFrame({
 })
 fundus_data = pd.read_csv("../test-data/sample_fundus_data.csv")
 
+#helper functions
+def query_risk(dataset, patient_id, disease, laterality, stage):
+    code = ""
+    if (disease == 'Diabetic Retinopathy'):
+        code = 'd'
+    elif (disease == 'Age-related Macular Degeneration'):
+        code = 'a'
+    elif (disease == 'Glaucoma'):
+        code = 'g'
+    risk_col = code + '-stage' + str(stage) + '-' +laterality + '-risk'
+    req_risk = dataset[dataset['patient-id'] == patient_id][risk_col]
+    return req_risk
+
 #demo variables
 patient_ids = fundus_data["patient-id"]
 disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
 # risk_levels = ['High', 'Medium', 'Low']
-stages = ['Stage 1', 'Stage 2', 'Stage 3']
+stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
 
 # Streamlit app
 st.set_page_config(
@@ -24,7 +38,7 @@ st.set_page_config(
     layout="wide"
 )
 st.title('RetiMark Fundus Dashboard')
-selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
+# selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
 
 # Filters
 with st.expander(label="Search and Filter", expanded=True):
@@ -61,16 +75,30 @@ with info:
 with body:
     tab1, tab2, tab3 = st.tabs(stages)
     with tab1:
-        st.header("A cat")
-        st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
-
+        col1, col2, col3 = st.columns(3)
+        right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
+        left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
+        overall_risk = (right_risk+left_risk)/2
+        col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+        col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+        col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
     with tab2:
-        st.header("A dog")
-        st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
+        col1, col2, col3 = st.columns(3)
+        right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 2)*100
+        left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 2)*100
+        overall_risk = (right_risk+left_risk)/2
+        col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+        col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+        col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 
     with tab3:
-        st.header("An owl")
-        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+        col1, col2, col3 = st.columns(3)
+        right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 3)*100
+        left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 3)*100
+        overall_risk = (right_risk+left_risk)/2
+        col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+        col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+        col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 # filtered_data = data[data['Category'] == selected_category]
 
 # # Placeholder line chart
@@ -85,3 +113,4 @@ with body:
 # # Show the data
 # st.subheader('Filtered Data')
 # st.write(filtered_data)
+
