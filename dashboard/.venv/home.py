@@ -64,15 +64,21 @@ with info:
     st.text("Sex: " + temp_sex)
     #query symptoms
     temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['symptoms'].to_string(index=False)
-    st.text("Observed Symptoms: \n" + temp_symptoms)
-    left, right = st.columns(2)
-    with left:
-        temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
-        st.text("Left Fundus")
-        st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", width=200)
-        st.text("Right Fundus")
-        st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", width=200)
+    st.text("Doctor's Note: \n" + temp_symptoms)
+    #query date
+    temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
+    st.text("Fundus Image Last Upload Date: \n" + temp_symptoms)
+    
 with body:
+    with st.expander(label="Fundus Images", expanded=True):
+        left, right = st.columns(2)
+        temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
+        with left:
+            st.subheader("Left Fundus Image")
+            st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+        with right:
+            st.subheader("Right Fundus Image")
+            st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
     tab1, tab2, tab3 = st.tabs(stages)
     with tab1:
         col1, col2, col3 = st.columns(3)
