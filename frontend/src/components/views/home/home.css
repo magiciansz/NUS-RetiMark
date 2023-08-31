@@ -11,35 +11,53 @@
     }
     .images img {
         height: 100px;
-        margin: 10px;
+        /* margin: 10px; */
+        margin: 10px 10px 20px 10px;
+    }
+    .image:hover {
+        transform: scale(1.05);
     }
     .run-test {
         border: 1px #e76d27 solid;
         background-color: #e76d27;
         color: white;
-        width: 150px;
+        /* width: 150px; */
+        width: 400px;
         padding: 10px;
         border-radius: 8px; 
         /* margin-top: 10px; */
         cursor: pointer;
         /* margin-bottom: 40px; */
-        margin: 10px 20px 40px 0;
+        margin: 10px 20px 10px 0;
+        text-align: center;
+    }
+    .run-test:hover {
+        background-color: #e76d27c7;
     }
 
     .run-test label {
         cursor: pointer;
     }
     .info {
-        /* background: #cbc8c68f; */
-        padding: 40px 0 0 20px;
-        height: 200px
+        /* padding: 40px 0 0 20px; */
+        height: 230px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        background-color: #f9d1b9c7;
     }
     .horizontal-line {
         /* background: black; */
         /* border: 1px solid #e76d27; */
     }
     .image-input {
-        padding: 20px 0 0 20px;
+        /* padding: 20px 0 0 20px; */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+    
     }
     .image-requirements {
         margin-bottom: 20px;
@@ -55,12 +73,31 @@
         align-items: center;
         text-align: center;
         padding: 10px;
+        /* height: 250px; */
+        
     }
     .preview {
         height: 150px;
+        margin-bottom: 20px;
     }
     .buttons {
         display: flex;
+    }
+    .header {
+        font-size: 26px;
+        font-weight: 700;
+        color: #e76d27;
+        margin-bottom: 20px;
+    }
+    .select-image {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+    .description {
+        width: 80%;
+        padding: 10px 0 10px 0; 
+        color: #000000c7;
     }
     
 }
