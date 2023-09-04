@@ -1,12 +1,6 @@
-# Dependencies
-node_modules
-
-# yarn error logs
+/node_modules
+/vendor
+npm-debug.log
 yarn-error.log
-
-# Environment varibales
-.env*
-!.env*.example
-
-# Code coverage
-coverage
+.env
+.DS_Store
