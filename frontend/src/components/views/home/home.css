@@ -99,5 +99,24 @@
         padding: 10px 0 10px 0; 
         color: #000000c7;
     }
-    
+    .new-prediction {
+        border: 1px #e76d27 solid;
+        background-color: #e76d27;
+        color: white;
+        width: 400px;
+        padding: 10px;
+        border-radius: 8px; 
+        cursor: pointer;
+        /* margin: 10px 20px 10px 0; */
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    .new-prediction:hover {
+        background-color: #e76d27c7;
+    }
+    .prediction-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
 }

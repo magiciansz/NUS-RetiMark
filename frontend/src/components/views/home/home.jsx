@@ -40,6 +40,14 @@ function Home() {
     setShowReport(true);
   };
 
+  
+  const handleNewPrediction = () => {
+    setSelectedFile(null)
+    setPreviewImage(null)
+    setPatient()
+    setShowReport(false);
+  };
+
 
   // useEffect(() => {
   //     if (previewImage) {
@@ -112,7 +120,18 @@ function Home() {
             </div>}
           </div>
         </div>}
+        {/* <div className='prediction-container'>
+          {showReport && <div className='new-prediction' onClick={handleNewPrediction}>
+            Make a new prediction
+          </div>}
+        </div> */}
         {showReport && <Report patient={patient} image={previewImage}/>}
+        <div className='prediction-container'>
+          {showReport && <div className='new-prediction' onClick={handleNewPrediction}>
+            Make a new prediction
+          </div>}
+        </div>
+        
     </div>
   );
 }
