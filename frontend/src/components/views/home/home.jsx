@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 // import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+
+
 import './home.css';
 
+import Report from './report'
 // import Placeholder from './ai.png';
 import Placeholder from '../../../css/imgs/ai.png';
 import Placeholder2 from '../../../css/imgs/img2.jpg';
@@ -11,6 +15,8 @@ import Placeholder3 from '../../../css/imgs/img3.png';
 function Home() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [showReport, setShowReport] = useState(false);
+  const [patient, setPatient] = useState()
   // const scrollToRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -19,11 +25,19 @@ function Home() {
       setSelectedFile(file);
       setPreviewImage(URL.createObjectURL(file));
       // scrollToRef.current.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      setSelectedFile(null);
-      setPreviewImage(null);
-      alert('Please select a valid JPEG or PNG image file.');
     }
+    // } else {
+    //   setSelectedFile(null);
+    //   setPreviewImage(null);
+    //   alert('Please select a valid JPEG or PNG image file.');
+    // }
+  };
+  const runPredictor = () => {
+    // Perform image analysis and generate a report
+    // Set the report data or state
+
+    // Show the report when "Run predictor" action occurs
+    setShowReport(true);
   };
 
 
@@ -44,7 +58,7 @@ function Home() {
         </div>
       </div>
       {/* <hr class="horizontal-line"></hr> */}
-        <div className='image-input'>
+        {!showReport && <div className='image-input'>
           <div className='image-requirements'>
             To start, simply upload an image.
             
@@ -71,10 +85,18 @@ function Home() {
             </div>
           </div>
           <div className='select-image'>
+            <input
+                type="text"
+                placeholder="Search patient"
+                onChange={(e) => setPatient(e.target.value)}
+                // value={searchQuery}
+              />
+            {/* <button>Search</button> */}
             {previewImage && <div className='header'>
-              Your selected image:
+              Your selected image for {patient}:
             </div>}
             {previewImage && <img src={previewImage} className='preview' alt="Preview" />}
+            
             <div className='buttons'>
               <div className="run-test">
                 <label className="add-button">
@@ -85,16 +107,12 @@ function Home() {
                 </label>
               </div>
             </div>
-            {previewImage && <div className='run-test'>
-              Run predictor
+            {previewImage && <div className='run-test' onClick={runPredictor}>
+                Run predictor
             </div>}
-            
-            
           </div>
-          {/* {previewImage && <div className='run-test'>
-            Run predictor
-          </div>} */}
-        </div>
+        </div>}
+        {showReport && <Report patient={patient} image={previewImage}/>}
     </div>
   );
 }
