@@ -40,19 +40,21 @@ st.set_page_config(
 st.title('RetiMark Fundus Dashboard')
 # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
 
-# Filters
-with st.expander(label="Search and Filter", expanded=True):
-    filter1, filter2 = st.columns(2)
-    with filter1:
-        selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
-    with filter2:
-        selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
-    # with filter2:
-    #     selected_risk_level = st.selectbox(label='Risk Level', options=risk_levels, help='Select desired risk level')
-    # with filter3:
-    #     selected_stage = st.selectbox(label='Stage', options=stages, help='select desired disease stage')
+#old filter code without sidebar
+# # Filters
+# with st.expander(label="Search and Filter", expanded=True):
+#     filter1, filter2 = st.columns(2)
+#     with filter1:
+#         selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
+#     with filter2:
+#         selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
 
-info, body = st.columns([0.2,0.8])
+
+# Filters
+selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
+selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
+
+info, body = st.columns([0.5,0.5])
 with info:
     st.subheader("Patient Details")
     st.text("Patient ID: " + selected_patient_id)
