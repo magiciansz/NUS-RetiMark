@@ -37,24 +37,36 @@ st.set_page_config(
     page_icon=":eye:",
     layout="wide"
 )
+# st.markdown(
+#             f'''
+#             <style>
+#                 .reportview-container .sidebar-content {{
+#                     padding-top: {1}rem;
+#                 }}
+#                 .reportview-container .main .block-container {{
+#                     padding-top: {1}rem;
+#                 }}
+#             </style>
+#             ''',unsafe_allow_html=True)
+
 st.title('RetiMark Fundus Dashboard')
 # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
 
-#old filter code without sidebar
-# # Filters
-# with st.expander(label="Search and Filter", expanded=True):
-#     filter1, filter2 = st.columns(2)
-#     with filter1:
-#         selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
-#     with filter2:
-#         selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
+# old filter code without sidebar
+# Filters
+with st.expander(label="Search and Filter", expanded=True):
+    filter1, filter2 = st.columns(2)
+    with filter1:
+        selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
+    with filter2:
+        selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
 
 
 # Filters
-selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
-selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
+# selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
+# selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
 
-info, body = st.columns([0.5,0.5])
+info, images = st.columns([0.3,0.7])
 with info:
     st.subheader("Patient Details")
     st.text("Patient ID: " + selected_patient_id)
@@ -70,17 +82,22 @@ with info:
     #query date
     temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
     st.text("Fundus Image Last Upload Date: \n" + temp_symptoms)
+
+with images:
+    st.expander(label="View fundus images", expanded=True)
+    # st.subheader("Fundus Images")
+    left, right = st.columns(2)
+    temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
+    with left:
+        st.caption("Left")
+        st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+    with right:
+        st.caption("Right")
+        st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+
     
-with body:
-    with st.expander(label="Fundus Images", expanded=True):
-        left, right = st.columns(2)
-        temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
-        with left:
-            st.subheader("Left Fundus Image")
-            st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
-        with right:
-            st.subheader("Right Fundus Image")
-            st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+metrics, chart = st.columns([0.5,0.5])    
+with metrics:
     tab1, tab2, tab3 = st.tabs(stages)
     with tab1:
         col1, col2, col3 = st.columns(3)
