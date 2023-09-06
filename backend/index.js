@@ -16,6 +16,7 @@ const router = express.Router();
 //Loading Routes
 const webRoutes = require("./routes/web");
 const sequelize = require("./config/database");
+
 const errorController = require("./app/controllers/ErrorController");
 
 env.config();
@@ -56,8 +57,20 @@ app.use(express.static(path.join(__dirname, "public")));
 // app.set("view engine", "hbs");
 // app.set("views", "views");
 
+app.use(express.json()); // Add this middleware to parse JSON data
 app.use(webRoutes);
 app.use(errorController.pageNotFound);
+
+const errorHandler = (error, req, res, next) => {
+  error.statusCode = error.statusCode || 500;
+  error.status = error.status || `error`;
+  res.status(error.statusCode).json({
+    status: error.statusCode,
+    message: error.message,
+  });
+};
+
+app.use(errorHandler);
 
 sequelize
   //.sync({force : true})
