@@ -6,8 +6,8 @@ import random
 
 # Create some sample data
 chart_data = pd.DataFrame(
-    np.random.randn(20, 3),
-    columns=['a', 'b', 'c'])
+    np.random.randn(20, 2),
+    columns=['left', 'right'])
 fundus_data = pd.read_csv("../test-data/sample_fundus_data.csv")
 
 #helper functions
@@ -50,6 +50,7 @@ st.set_page_config(
 st.title('RetiMark Fundus Dashboard')
 # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
 
+
 # old filter code without sidebar
 # Filters
 with st.expander(label="Search and Filter", expanded=True):
@@ -64,7 +65,8 @@ with st.expander(label="Search and Filter", expanded=True):
 # selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
 # selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
 
-info, overview, images = st.columns([0.2, 0.2, 0.6])
+info, left, right = st.columns([0.35, 0.275, 0.275])
+temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
 with info:
     st.subheader("Patient Details")
     st.text("Patient ID: " + selected_patient_id)
@@ -80,8 +82,13 @@ with info:
     #query date
     temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
     st.text("Fundus Image Last Upload Date: \n" + temp_symptoms)
-with overview:
-    st.subheader("Overview")
+    st.subheader("Risk Trend")
+    st.line_chart(chart_data)
+with left:
+    st.subheader("Left")
+    st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+    # st.caption("Left")
+    
     right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
     left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
     overall_risk = (right_risk+left_risk)/2
@@ -89,50 +96,61 @@ with overview:
     st.metric("Most Probable Stage", 2)
     st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
     st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-with images:
-    st.subheader("Fundus Images")
+with right:
+    st.subheader("Right")
+    st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+    # st.caption("Right")
+    
+    right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
+    left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
+    overall_risk = (right_risk+left_risk)/2
+    # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    st.metric("Most Probable Stage", 2)
+    st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    # st.subheader("Fundus Images")
     # with st.expander(label="View fundus images", expanded=True):
-    left, right = st.columns(2)
-    temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
-    with left:
-        st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
-        st.caption("Left")
-    with right:
-        st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
-        st.caption("Right")
+    # left, right = st.columns(2)
+    
+    # with left:
+    #     st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+    #     st.caption("Left")
+    # with right:
+    #     st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+    #     st.caption("Right")
 
     
-metrics, chart = st.columns([0.5,0.5])    
-with metrics:
-    tab1, tab2, tab3 = st.tabs(stages)
-    with tab1:
-        col1, col2, col3 = st.columns(3)
-        right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
-        left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
-        overall_risk = (right_risk+left_risk)/2
-        col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-        col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-        col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    with tab2:
-        col1, col2, col3 = st.columns(3)
-        right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 2)*100
-        left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 2)*100
-        overall_risk = (right_risk+left_risk)/2
-        col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-        col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-        col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+# metrics, chart = st.columns([0.5,0.5])    
+# with metrics:
+#     tab1, tab2, tab3 = st.tabs(stages)
+#     with tab1:
+#         col1, col2, col3 = st.columns(3)
+#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
+#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
+#         overall_risk = (right_risk+left_risk)/2
+#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#     with tab2:
+#         col1, col2, col3 = st.columns(3)
+#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 2)*100
+#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 2)*100
+#         overall_risk = (right_risk+left_risk)/2
+#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 
-    with tab3:
-        col1, col2, col3 = st.columns(3)
-        right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 3)*100
-        left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 3)*100
-        overall_risk = (right_risk+left_risk)/2
-        col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-        col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-        col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#     with tab3:
+#         col1, col2, col3 = st.columns(3)
+#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 3)*100
+#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 3)*100
+#         overall_risk = (right_risk+left_risk)/2
+#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 
-with chart:
-    st.line_chart(chart_data)
+# with chart:
+#     st.line_chart(chart_data)
 # filtered_data = data[data['Category'] == selected_category]
 
 # # Placeholder line chart
