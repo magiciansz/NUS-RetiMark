@@ -75,7 +75,7 @@ const Patient = sequelize.define(
     right_glaucoma: {
       type: DataTypes.TINYINT,
     },
-    updatedDate: {
+    last_upload_date: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
