@@ -5,11 +5,9 @@ import random
 # import matplotlib.pyplot as plt
 
 # Create some sample data
-data = pd.DataFrame({
-    'Date': pd.date_range(start='2023-01-01', periods=10, freq='D'),
-    'Value': np.random.randint(10, 100, 10),
-    'Category': np.random.choice(['A', 'B', 'C'], 10)
-})
+chart_data = pd.DataFrame(
+    np.random.randn(20, 3),
+    columns=['a', 'b', 'c'])
 fundus_data = pd.read_csv("../test-data/sample_fundus_data.csv")
 
 #helper functions
@@ -66,7 +64,7 @@ with st.expander(label="Search and Filter", expanded=True):
 # selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
 # selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
 
-images, info = st.columns([0.6,0.4])
+info, overview, images = st.columns([0.2, 0.2, 0.6])
 with info:
     st.subheader("Patient Details")
     st.text("Patient ID: " + selected_patient_id)
@@ -82,18 +80,26 @@ with info:
     #query date
     temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
     st.text("Fundus Image Last Upload Date: \n" + temp_symptoms)
-
+with overview:
+    st.subheader("Overview")
+    right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
+    left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
+    overall_risk = (right_risk+left_risk)/2
+    # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    st.metric("Most Probable Stage", 2)
+    st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 with images:
     st.subheader("Fundus Images")
-    with st.expander(label="View fundus images", expanded=True):
-        left, right = st.columns(2)
-        temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
-        with left:
-            st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
-            st.caption("Left")
-        with right:
-            st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
-            st.caption("Right")
+    # with st.expander(label="View fundus images", expanded=True):
+    left, right = st.columns(2)
+    temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
+    with left:
+        st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+        st.caption("Left")
+    with right:
+        st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+        st.caption("Right")
 
     
 metrics, chart = st.columns([0.5,0.5])    
@@ -124,6 +130,9 @@ with metrics:
         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+
+with chart:
+    st.line_chart(chart_data)
 # filtered_data = data[data['Category'] == selected_category]
 
 # # Placeholder line chart
