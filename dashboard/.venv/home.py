@@ -66,7 +66,7 @@ with st.expander(label="Search and Filter", expanded=True):
 # selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
 # selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
 
-info, images = st.columns([0.3,0.7])
+images, info = st.columns([0.6,0.4])
 with info:
     st.subheader("Patient Details")
     st.text("Patient ID: " + selected_patient_id)
@@ -84,16 +84,16 @@ with info:
     st.text("Fundus Image Last Upload Date: \n" + temp_symptoms)
 
 with images:
-    st.expander(label="View fundus images", expanded=True)
-    # st.subheader("Fundus Images")
-    left, right = st.columns(2)
-    temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
-    with left:
-        st.caption("Left")
-        st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
-    with right:
-        st.caption("Right")
-        st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+    st.subheader("Fundus Images")
+    with st.expander(label="View fundus images", expanded=True):
+        left, right = st.columns(2)
+        temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
+        with left:
+            st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+            st.caption("Left")
+        with right:
+            st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+            st.caption("Right")
 
     
 metrics, chart = st.columns([0.5,0.5])    
