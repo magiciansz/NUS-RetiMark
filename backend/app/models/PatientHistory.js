@@ -74,7 +74,7 @@ const PatientHistory = sequelize.define(
     right_glaucoma: {
       type: DataTypes.TINYINT,
     },
-    createdDate: {
+    created_date: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },

@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `PatientTbl` (
     `right_ocular` TINYINT,
     `left_glaucoma` TINYINT,
     `right_glaucoma` TINYINT,
-    `updatedDate` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `last_upload_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`)
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `PatientHistoryTbl` (
     `right_ocular` TINYINT,
     `left_glaucoma` TINYINT,
     `right_glaucoma` TINYINT,
-    `createdDate` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `created_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`, `version`)
 );
 
