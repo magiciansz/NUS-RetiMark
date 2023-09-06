@@ -48,13 +48,6 @@ function Home() {
     setShowReport(false);
   };
 
-
-  // useEffect(() => {
-  //     if (previewImage) {
-  //         scrollToRef.current.scrollIntoView({ behavior: 'smooth' });
-  //     }
-  // }, [previewImage]);
-
   return (
     <div className='home-page'>
       <div className='info'>
@@ -65,7 +58,6 @@ function Home() {
         The OcularRisk AI Predictor is a cutting-edge platform meticulously designed to analyze medical images of the eye with unparalleled precision. Leveraging the capabilities of advanced artificial intelligence, this system conducts a thorough examination of submitted ocular images to offer insightful predictions regarding potential ocular diseases.
         </div>
       </div>
-      {/* <hr class="horizontal-line"></hr> */}
         {!showReport && <div className='image-input'>
           <div className='image-requirements'>
             To start, simply upload an image.
@@ -120,11 +112,6 @@ function Home() {
             </div>}
           </div>
         </div>}
-        {/* <div className='prediction-container'>
-          {showReport && <div className='new-prediction' onClick={handleNewPrediction}>
-            Make a new prediction
-          </div>}
-        </div> */}
         {showReport && <Report patient={patient} image={previewImage}/>}
         <div className='prediction-container'>
           {showReport && <div className='new-prediction' onClick={handleNewPrediction}>

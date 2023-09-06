@@ -24,5 +24,23 @@
         max-height: 150px;
         margin-top: 10px;
     }
-    
+}
+.download-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    .button {
+        border: 1px #e76d27 solid;
+        background-color: #e76d27;
+        color: white;
+        width: 400px;
+        padding: 10px;
+        border-radius: 8px; 
+        cursor: pointer;
+        /* margin: 10px 20px 10px 0; */
+        text-align: center;
+    }
+    .button:hover {
+        background-color: #e76d27c7;
+    }
 }
