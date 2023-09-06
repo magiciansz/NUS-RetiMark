@@ -49,7 +49,11 @@ st.set_page_config(
 
 st.title('RetiMark Fundus Dashboard')
 # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
+st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
 
+if st.sidebar.button('Log in', type="primary"):
+    st.sidebar.write('Welcome, Dr. Swift')
+st.sidebar.button("Sign out", type="secondary")
 
 # old filter code without sidebar
 # Filters
@@ -69,21 +73,22 @@ info, left, right = st.columns([0.35, 0.275, 0.275])
 temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
 with info:
     st.subheader("Patient Details")
-    st.text("Patient ID: " + selected_patient_id)
+    # st.write("**Patient ID:**" + selected_patient_id)
+    st.write(f"**Patient ID:** {selected_patient_id}")
+    # st.write(selected_patient_id)
     #query patient's age
     temp_age = fundus_data[fundus_data['patient-id'] == selected_patient_id]['age'].to_string(index=False)
-    st.text("Age: " + temp_age)
+    st.write(f"**Age:** {temp_age}")
     #query patient's sex
     temp_sex = fundus_data[fundus_data['patient-id'] == selected_patient_id]['sex'].to_string(index=False)
-    st.text("Sex: " + temp_sex)
+    st.write(f"**Sex:** {temp_sex}")
     #query symptoms
     temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['symptoms'].to_string(index=False)
-    st.text("Doctor's Note: \n" + temp_symptoms)
+    st.write(f"**Notes:** {temp_symptoms}")
     #query date
-    temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
-    st.text("Fundus Image Last Upload Date: \n" + temp_symptoms)
-    st.subheader("Risk Trend")
-    st.line_chart(chart_data)
+    temp_date = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
+    st.write(f"**Last Upload Date:** {temp_date}")
+    
 with left:
     st.subheader("Left")
     st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
@@ -93,9 +98,13 @@ with left:
     left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
     overall_risk = (right_risk+left_risk)/2
     # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    st.metric("Most Probable Stage", 2)
-    st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    stage, risk = st.columns([0.5, 0.5])
+    with stage:
+        st.metric("Most Probable Stage", 2)
+    # st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    with risk:
+        st.metric("Left Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    # st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 with right:
     st.subheader("Right")
     st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
@@ -105,9 +114,12 @@ with right:
     left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
     overall_risk = (right_risk+left_risk)/2
     # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    st.metric("Most Probable Stage", 2)
-    st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    stage, risk = st.columns([0.5, 0.5])
+    with stage:
+        st.metric("Most Probable Stage", 2)
+    # st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    with risk:
+        st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
     # st.subheader("Fundus Images")
     # with st.expander(label="View fundus images", expanded=True):
     # left, right = st.columns(2)
@@ -118,7 +130,9 @@ with right:
     # with right:
     #     st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
     #     st.caption("Right")
-
+st.divider()
+st.subheader("Risk Trend")
+st.line_chart(chart_data)
     
 # metrics, chart = st.columns([0.5,0.5])    
 # with metrics:
