@@ -11,6 +11,7 @@ const DB_PASSWORD = process.env.DB_PASSWORD;
 const sequelize = new Sequelize(DB_DATABASE, DB_USERNAME, DB_PASSWORD, {
   dialect: "mysql",
   host: DB_HOST,
+  port: DB_PORT,
   define: {
     timestamps: false,
   },
