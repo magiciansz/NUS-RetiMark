@@ -49,3 +49,6 @@ tmp_email/
 .direnv
 .envrc
 .tool-versions
+
+#secrets manager for streamlit dashboard
+/dashboard/.venv/.streamlit/secrets.toml
