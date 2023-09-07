@@ -1,41 +1,33 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import random
 # import matplotlib.pyplot as plt
 
 # Create some sample data
-data = pd.DataFrame({
-    'Date': pd.date_range(start='2023-01-01', periods=10, freq='D'),
-    'Value': np.random.randint(10, 100, 10),
-    'Category': np.random.choice(['A', 'B', 'C'], 10)
-})
+chart_data = pd.DataFrame(
+    np.random.randn(20, 2),
+    columns=['left', 'right'])
+fundus_data = pd.read_csv("../test-data/sample_fundus_data.csv")
+
+#helper functions
+def query_risk(dataset, patient_id, disease, laterality, stage):
+    code = ""
+    if (disease == 'Diabetic Retinopathy'):
+        code = 'd'
+    elif (disease == 'Age-related Macular Degeneration'):
+        code = 'a'
+    elif (disease == 'Glaucoma'):
+        code = 'g'
+    risk_col = code + '-stage' + str(stage) + '-' +laterality + '-risk'
+    req_risk = dataset[dataset['patient-id'] == patient_id][risk_col]
+    return req_risk
 
 #demo variables
-patient_ids = [
-    'A1B3C7D', 'E2F4G8H', 'I3J5K9L', 'M4N6P0Q', 'R5S7T1U',
-    'V6W8X2Y', 'Z7A9B3C', 'D8E0F4G', 'H9I1J5K', 'L0M2N6P',
-    'Q1R3S7T', 'U2V4W8X', 'Y3Z5A9B', 'C4D6E0F', 'G5H7I1J',
-    'K6L8M2N', 'P9Q1R3S', 'T0U2V4W', 'X3Y5Z7A', 'B4C6D8E',
-    'F5G7H9I', 'J6K8L0M', 'N9P1Q3R', 'S2T4U6V', 'W7X9Y1Z',
-    'A3B5C7D', 'E6F8G0H', 'I2J4K6L', 'M0N2P4Q', 'R8S0T2U',
-    'V4W6X8Y', 'Z1A3B5C', 'D7E9F1G', 'H5I7J9K', 'L3M5N7P',
-    'Q1R3S5T', 'U7V9W1X', 'Y5Z7A9B', 'C3D5E7F', 'G9H1I3J',
-    'K5L7M9N', 'P1Q3R5S', 'T7U9V1W', 'X5Y7Z9A', 'B3C5D7E',
-    'F9G1H3I', 'J5K7L9M', 'N1P3Q5R', 'S7T9U1V', 'W5X7Y9Z',
-    'A2B4C6D', 'E0F2G4H', 'I8J0K2L', 'M4N6P8Q', 'R2S4T6U',
-    'V0W2X4Y', 'Z8A0B2C', 'D6E8F0G', 'H4I6J8K', 'L2M4N6P',
-    'Q0R2S4T', 'U8V0W2X', 'Y6Z8A0B', 'C4D6E8F', 'G2H4I6J',
-    'K0L2M4N', 'P8Q0R2S', 'T6U8V0W', 'X4Y6Z8A', 'B2C4D6E',
-    'F0G2H4I', 'J8K0L2M', 'N6P8Q0R', 'S4T6U8V', 'W2X4Y6Z',
-    'A9B1C3D', 'E7F9G1H', 'I5J7K9L', 'M3N5P7Q', 'R1S3T5U',
-    'V9W1X3Y', 'Z7A9B1C', 'D5E7F9G', 'H3I5J7K', 'L1M3N5P',
-    'Q9R1S3T', 'U7V9W1X', 'Y5Z7A9B', 'C3D5E7F', 'G1H3I5J',
-    'K9L1M3N', 'P7Q9R1S', 'T5U7V9W', 'X3Y5Z7A', 'B1C3D5E',
-    'F9G1H3I', 'J7K9L1M', 'N5P7Q9R', 'S3T5U7V', 'W1X3Y5Z'
-]
+patient_ids = fundus_data["patient-id"]
 disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
-risk_levels = ['High', 'Medium', 'Low']
-stages = ['Stage 1', 'Stage 2', 'Stage 3']
+# risk_levels = ['High', 'Medium', 'Low']
+stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
 
 # Streamlit app
 st.set_page_config(
@@ -43,37 +35,136 @@ st.set_page_config(
     page_icon=":eye:",
     layout="wide"
 )
-st.title('RetiMark Fundus Dashboard')
-selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
+# st.markdown(
+#             f'''
+#             <style>
+#                 .reportview-container .sidebar-content {{
+#                     padding-top: {1}rem;
+#                 }}
+#                 .reportview-container .main .block-container {{
+#                     padding-top: {1}rem;
+#                 }}
+#             </style>
+#             ''',unsafe_allow_html=True)
 
-# Filter by category
+st.title('RetiMark Fundus Dashboard')
+# selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
+st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
+
+if st.sidebar.button('Log in', type="primary"):
+    st.sidebar.write('Welcome, Dr. Swift')
+st.sidebar.button("Sign out", type="secondary")
+
+# old filter code without sidebar
+# Filters
 with st.expander(label="Search and Filter", expanded=True):
-    filter1, filter2, filter3 = st.columns(3)
+    filter1, filter2 = st.columns(2)
     with filter1:
         selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
-    # with filter2:
-    #     selected_disease_type = st.multiselect(label='Disease', options=disease_types, help='Select one or more diseases', default=None)
     with filter2:
-        selected_risk_level = st.selectbox(label='Risk Level', options=risk_levels, help='Select desired risk level')
-    with filter3:
-        selected_stage = st.selectbox(label='Stage', options=stages, help='select desired disease stage')
+        selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
 
-info, body = st.columns([0.2,0.8])
+
+# Filters
+# selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
+# selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
+
+info, left, right = st.columns([0.35, 0.275, 0.275])
+temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
 with info:
     st.subheader("Patient Details")
-with body:
-    tab1, tab2, tab3 = st.tabs(disease_types)
-    with tab1:
-        st.header("A cat")
-        st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
+    # st.write("**Patient ID:**" + selected_patient_id)
+    st.write(f"**Patient ID:** {selected_patient_id}")
+    # st.write(selected_patient_id)
+    #query patient's age
+    temp_age = fundus_data[fundus_data['patient-id'] == selected_patient_id]['age'].to_string(index=False)
+    st.write(f"**Age:** {temp_age}")
+    #query patient's sex
+    temp_sex = fundus_data[fundus_data['patient-id'] == selected_patient_id]['sex'].to_string(index=False)
+    st.write(f"**Sex:** {temp_sex}")
+    #query symptoms
+    temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['symptoms'].to_string(index=False)
+    st.write(f"**Notes:** {temp_symptoms}")
+    #query date
+    temp_date = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
+    st.write(f"**Last Upload Date:** {temp_date}")
+    
+with left:
+    st.subheader("Left")
+    st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+    # st.caption("Left")
+    
+    right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
+    left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
+    overall_risk = (right_risk+left_risk)/2
+    # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    stage, risk = st.columns([0.5, 0.5])
+    with stage:
+        st.metric("Most Probable Stage", 2)
+    # st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    with risk:
+        st.metric("Left Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    # st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+with right:
+    st.subheader("Right")
+    st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+    # st.caption("Right")
+    
+    right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
+    left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
+    overall_risk = (right_risk+left_risk)/2
+    # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    stage, risk = st.columns([0.5, 0.5])
+    with stage:
+        st.metric("Most Probable Stage", 2)
+    # st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    with risk:
+        st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    # st.subheader("Fundus Images")
+    # with st.expander(label="View fundus images", expanded=True):
+    # left, right = st.columns(2)
+    
+    # with left:
+    #     st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+    #     st.caption("Left")
+    # with right:
+    #     st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+    #     st.caption("Right")
+st.divider()
+st.subheader("Risk Trend")
+st.line_chart(chart_data)
+    
+# metrics, chart = st.columns([0.5,0.5])    
+# with metrics:
+#     tab1, tab2, tab3 = st.tabs(stages)
+#     with tab1:
+#         col1, col2, col3 = st.columns(3)
+#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
+#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
+#         overall_risk = (right_risk+left_risk)/2
+#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#     with tab2:
+#         col1, col2, col3 = st.columns(3)
+#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 2)*100
+#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 2)*100
+#         overall_risk = (right_risk+left_risk)/2
+#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 
-    with tab2:
-        st.header("A dog")
-        st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
+#     with tab3:
+#         col1, col2, col3 = st.columns(3)
+#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 3)*100
+#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 3)*100
+#         overall_risk = (right_risk+left_risk)/2
+#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 
-    with tab3:
-        st.header("An owl")
-        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+# with chart:
+#     st.line_chart(chart_data)
 # filtered_data = data[data['Category'] == selected_category]
 
 # # Placeholder line chart
@@ -88,3 +179,4 @@ with body:
 # # Show the data
 # st.subheader('Filtered Data')
 # st.write(filtered_data)
+
