@@ -1,7 +1,9 @@
-import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
 import random
+import streamlit as st
+import streamlit_authenticator as stauth
+
 # import matplotlib.pyplot as plt
 
 # Create some sample data
