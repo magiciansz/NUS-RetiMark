@@ -8,7 +8,7 @@ import random
 chart_data = pd.DataFrame(
     np.random.randn(20, 2),
     columns=['left', 'right'])
-fundus_data = pd.read_csv("../test-data/sample_fundus_data.csv")
+fundus_data = pd.read_csv("./test-data/sample_fundus_data.csv")
 
 #helper functions
 def query_risk(dataset, patient_id, disease, laterality, stage):
@@ -91,7 +91,7 @@ with info:
     
 with left:
     st.subheader("Left")
-    st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
+    st.image("./test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
     # st.caption("Left")
     
     right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
@@ -107,7 +107,7 @@ with left:
     # st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
 with right:
     st.subheader("Right")
-    st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
+    st.image("./test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
     # st.caption("Right")
     
     right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
