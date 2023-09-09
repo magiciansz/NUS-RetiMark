@@ -1,0 +1,31 @@
+cookie:
+  expiry_days: 0
+  key: retimark # Must be string
+  name: fundus_dashboard
+credentials:
+  usernames:
+    spiderman:
+      email: jiajunseah@u.nus.edu
+      name: Jia Jun Seah
+      password: $2b$12$A6eMVx.4g4vZLwXdelanVOiuEoa13EeQwivjMD7hcU5b6scqpicn2
+    wizard:
+      email: glennbjorn@u.nus.edu
+      name: Glenn Bjorn Chia
+      password: $2b$12$qfPjuLSH50.P9lggvHqzf.y.LK8XjY.BitWPwNz28Sk8JxLt0VQE2
+    polarbear:
+      email: josiah.foo@u.nus.edu
+      name: Josiah Foo
+      password: $2b$12$LRr/O1Rg3Bsxv6hNa.kKW.goFp3q4Gp9Kob/H6UsCY2PCYRCBXq1K
+    butterfly:
+      email: tan.jiahui@u.nus.edu
+      name: Jia Hui Tan
+      password: $2b$12$zazHV78h/r1hN9rSrGGxxOc5eDj2dM6wWlXR76ZvwfVI/RCDNHFRm
+    oliver:
+      email: e0555882@u.nus.edu
+      name: Xiang Han Ng
+      password: $2b$12$XL6PjcXU2.2aJdYHqEEJPeuPx7ffKrQnVhmw5p7U6bb/3Y.SPbkru
+
+preauthorized:
+  emails:
+  - orangepufflejj@gmail.com
+  - ngxianghan99@gmail.com
