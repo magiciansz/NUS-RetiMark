@@ -87,6 +87,10 @@ if st.session_state["authentication_status"]:
         #query date
         temp_date = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
         st.write(f"**Last Upload Date:** {temp_date}")
+        #query diagnosed date
+        #placeholder information for now
+        # temp_date = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
+        st.write(f"**Diagnosed Date:** {temp_date}")
         
     with left:
         st.subheader("Left")
