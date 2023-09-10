@@ -52,9 +52,9 @@ CREATE TABLE IF NOT EXISTS `PatientHistoryTbl` (
 	PRIMARY KEY (`id`, `version`)
 );
 
-CREATE TABLE IF NOT EXISTS `DoctorTbl` (
+CREATE TABLE IF NOT EXISTS `UserTbl` (
 	`id` INT NOT NULL AUTO_INCREMENT,
-    `hash` VARCHAR(255),
+    `password` VARCHAR(255),
     `username` VARCHAR(255),
     
 	PRIMARY KEY (`id`)
