@@ -31,7 +31,7 @@ const logout = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const refreshAuthToken = catchAsync(async (req, res) => {
+const refreshTokens = catchAsync(async (req, res) => {
   const tokens = await AuthService.refreshAuth(
     req.body.refreshToken,
     req.query.timezone
@@ -43,5 +43,5 @@ module.exports = {
   register,
   login,
   logout,
-  refreshAuthToken,
+  refreshTokens,
 };

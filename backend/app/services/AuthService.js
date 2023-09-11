@@ -54,8 +54,8 @@ const refreshAuth = async (refreshToken, timezone) => {
       "User authenticated to this token is not found in the database"
     );
   }
-
-  return tokenService.renewAuthToken(user, timezone);
+  await refreshTokenDoc.destroy();
+  return tokenService.generateAuthTokens(user, timezone);
 };
 
 module.exports = {

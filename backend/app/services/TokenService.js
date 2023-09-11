@@ -58,27 +58,9 @@ const verifyToken = async (token, type) => {
 /**
  * Generate auth tokens
  * @param {User} user
+ * @param {String} timezone
  * @returns {Promise<Object>}
  */
-
-const renewAuthToken = async (user, timezone) => {
-  const accessTokenExpires = moment().add(
-    process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
-    "minutes"
-  );
-  const accessToken = generateToken(
-    user.id,
-    accessTokenExpires,
-    tokenTypes.ACCESS
-  );
-  return {
-    access: {
-      token: accessToken,
-      // take in an appropriate timezone
-      expires: accessTokenExpires.tz(timezone).toString(),
-    },
-  };
-};
 
 const generateAuthTokens = async (user, timezone) => {
   const accessTokenExpires = moment().add(
@@ -92,8 +74,8 @@ const generateAuthTokens = async (user, timezone) => {
   );
 
   const refreshTokenExpires = moment().add(
-    process.env.TOKEN_REFRESH_EXPIRATION_DAYS,
-    "days"
+    process.env.TOKEN_REFRESH_EXPIRATION_HOURS,
+    "hours"
   );
   const refreshToken = generateToken(
     user.id,
@@ -124,6 +106,5 @@ module.exports = {
   generateToken,
   saveToken,
   verifyToken,
-  renewAuthToken,
   generateAuthTokens,
 };
