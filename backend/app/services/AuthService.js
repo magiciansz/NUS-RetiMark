@@ -16,7 +16,7 @@ const loginUserWithUsernameAndPassword = async (username, password) => {
   if (!user || !(await user.validatePassword(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
   }
-  return user;
+  return await userService.getUserByUsername(username);
 };
 
 /**
