@@ -79,7 +79,7 @@ const validateLogout = [
   },
 ];
 
-const validateRefreshAuthToken = [
+const validateRefreshTokens = [
   body("refreshToken")
     .not()
     .isEmpty()
@@ -189,5 +189,5 @@ module.exports = {
   validateUserId,
   validateUserDetailsAndTimezone,
   validateLogout,
-  validateRefreshAuthToken,
+  validateRefreshTokens,
 };

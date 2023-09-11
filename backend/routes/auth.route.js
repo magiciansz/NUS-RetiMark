@@ -6,7 +6,7 @@ const {
   validateUserDetailsAndTimezone,
   validateLogout,
   validateLogin,
-  validateRefreshAuthToken,
+  validateRefreshTokens,
 } = require("../app/middlewares/validators");
 
 router.post(
@@ -19,9 +19,9 @@ router.post("/login", validateLogin, AuthController.login);
 router.post("/logout", validateLogout, AuthController.logout);
 
 router.post(
-  "/refresh-auth-token",
-  validateRefreshAuthToken,
-  AuthController.refreshAuthToken
+  "/refresh-tokens",
+  validateRefreshTokens,
+  AuthController.refreshTokens
 );
 
 module.exports = router;
