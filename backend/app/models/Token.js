@@ -5,10 +5,15 @@ const { tokenTypes } = require("../../config/tokens");
 const Token = sequelize.define(
   "Token",
   {
-    token: {
-      type: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
+    },
+    value: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     user_id: {
       type: DataTypes.INTEGER,
@@ -34,7 +39,6 @@ const Token = sequelize.define(
   },
   {
     tableName: "TokenTbl",
-    timestamps: true,
   }
 );
 
