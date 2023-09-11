@@ -23,7 +23,7 @@ const generateToken = (
 
 const saveToken = async (token, userId, expires, type, blacklisted = false) => {
   const tokenDoc = await Token.create({
-    token,
+    value: token,
     user_id: userId,
     expires: expires.toDate(),
     type,
@@ -37,7 +37,7 @@ const verifyToken = async (token, type) => {
   const payload = jwt.verify(token, process.env.TOKEN_SECRET);
   const tokenDoc = await Token.findOne({
     where: {
-      token,
+      value: token,
       type,
       user_id: payload.sub,
       expires: {
