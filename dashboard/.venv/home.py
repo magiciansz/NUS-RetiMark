@@ -52,11 +52,16 @@ stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
 
 
 if st.session_state["authentication_status"]:
+    st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
     st.sidebar.write(f'Welcome, *{st.session_state["name"]}*')
     authenticator.logout('Logout', 'sidebar', key='logout_button')
-    st.title('RetiMark Fundus Dashboard')
+    logo, title = st.columns([0.08,0.92])
+    with title:
+        st.title('RetiMark Fundus Dashboard')
+    with logo:
+        st.image("http://retimark.com/layout/images/common/logo_on.png")
     # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
-    # st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
+    
 
     # if st.sidebar.button('Log in', type="primary"):
     #     st.sidebar.write('Welcome, Dr. Swift')
