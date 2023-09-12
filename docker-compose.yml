@@ -31,6 +31,10 @@ services:
       - AWS_BUCKET=${AWS_BUCKET}
     stdin_open: true
     tty: true
-
+  streamlit:
+    build:
+      dockerfile: ./dashboard
+    ports:
+      - '8501:8501'
 volumes: 
   db:
