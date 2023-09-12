@@ -64,11 +64,13 @@ if st.session_state["authentication_status"]:
 
     # Filters
     with st.expander(label="Search and Filter", expanded=True):
-        filter1, filter2 = st.columns(2)
+        filter1, filter2, filter3 = st.columns(3)
         with filter1:
             selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
         with filter2:
             selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
+        with filter3:
+            selected_date = st.selectbox(label='Date', options=["12/09/21", "25/11/21", "03/05/22", "18/08/22", "30/01/23"], help='Select visit date')
 
     info, left, right = st.columns([0.35, 0.275, 0.275])
     temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
