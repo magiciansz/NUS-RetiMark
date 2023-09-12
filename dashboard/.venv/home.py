@@ -100,7 +100,7 @@ if st.session_state["authentication_status"]:
         st.write(f"**Diagnosed Date:** {temp_date}")
         
     with left:
-        st.subheader("Left")
+        st.subheader("Left Fundus")
         st.image("./test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
@@ -111,7 +111,7 @@ if st.session_state["authentication_status"]:
         with risk:
             st.metric("Left Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
     with right:
-        st.subheader("Right")
+        st.subheader("Right Fundus")
         st.image("./test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
         
         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
