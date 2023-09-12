@@ -1,0 +1,316 @@
+openapi: 3.0.3
+info:
+  title: NUS-Retimark Backend API Repo
+  description: |-
+    This is a list of APIs used on the server. you can find it on our repo, at apidoc.yaml)
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: ngxianghan99@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://localhost:XXXX/api/v1
+tags:
+  - name: Authentication
+    description: User Management
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Log In
+      description: Log in with user's credentials
+      parameters:
+        - name: timezone
+          in: query
+          description: timezone to return expiry dates of tokens
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginInvalidData"
+        "401":
+          description: Incorrect email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginIncorrectDetailsError"
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Create a user
+      description: Create a user with provided credentials
+      parameters:
+        - name: timezone
+          in: query
+          description: timezone to return expiry dates of tokens
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginInvalidData"
+        "409":
+          description: Username already taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUserUsernameTaken"
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Log out
+      description: Log out a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenForm"
+        required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "404":
+          description: Refresh Token not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutTokenNotFound"
+  /auth/refresh-tokens:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access and refresh tokens
+      description: Refresh tokens given refresh token
+      parameters:
+        - name: timezone
+          in: query
+          description: timezone to return expiry dates of tokens
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenForm"
+        required: true
+      responses:
+        "200":
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshTokenResponse"
+        "403":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpiredOrInvalidRefreshToken"
+        "404":
+          description: User authenticated to user not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshTokenUserNotFound"
+
+components:
+  schemas:
+    CreateUserUsernameTaken:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 409
+        message:
+          type: string
+          example: "Username already taken"
+        stack:
+          type: string
+          example: "Username already taken, at Object.createUser"
+    LoginForm:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "ngxianghan99@gmail.com"
+        password:
+          type: string
+          example: "samplepassword"
+    RefreshTokenForm:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NTAwOTM1LCJ0eXBlIjoicmVmcmVzaCJ9.NSX9bPKOJagAqoBpDU2SoQMFE2ST0qhYpVyR20-Z5CQ"
+    ExpiredOrInvalidRefreshToken:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 403
+        message:
+          type: string
+          example: "Forbidden: Invalid or expired refresh token."
+        stack:
+          type: string
+          example: "Error: Forbidden: Invalid or expired refresh token."
+    LogoutTokenNotFound:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "Token not found"
+        stack:
+          type: string
+          example: "Error: Token Not found, at Object.logout"
+    RefreshTokenUserNotFound:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "User authenticated to this token is not found in the database"
+        stack:
+          type: string
+          example: "Error: User authenticated to this token is not found in the database"
+    LoginInvalidData:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: "field"
+              msg:
+                type: string
+                example: "username cannot be empty."
+              path:
+                type: string
+                example: "username"
+              location:
+                type: string
+                example: "body"
+    LoginIncorrectDetailsError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: "Incorrect email or password"
+        stack:
+          type: string
+          example: "Error: Incorrect email or password, at Object.loginUserWithUsernameAndPassword"
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NDkwMTM1LCJ0eXBlIjoiYWNjZXNzIn0.RfkK1wzZnwx037E7P37gDBPJ49zCEGTFv27SQ-B_lzA"
+            expires:
+              type: string
+              example: "Tue Sep 12 2023 11:42:15 GMT+0800"
+        refreshToken:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NTAwOTM1LCJ0eXBlIjoicmVmcmVzaCJ9.NSX9bPKOJagAqoBpDU2SoQMFE2ST0qhYpVyR20-Z5CQ"
+            expires:
+              type: string
+              example: "Tue Sep 12 2023 14:42:15 GMT+0800"
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            username:
+              type: string
+              example: "ngxianghan99@gmail.com"
+        tokens:
+          type: object
+          properties:
+            accessToken:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NDkwMTM1LCJ0eXBlIjoiYWNjZXNzIn0.RfkK1wzZnwx037E7P37gDBPJ49zCEGTFv27SQ-B_lzA"
+                expires:
+                  type: string
+                  example: "Tue Sep 12 2023 11:42:15 GMT+0800"
+            refreshToken:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NTAwOTM1LCJ0eXBlIjoicmVmcmVzaCJ9.NSX9bPKOJagAqoBpDU2SoQMFE2ST0qhYpVyR20-Z5CQ"
+                expires:
+                  type: string
+                  example: "Tue Sep 12 2023 14:42:15 GMT+0800"

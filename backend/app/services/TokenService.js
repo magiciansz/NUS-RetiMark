@@ -90,12 +90,12 @@ const generateAuthTokens = async (user, timezone) => {
   );
 
   return {
-    access: {
+    accessToken: {
       token: accessToken,
       // take in an appropriate timezone
       expires: accessTokenExpires.tz(timezone).toString(),
     },
-    refresh: {
+    refreshToken: {
       token: refreshToken,
       expires: refreshTokenExpires.tz(timezone).toString(),
     },

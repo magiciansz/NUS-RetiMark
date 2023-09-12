@@ -5,7 +5,7 @@ const ApiError = require("../middlewares/ApiError");
 const createUser = async (userBody) => {
   const user = await User.findOne({ where: { username: userBody.username } });
   if (user !== null) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Username already taken");
+    throw new ApiError(httpStatus.CONFLICT, "Username already taken");
   }
   await User.create(userBody);
   return await User.findOne({ where: { username: userBody.username } });
@@ -36,7 +36,7 @@ const updateUserById = async (userId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   if (await User.isUsernameTaken(updateBody.username)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Username already taken");
+    throw new ApiError(httpStatus.CONFLICT, "Username already taken");
   }
   user.set(updateBody);
   await user.save();
