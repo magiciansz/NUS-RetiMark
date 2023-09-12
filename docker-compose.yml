@@ -11,6 +11,7 @@ services:
       - ${MYSQLDB_LOCAL_PORT}:${MYSQLDB_DOCKER_PORT}
     volumes:
       - db:/var/lib/mysql
+    platform: linux/x86_64
   server:
     depends_on:
       - mysqldb
