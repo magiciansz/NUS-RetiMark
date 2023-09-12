@@ -113,6 +113,14 @@ function Home() {
 							type="text"
 							placeholder="Search patient"
 							value={patient}
+							onChange={(e) => {setPatient(e.target.value);}}
+						/>
+					</div>}
+					{/* {existingPatient && <div>
+						<input
+							type="text"
+							placeholder="Search patient"
+							value={patient}
 							onChange={(e) => {
 								setPatient(e.target.value);
 								handleFilterPatients(); // Call the filter function here
@@ -124,7 +132,7 @@ function Home() {
 						))}
 						</ul>
 
-					</div>}
+					</div>} */}
 					{previewImage && <div className='header'>
 						Your selected image for {patient}:
 					</div>}
