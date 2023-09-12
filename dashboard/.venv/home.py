@@ -52,11 +52,16 @@ stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
 
 
 if st.session_state["authentication_status"]:
+    st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
     st.sidebar.write(f'Welcome, *{st.session_state["name"]}*')
     authenticator.logout('Logout', 'sidebar', key='logout_button')
-    st.title('RetiMark Fundus Dashboard')
+    logo, title = st.columns([0.08,0.92])
+    with title:
+        st.title('RetiMark Fundus Dashboard')
+    with logo:
+        st.image("http://retimark.com/layout/images/common/logo_on.png")
     # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
-    # st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
+    
 
     # if st.sidebar.button('Log in', type="primary"):
     #     st.sidebar.write('Welcome, Dr. Swift')
@@ -64,11 +69,13 @@ if st.session_state["authentication_status"]:
 
     # Filters
     with st.expander(label="Search and Filter", expanded=True):
-        filter1, filter2 = st.columns(2)
+        filter1, filter2, filter3 = st.columns(3)
         with filter1:
             selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
         with filter2:
             selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
+        with filter3:
+            selected_date = st.selectbox(label='Date', options=["12/09/21", "25/11/21", "03/05/22", "18/08/22", "30/01/23"], help='Select visit date')
 
     info, left, right = st.columns([0.35, 0.275, 0.275])
     temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
@@ -93,7 +100,7 @@ if st.session_state["authentication_status"]:
         st.write(f"**Diagnosed Date:** {temp_date}")
         
     with left:
-        st.subheader("Left")
+        st.subheader("Left Fundus")
         st.image("./test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
@@ -104,7 +111,7 @@ if st.session_state["authentication_status"]:
         with risk:
             st.metric("Left Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
     with right:
-        st.subheader("Right")
+        st.subheader("Right Fundus")
         st.image("./test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
         
         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
