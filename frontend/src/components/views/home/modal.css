@@ -1,0 +1,49 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .modal-content {
+        position: relative;
+        padding: 32px;
+        width: 50%;
+        background-color: #fff;
+        border-radius: 20px;
+    }
+    .text-input{
+        /* background-color:#fff; */
+        font-weight: 500;
+        font-size: 15px;
+        border-radius: 5px;
+        display: block;
+        width: 100%;
+        border: none;
+        background-color: #e4edf6;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+    .submit-btn {
+        margin-top: 40px;
+        border: 1px #e76d27 solid;
+        background-color: #e76d27;
+        color: white;
+        width: 200px;
+        padding: 10px;
+        border-radius: 8px; 
+        cursor: pointer;
+        text-align: center;
+    }
+    .close-button {
+        display: flex;
+        float: right;
+        cursor: pointer;
+        font-weight: 600;
+    }
+}

@@ -2,10 +2,20 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import './home.css';
 import Report from './report'
+import Modal from './modal';
+
 
 import Placeholder from '../../../css/imgs/ai.png';
 import Placeholder2 from '../../../css/imgs/img2.jpg';
 import Placeholder3 from '../../../css/imgs/img3.png';
+
+const patients = [
+	{name: 'jiahui', age: '22', gender: 'F'},
+	{name: 'xianghan', age: '24', gender: 'M'},
+	{name: 'jiajun', age: '24', gender: 'M'},
+	{name: 'glenn', age: '24', gender: 'M'},
+	{name: 'josiah', age: '24', gender: 'M'},
+]
 
 
 function Home() {
@@ -13,6 +23,17 @@ function Home() {
 	const [previewImage, setPreviewImage] = useState(null);
 	const [showReport, setShowReport] = useState(false);
 	const [patient, setPatient] = useState()
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [existingPatient, setExistingPatient] = useState(false)
+	const [filteredPatients, setFilteredPatients] = useState(patients)
+
+	const openModal = () => {
+		setIsModalOpen(true);
+	};
+
+	const closeModal = () => {
+		setIsModalOpen(false);
+	};
 
 	const handleFileChange = (event) => {
 		const file = event.target.files[0];
@@ -31,7 +52,25 @@ function Home() {
 		setPreviewImage(null)
 		setPatient()
 		setShowReport(false);
+		setExistingPatient(false)
 	};
+
+	const handleExistingPatient = () => {
+        setExistingPatient(true)
+    };
+
+	// const filteredPatients = patients.filter((p) =>
+	// 	console.log("running", p)
+	// 	// console.log(p)
+	// 	// p.name && p.name.toLowerCase().includes(patient.toLowerCase())
+	// );
+
+	const handleFilterPatients = useCallback(() => {
+
+		setFilteredPatients(patients.filter((p) =>
+		  p.name && patient && p.name.toLowerCase().includes(patient.toLowerCase()))
+		);
+	  }, [patient]);
 
 	return (
 		<div className='home-page'>
@@ -69,17 +108,48 @@ function Home() {
 					</div>
 				</div>
 				<div className='select-image'>
-					<input
-						type="text"
-						placeholder="Search patient"
-						onChange={(e) => setPatient(e.target.value)}
-					/>
+					{existingPatient && <div>
+						<input
+							type="text"
+							placeholder="Search patient"
+							value={patient}
+							onChange={(e) => {setPatient(e.target.value);}}
+						/>
+					</div>}
+					{/* {existingPatient && <div>
+						<input
+							type="text"
+							placeholder="Search patient"
+							value={patient}
+							onChange={(e) => {
+								setPatient(e.target.value);
+								handleFilterPatients(); // Call the filter function here
+							}}
+						/>
+						<ul>
+						{filteredPatients?.map((patient) => (
+							<li key={patient.name}>{patient.name}</li>
+						))}
+						</ul>
+
+					</div>} */}
 					{previewImage && <div className='header'>
 						Your selected image for {patient}:
 					</div>}
 					{previewImage && <img src={previewImage} className='preview' alt="Preview" />}
+					{!existingPatient && <div>
+						<div className='run-test' onClick={openModal}>
+							New Patient
+						</div>
+						<div className='run-test' onClick={handleExistingPatient}>
+							Existing Patient
+						</div>	
+					</div>}
 					
-					<div className='buttons'>
+					<Modal isOpen={isModalOpen} onClose={closeModal} />
+					
+					
+					{existingPatient && <div className='buttons'>
 						<div className="run-test">
 							<label className="add-button">
 							<input type="file" style={{display:'none'}} accept=".jpg, .png" onChange={handleFileChange} />
@@ -88,7 +158,7 @@ function Home() {
 							</div>
 							</label>
 						</div>
-					</div>
+					</div>}
 					{previewImage && <div className='run-test' onClick={runPredictor}>
 						Run predictor
 					</div>}
