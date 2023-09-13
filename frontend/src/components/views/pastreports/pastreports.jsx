@@ -85,9 +85,9 @@ const PastReports = () => {
                     ))}
                 </div>
             </div>
-            <div>
+            {/* <div>
                 {patient && <div> Selected patient: {patient.name} </div>}
-            </div>
+            </div> */}
         </div>
     )
 }

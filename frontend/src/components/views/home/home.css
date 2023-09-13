@@ -153,4 +153,9 @@
     .cross-btn {
         cursor: pointer;
     }
+    .input-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 }

@@ -129,15 +129,17 @@ function Home() {
 				</div>
 				<div className='select-image'>
 					{existingPatient && <div>
-						<div className='input-wrapper'>
-							<input
-								className='input'
-								placeholder="Search patient"
-								value={input}
-								onChange={(e) => handleChange(e.target.value)}
-							/>
-							<div>
-								{input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
+						<div className='input-container'>
+							<div className='input-wrapper'>
+								<input
+									className='input'
+									placeholder="Search patient"
+									value={input}
+									onChange={(e) => handleChange(e.target.value)}
+								/>
+								<div>
+									{input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
+								</div>
 							</div>
 						</div>
 						<div className='results-list'>
@@ -145,9 +147,9 @@ function Home() {
 								<div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
 							))}
 						</div>
-						<div>
+						{/* <div>
 							{patient && <div> Selected patient: {patient.name} </div>}
-						</div>
+						</div> */}
 					</div>}
 					{previewImage && <div className='header'>
 						Your selected image for {patient.name}:
