@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {FaSearch} from "react-icons/fa"
 
 import './home.css';
 import Report from './report'
@@ -25,7 +26,8 @@ function Home() {
 	const [patient, setPatient] = useState()
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [existingPatient, setExistingPatient] = useState(false)
-	const [filteredPatients, setFilteredPatients] = useState(patients)
+	const [filteredPatients, setFilteredPatients] = useState([])
+	const [input, setInput] = useState("");
 
 	const openModal = () => {
 		setIsModalOpen(true);
@@ -53,24 +55,42 @@ function Home() {
 		setPatient()
 		setShowReport(false);
 		setExistingPatient(false)
+		setInput("")
+		setFilteredPatients([])    
 	};
 
 	const handleExistingPatient = () => {
         setExistingPatient(true)
     };
 
-	// const filteredPatients = patients.filter((p) =>
-	// 	console.log("running", p)
-	// 	// console.log(p)
-	// 	// p.name && p.name.toLowerCase().includes(patient.toLowerCase())
-	// );
+	const fetchData = (value) => {
+        const results = patients.filter((user) => {
+            return (
+              value &&
+              user &&
+              user.name &&
+              user.name.toLowerCase().includes(value)
+            );
+        });
+        setFilteredPatients(results)
+        console.log("results", results);
+    }
 
-	const handleFilterPatients = useCallback(() => {
+    const handleChange = (value) => {
+        setInput(value);
+        fetchData(value);
+    };
 
-		setFilteredPatients(patients.filter((p) =>
-		  p.name && patient && p.name.toLowerCase().includes(patient.toLowerCase()))
-		);
-	  }, [patient]);
+	const clearInput = () => {
+        setInput("");   
+		setFilteredPatients([])     
+    };
+
+	const handlePatientClick = (selectedPatient) => {
+		setPatient(selectedPatient);
+		setInput(selectedPatient.name); // Update the search input with the selected patient's name
+		setFilteredPatients([])   
+	};
 
 	return (
 		<div className='home-page'>
@@ -109,32 +129,30 @@ function Home() {
 				</div>
 				<div className='select-image'>
 					{existingPatient && <div>
-						<input
-							type="text"
-							placeholder="Search patient"
-							value={patient}
-							onChange={(e) => {setPatient(e.target.value);}}
-						/>
+						<div className='input-container'>
+							<div className='input-wrapper'>
+								<input
+									className='input'
+									placeholder="Search patient"
+									value={input}
+									onChange={(e) => handleChange(e.target.value)}
+								/>
+								<div>
+									{input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
+								</div>
+							</div>
+						</div>
+						<div className='results-list'>
+							{filteredPatients && filteredPatients.map((p, id) => (
+								<div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
+							))}
+						</div>
+						{/* <div>
+							{patient && <div> Selected patient: {patient.name} </div>}
+						</div> */}
 					</div>}
-					{/* {existingPatient && <div>
-						<input
-							type="text"
-							placeholder="Search patient"
-							value={patient}
-							onChange={(e) => {
-								setPatient(e.target.value);
-								handleFilterPatients(); // Call the filter function here
-							}}
-						/>
-						<ul>
-						{filteredPatients?.map((patient) => (
-							<li key={patient.name}>{patient.name}</li>
-						))}
-						</ul>
-
-					</div>} */}
 					{previewImage && <div className='header'>
-						Your selected image for {patient}:
+						Your selected image for {patient.name}:
 					</div>}
 					{previewImage && <img src={previewImage} className='preview' alt="Preview" />}
 					{!existingPatient && <div>
@@ -149,7 +167,7 @@ function Home() {
 					<Modal isOpen={isModalOpen} onClose={closeModal} />
 					
 					
-					{existingPatient && <div className='buttons'>
+					{patient && existingPatient && <div className='buttons'>
 						<div className="run-test">
 							<label className="add-button">
 							<input type="file" style={{display:'none'}} accept=".jpg, .png" onChange={handleFileChange} />
