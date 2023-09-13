@@ -4,8 +4,6 @@ import {FaSearch} from "react-icons/fa"
 import './home.css';
 import Report from './report'
 import Modal from './modal';
-import SearchBar from './searchbar';
-import SearchResults from './searchresults';
 
 
 import Placeholder from '../../../css/imgs/ai.png';
@@ -57,6 +55,8 @@ function Home() {
 		setPatient()
 		setShowReport(false);
 		setExistingPatient(false)
+		setInput("")
+		setFilteredPatients([])    
 	};
 
 	const handleExistingPatient = () => {
@@ -79,7 +79,6 @@ function Home() {
     const handleChange = (value) => {
         setInput(value);
         fetchData(value);
-        
     };
 
 	const clearInput = () => {
@@ -90,14 +89,8 @@ function Home() {
 	const handlePatientClick = (selectedPatient) => {
 		setPatient(selectedPatient);
 		setInput(selectedPatient.name); // Update the search input with the selected patient's name
-	  };
-
-	const handleFilterPatients = useCallback(() => {
-
-		setFilteredPatients(patients.filter((p) =>
-		  p.name && patient && p.name.toLowerCase().includes(patient.toLowerCase()))
-		);
-	  }, [patient]);
+		setFilteredPatients([])   
+	};
 
 	return (
 		<div className='home-page'>
@@ -136,52 +129,28 @@ function Home() {
 				</div>
 				<div className='select-image'>
 					{existingPatient && <div>
-						{/* <input
-							type="text"
-							placeholder="Search patient"
-							value={patient}
-							onChange={(e) => {setPatient(e.target.value);}}
-						/> */}
-						{/* <SearchBar setFilteredPatients={setFilteredPatients}/> */}
 						<div className='input-wrapper'>
 							<input
+								className='input'
 								placeholder="Search patient"
 								value={input}
 								onChange={(e) => handleChange(e.target.value)}
 							/>
 							<div>
-								{input.length === 0 ? <FaSearch id='search-icon' /> : <div onClick={() => clearInput()}> X </div>}
+								{input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
 							</div>
 						</div>
 						<div className='results-list'>
 							{filteredPatients && filteredPatients.map((p, id) => (
-								<div className='results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
+								<div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
 							))}
 						</div>
 						<div>
-							Selected patient: {patient?.name}
+							{patient && <div> Selected patient: {patient.name} </div>}
 						</div>
-						{/* <SearchResults patients={filteredPatients} /> */}
 					</div>}
-					{/* {existingPatient && <div>
-						<input
-							type="text"
-							placeholder="Search patient"
-							value={patient}
-							onChange={(e) => {
-								setPatient(e.target.value);
-								handleFilterPatients(); // Call the filter function here
-							}}
-						/>
-						<ul>
-						{filteredPatients?.map((patient) => (
-							<li key={patient.name}>{patient.name}</li>
-						))}
-						</ul>
-
-					</div>} */}
 					{previewImage && <div className='header'>
-						Your selected image for {patient}:
+						Your selected image for {patient.name}:
 					</div>}
 					{previewImage && <img src={previewImage} className='preview' alt="Preview" />}
 					{!existingPatient && <div>
@@ -196,7 +165,7 @@ function Home() {
 					<Modal isOpen={isModalOpen} onClose={closeModal} />
 					
 					
-					{existingPatient && <div className='buttons'>
+					{patient && existingPatient && <div className='buttons'>
 						<div className="run-test">
 							<label className="add-button">
 							<input type="file" style={{display:'none'}} accept=".jpg, .png" onChange={handleFileChange} />

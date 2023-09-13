@@ -12,8 +12,12 @@ const Navi = () => {
             />
         </div>
         <div className='tabs'>
+          <Link to="/">
             <div className='tab'>Predictor</div>
+          </Link>
+          <Link to='/reports'>
             <div className='tab'>Past reports</div>
+          </Link>
         </div>
         <div className="logout">Logout</div>
     </div>
