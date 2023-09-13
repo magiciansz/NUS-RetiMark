@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {FaSearch} from "react-icons/fa"
 
 import './home.css';
 import Report from './report'
 import Modal from './modal';
+import SearchBar from './searchbar';
+import SearchResults from './searchresults';
 
 
 import Placeholder from '../../../css/imgs/ai.png';
@@ -25,7 +28,8 @@ function Home() {
 	const [patient, setPatient] = useState()
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [existingPatient, setExistingPatient] = useState(false)
-	const [filteredPatients, setFilteredPatients] = useState(patients)
+	const [filteredPatients, setFilteredPatients] = useState([])
+	const [input, setInput] = useState("");
 
 	const openModal = () => {
 		setIsModalOpen(true);
@@ -59,11 +63,34 @@ function Home() {
         setExistingPatient(true)
     };
 
-	// const filteredPatients = patients.filter((p) =>
-	// 	console.log("running", p)
-	// 	// console.log(p)
-	// 	// p.name && p.name.toLowerCase().includes(patient.toLowerCase())
-	// );
+	const fetchData = (value) => {
+        const results = patients.filter((user) => {
+            return (
+              value &&
+              user &&
+              user.name &&
+              user.name.toLowerCase().includes(value)
+            );
+        });
+        setFilteredPatients(results)
+        console.log("results", results);
+    }
+
+    const handleChange = (value) => {
+        setInput(value);
+        fetchData(value);
+        
+    };
+
+	const clearInput = () => {
+        setInput("");   
+		setFilteredPatients([])     
+    };
+
+	const handlePatientClick = (selectedPatient) => {
+		setPatient(selectedPatient);
+		setInput(selectedPatient.name); // Update the search input with the selected patient's name
+	  };
 
 	const handleFilterPatients = useCallback(() => {
 
@@ -109,12 +136,32 @@ function Home() {
 				</div>
 				<div className='select-image'>
 					{existingPatient && <div>
-						<input
+						{/* <input
 							type="text"
 							placeholder="Search patient"
 							value={patient}
 							onChange={(e) => {setPatient(e.target.value);}}
-						/>
+						/> */}
+						{/* <SearchBar setFilteredPatients={setFilteredPatients}/> */}
+						<div className='input-wrapper'>
+							<input
+								placeholder="Search patient"
+								value={input}
+								onChange={(e) => handleChange(e.target.value)}
+							/>
+							<div>
+								{input.length === 0 ? <FaSearch id='search-icon' /> : <div onClick={() => clearInput()}> X </div>}
+							</div>
+						</div>
+						<div className='results-list'>
+							{filteredPatients && filteredPatients.map((p, id) => (
+								<div className='results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
+							))}
+						</div>
+						<div>
+							Selected patient: {patient?.name}
+						</div>
+						{/* <SearchResults patients={filteredPatients} /> */}
 					</div>}
 					{/* {existingPatient && <div>
 						<input
