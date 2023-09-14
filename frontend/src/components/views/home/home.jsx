@@ -147,9 +147,9 @@ function Home() {
 								<div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
 							))}
 						</div>
-						{/* <div>
-							{patient && <div> Selected patient: {patient.name} </div>}
-						</div> */}
+						<div>
+							{patient && <div className='selected-patient'> Selected patient: {patient.name} </div>}
+						</div>
 					</div>}
 					{previewImage && <div className='header'>
 						Your selected image for {patient.name}:

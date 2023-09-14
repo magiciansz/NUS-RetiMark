@@ -44,6 +44,8 @@
     .results-container {
         display: flex;
         justify-content: center;
+        position: relative;
+        left: -70px;
     }
     .input-wrapper {
         /* width: 100%;
@@ -77,5 +79,22 @@
     }
     .cross-btn {
         cursor: pointer;
+    }
+    .search-btn {
+        border: 1px #e76d27 solid;
+        background-color: #e76d27;
+        color: white;
+        width: 100px;
+        padding: 10px;
+        border-radius: 8px; 
+        cursor: pointer;
+        /* margin: 10px 20px 10px 0; */
+        text-align: center;
+        margin-left: 15px;
+        font-weight: 500;
+        vertical-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 }
