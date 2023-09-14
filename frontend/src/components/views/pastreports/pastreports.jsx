@@ -54,6 +54,10 @@ const PastReports = () => {
 		setInput(selectedPatient.name); // Update the search input with the selected patient's name
         setFilteredPatients([])     
 	};
+
+    const handleSearch = () => {
+        setPatient(input);
+    };
     return (
         <div className='past-reports'>
             <div className='info'>
@@ -77,6 +81,9 @@ const PastReports = () => {
                         {input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
                     </div>
                 </div>
+                <div className='search-btn' onClick={() => handleSearch()}>
+                    Search
+                </div>
             </div>
             <div className='results-container'>
                 <div className='results-list'>
@@ -85,9 +92,9 @@ const PastReports = () => {
                     ))}
                 </div>
             </div>
-            {/* <div>
+            <div>
                 {patient && <div> Selected patient: {patient.name} </div>}
-            </div> */}
+            </div>
         </div>
     )
 }
