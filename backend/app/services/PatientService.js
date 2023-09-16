@@ -10,6 +10,43 @@ const getPatientByID = async (id) => {
   return patient;
 };
 
+const addPatient = async (body) => {
+  const patient = await Patient.create({
+    date_of_birth: body.date_of_birth,
+    sex: body.sex,
+    left_eye_image: body.left_eye_image,
+    right_eye_image: body.right_eye_image,
+    left_diabetic_retinography_stage: body.left_diabetic_retinography_stage,
+    left_diabetic_retinography_prob: body.left_diabetic_retinography_prob,
+    right_diabetic_retinography_stage: body.right_diabetic_retinography_stage,
+    right_diabetic_retinography_prob: body.right_diabetic_retinography_prob,
+    left_ocular_prob: body.left_ocular_prob,
+    right_ocular_prob: body.right_ocular_prob,
+    left_glaucoma_prob: body.left_glaucoma_prob,
+    right_glaucoma_prob: body.right_glaucoma_prob,
+  });
+  return patient;
+};
+
+const updatePatient = async (id, body) => {
+  const patient = await getPatientByID(id);
+  await patient.update({
+    left_eye_image: body.left_eye_image,
+    right_eye_image: body.right_eye_image,
+    left_diabetic_retinography_stage: body.left_diabetic_retinography_stage,
+    left_diabetic_retinography_prob: body.left_diabetic_retinography_prob,
+    right_diabetic_retinography_stage: body.right_diabetic_retinography_stage,
+    right_diabetic_retinography_prob: body.right_diabetic_retinography_prob,
+    left_ocular_prob: body.left_ocular_prob,
+    right_ocular_prob: body.right_ocular_prob,
+    left_glaucoma_prob: body.left_glaucoma_prob,
+    right_glaucoma_prob: body.right_glaucoma_prob,
+  });
+  return patient;
+};
+
 module.exports = {
   getPatientByID,
+  addPatient,
+  updatePatient,
 };
