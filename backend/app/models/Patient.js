@@ -1,6 +1,30 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../../config/database");
 
+const afterCreateUpdateHandler = async (record, transaction) => {
+  await sequelize.models.PatientHistory.create(
+    {
+      id: record.id,
+      version: record.version,
+      date_of_birth: record.date_of_birth,
+      sex: record.sex,
+      left_eye_image: record.left_eye_image,
+      right_eye_image: record.right_eye_image,
+      left_diabetic_retinography_stage: record.left_diabetic_retinography_stage,
+      left_diabetic_retinography_prob: record.left_diabetic_retinography_prob,
+      right_diabetic_retinography_stage:
+        record.right_diabetic_retinography_stage,
+      right_diabetic_retinography_prob: record.right_diabetic_retinography_prob,
+      left_ocular_prob: record.left_ocular_prob,
+      right_ocular_prob: record.right_ocular_prob,
+      left_glaucoma_prob: record.left_glaucoma_prob,
+      right_glaucoma_prob: record.right_glaucoma_prob,
+      visit_date: record.visit_date,
+    },
+    { transaction }
+  );
+};
+
 const Patient = sequelize.define(
   "Patient",
   {
@@ -10,16 +34,16 @@ const Patient = sequelize.define(
       allowNull: false,
       primaryKey: true,
     },
-    age: {
-      type: DataTypes.INTEGER,
-    },
-    sex: {
-      type: DataTypes.STRING,
-    },
     version: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 1,
+    },
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+    },
+    sex: {
+      type: DataTypes.STRING,
     },
     left_eye_image: {
       type: DataTypes.STRING,
@@ -27,61 +51,51 @@ const Patient = sequelize.define(
     right_eye_image: {
       type: DataTypes.STRING,
     },
-    left_eye_resized_image: {
-      type: DataTypes.STRING,
-    },
-    right_eye_resized_image: {
-      type: DataTypes.STRING,
-    },
-    left_diabetic_retinography_stage_0: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_1: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_2: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_3: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_4: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_0: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_1: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_2: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_3: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_4: {
-      type: DataTypes.FLOAT,
-    },
-    left_ocular: {
+    left_diabetic_retinography_stage: {
       type: DataTypes.TINYINT,
     },
-    right_ocular: {
+    left_diabetic_retinography_prob: {
+      type: DataTypes.FLOAT,
+    },
+    right_diabetic_retinography_stage: {
       type: DataTypes.TINYINT,
     },
-    left_glaucoma: {
-      type: DataTypes.TINYINT,
+    right_diabetic_retinography_prob: {
+      type: DataTypes.FLOAT,
     },
-    right_glaucoma: {
-      type: DataTypes.TINYINT,
+    left_ocular_prob: {
+      type: DataTypes.FLOAT,
     },
-    last_upload_date: {
+    right_ocular_prob: {
+      type: DataTypes.FLOAT,
+    },
+    left_glaucoma_prob: {
+      type: DataTypes.FLOAT,
+    },
+    right_glaucoma_prob: {
+      type: DataTypes.FLOAT,
+    },
+    visit_date: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: Sequelize.fn("NOW"),
     },
   },
   {
     tableName: "PatientTbl",
+    hooks: {
+      beforeUpdate: async (record) => {
+        record.setDataValue("version", record.dataValues.version + 1);
+        record.setDataValue("visit_date", Sequelize.fn("NOW"));
+      },
+      afterUpdate: async (record, options) => {
+        const { transaction } = options;
+        await afterCreateUpdateHandler(record, transaction);
+      },
+      afterCreate: async (record, options) => {
+        const { transaction } = options;
+        await afterCreateUpdateHandler(record, transaction);
+      },
+    },
   }
 );
 

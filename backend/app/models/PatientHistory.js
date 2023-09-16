@@ -14,8 +14,8 @@ const PatientHistory = sequelize.define(
       allowNull: false,
       primaryKey: true,
     },
-    age: {
-      type: DataTypes.INTEGER,
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
     },
     sex: {
       type: DataTypes.STRING,
@@ -26,55 +26,31 @@ const PatientHistory = sequelize.define(
     right_eye_image: {
       type: DataTypes.STRING,
     },
-    left_eye_resized_image: {
-      type: DataTypes.STRING,
-    },
-    right_eye_resized_image: {
-      type: DataTypes.STRING,
-    },
-    left_diabetic_retinography_stage_0: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_1: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_2: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_3: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_4: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_0: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_1: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_2: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_3: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_4: {
-      type: DataTypes.FLOAT,
-    },
-    left_ocular: {
+    left_diabetic_retinography_stage: {
       type: DataTypes.TINYINT,
     },
-    right_ocular: {
+    left_diabetic_retinography_prob: {
+      type: DataTypes.FLOAT,
+    },
+    right_diabetic_retinography_stage: {
       type: DataTypes.TINYINT,
     },
-    left_glaucoma: {
-      type: DataTypes.TINYINT,
+    right_diabetic_retinography_prob: {
+      type: DataTypes.FLOAT,
     },
-    right_glaucoma: {
-      type: DataTypes.TINYINT,
+    left_ocular_prob: {
+      type: DataTypes.FLOAT,
     },
-    created_date: {
+    right_ocular_prob: {
+      type: DataTypes.FLOAT,
+    },
+    left_glaucoma_prob: {
+      type: DataTypes.FLOAT,
+    },
+    right_glaucoma_prob: {
+      type: DataTypes.FLOAT,
+    },
+    visit_date: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
