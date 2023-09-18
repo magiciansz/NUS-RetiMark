@@ -89,10 +89,16 @@ const update = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send(patient);
 });
 
+const remove = catchAsync(async (req, res) => {
+  await PatientService.deletePatient(req.params.id);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 module.exports = {
   getImage,
   addToBucketFromURL,
   index,
   update,
   add,
+  remove,
 };

@@ -1,4 +1,4 @@
-name: Develop - Deploy to ECR
+name: Staging - Deploy to ECR
 
 on:
   pull_request:
@@ -38,3 +38,7 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster staging --service staging-server --force-new-deployment

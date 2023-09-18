@@ -18,4 +18,6 @@ router.patch("/:id", PatientController.update);
 
 router.post("", PatientController.add);
 
+router.delete("/:id", PatientController.remove);
+
 module.exports = router;
