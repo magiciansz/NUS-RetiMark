@@ -4,6 +4,8 @@
 // import Home from "./pages/Home"
 import Home from './components/views/home/home';
 import Navi from './components/navi/navi';
+import PastReports from './components/views/pastreports/pastreports';
+// import Login from './components/views/pastreports/pastreports';
 
 // import Register from "./pages/Register"
 // import Wishes from "./pages/Wishes"
@@ -19,7 +21,9 @@ const App = () => {
         <BrowserRouter>
             <div> 
                 <Routes>
+                    {/* <Route path="/login" element={<Login/>}/> */}
                     <Route path="/" element={<><Navi/><Home/></>}/>
+                    <Route path="/reports" element={<><Navi/><PastReports/></>}/>
                     {/* <Route path="/register" element={<Register/>}/>
                     <Route path = "/home" element = {<><Navbar/><Home/></>} />
                     <Route path="/wishes" element={<><Navbar/><Wishes/></>}/>

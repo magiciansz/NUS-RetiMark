@@ -36,11 +36,11 @@ function Report({patient, image}) {
                         <div className='sub-header'>
                             Patient details
                         </div>
-                        Name: {patient}
+                        Name: {patient.name}
                         <br/>
-                        Age: 22
+                        Age: {patient.age}
                         <br/>
-                        Sex: Female
+                        Sex: {patient.gender}
                     </div>
                     <div className='eye-image'>
                         <div className='sub-header'>

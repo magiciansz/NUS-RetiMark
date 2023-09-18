@@ -11,6 +11,13 @@ router.post(
   validateUploadImageParameters,
   PatientController.addToBucketFromURL
 );
-router.get("/get/:id", validatePatientID, PatientController.getPatient);
+router.get("/:id", validatePatientID, PatientController.index);
+
+// add validation once confirm fields to add
+router.patch("/:id", PatientController.update);
+
+router.post("", PatientController.add);
+
+router.delete("/:id", PatientController.remove);
 
 module.exports = router;

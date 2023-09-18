@@ -25,6 +25,11 @@ defaultRoutes.forEach((route) => {
   router.use(route.path, route.route);
 });
 
+// health check
+router.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 router.all("*", () => {
   throw new ApiError(httpStatus.NOT_FOUND, "Route not found");
 });

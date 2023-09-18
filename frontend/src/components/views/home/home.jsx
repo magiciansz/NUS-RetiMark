@@ -1,11 +1,22 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {FaSearch} from "react-icons/fa"
 
 import './home.css';
 import Report from './report'
+import Modal from './modal';
+
 
 import Placeholder from '../../../css/imgs/ai.png';
 import Placeholder2 from '../../../css/imgs/img2.jpg';
 import Placeholder3 from '../../../css/imgs/img3.png';
+
+const patients = [
+	{name: 'jiahui', age: '22', gender: 'F'},
+	{name: 'xianghan', age: '24', gender: 'M'},
+	{name: 'jiajun', age: '24', gender: 'M'},
+	{name: 'glenn', age: '24', gender: 'M'},
+	{name: 'josiah', age: '24', gender: 'M'},
+]
 
 
 function Home() {
@@ -13,6 +24,18 @@ function Home() {
 	const [previewImage, setPreviewImage] = useState(null);
 	const [showReport, setShowReport] = useState(false);
 	const [patient, setPatient] = useState()
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [existingPatient, setExistingPatient] = useState(false)
+	const [filteredPatients, setFilteredPatients] = useState([])
+	const [input, setInput] = useState("");
+
+	const openModal = () => {
+		setIsModalOpen(true);
+	};
+
+	const closeModal = () => {
+		setIsModalOpen(false);
+	};
 
 	const handleFileChange = (event) => {
 		const file = event.target.files[0];
@@ -31,6 +54,42 @@ function Home() {
 		setPreviewImage(null)
 		setPatient()
 		setShowReport(false);
+		setExistingPatient(false)
+		setInput("")
+		setFilteredPatients([])    
+	};
+
+	const handleExistingPatient = () => {
+        setExistingPatient(true)
+    };
+
+	const fetchData = (value) => {
+        const results = patients.filter((user) => {
+            return (
+              value &&
+              user &&
+              user.name &&
+              user.name.toLowerCase().includes(value)
+            );
+        });
+        setFilteredPatients(results)
+        console.log("results", results);
+    }
+
+    const handleChange = (value) => {
+        setInput(value);
+        fetchData(value);
+    };
+
+	const clearInput = () => {
+        setInput("");   
+		setFilteredPatients([])     
+    };
+
+	const handlePatientClick = (selectedPatient) => {
+		setPatient(selectedPatient);
+		setInput(selectedPatient.name); // Update the search input with the selected patient's name
+		setFilteredPatients([])   
 	};
 
 	return (
@@ -69,17 +128,46 @@ function Home() {
 					</div>
 				</div>
 				<div className='select-image'>
-					<input
-						type="text"
-						placeholder="Search patient"
-						onChange={(e) => setPatient(e.target.value)}
-					/>
+					{existingPatient && <div>
+						<div className='input-container'>
+							<div className='input-wrapper'>
+								<input
+									className='input'
+									placeholder="Search patient"
+									value={input}
+									onChange={(e) => handleChange(e.target.value)}
+								/>
+								<div>
+									{input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
+								</div>
+							</div>
+						</div>
+						<div className='results-list'>
+							{filteredPatients && filteredPatients.map((p, id) => (
+								<div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
+							))}
+						</div>
+						<div>
+							{patient && <div className='selected-patient'> Selected patient: {patient.name} </div>}
+						</div>
+					</div>}
 					{previewImage && <div className='header'>
-						Your selected image for {patient}:
+						Your selected image for {patient.name}:
 					</div>}
 					{previewImage && <img src={previewImage} className='preview' alt="Preview" />}
+					{!existingPatient && <div>
+						<div className='run-test' onClick={openModal}>
+							New Patient
+						</div>
+						<div className='run-test' onClick={handleExistingPatient}>
+							Existing Patient
+						</div>	
+					</div>}
 					
-					<div className='buttons'>
+					<Modal isOpen={isModalOpen} onClose={closeModal} />
+					
+					
+					{patient && existingPatient && <div className='buttons'>
 						<div className="run-test">
 							<label className="add-button">
 							<input type="file" style={{display:'none'}} accept=".jpg, .png" onChange={handleFileChange} />
@@ -88,7 +176,7 @@ function Home() {
 							</div>
 							</label>
 						</div>
-					</div>
+					</div>}
 					{previewImage && <div className='run-test' onClick={runPredictor}>
 						Run predictor
 					</div>}
