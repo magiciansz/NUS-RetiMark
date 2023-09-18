@@ -6,6 +6,8 @@ const afterCreateUpdateHandler = async (record, transaction) => {
     {
       id: record.id,
       version: record.version,
+      name: record.name,
+      age: record.age,
       date_of_birth: record.date_of_birth,
       sex: record.sex,
       left_eye_image: record.left_eye_image,
@@ -19,6 +21,8 @@ const afterCreateUpdateHandler = async (record, transaction) => {
       right_ocular_prob: record.right_ocular_prob,
       left_glaucoma_prob: record.left_glaucoma_prob,
       right_glaucoma_prob: record.right_glaucoma_prob,
+      doctor_notes: record.doctor_notes,
+      report_link: record.report_link,
       visit_date: record.visit_date,
     },
     { transaction }
@@ -39,8 +43,15 @@ const Patient = sequelize.define(
       allowNull: false,
       defaultValue: 1,
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     date_of_birth: {
       type: DataTypes.DATEONLY,
+    },
+    age: {
+      type: DataTypes.INTEGER,
     },
     sex: {
       type: DataTypes.STRING,
@@ -75,6 +86,12 @@ const Patient = sequelize.define(
     right_glaucoma_prob: {
       type: DataTypes.FLOAT,
     },
+    doctor_notes: {
+      type: DataTypes.STRING,
+    },
+    report_link: {
+      type: DataTypes.STRING,
+    },
     visit_date: {
       type: DataTypes.DATE,
       defaultValue: Sequelize.fn("NOW"),
@@ -86,6 +103,12 @@ const Patient = sequelize.define(
       beforeUpdate: async (record) => {
         record.setDataValue("version", record.dataValues.version + 1);
         record.setDataValue("visit_date", Sequelize.fn("NOW"));
+        const ageDate = new Date(Date.now() - new Date(record.date_of_birth));
+        record.setDataValue("age", Math.abs(ageDate.getUTCFullYear() - 1970));
+      },
+      beforeCreate: async (record) => {
+        const ageDate = new Date(Date.now() - new Date(record.date_of_birth));
+        record.setDataValue("age", Math.abs(ageDate.getUTCFullYear() - 1970));
       },
       afterUpdate: async (record, options) => {
         const { transaction } = options;
