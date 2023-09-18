@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import random
+import math
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
@@ -47,42 +48,78 @@ for d in patient_raw_dict:
     patient_dict[d['id']].append(d)
 
 #helper functions
+#def: this function queries a specific attribute (column) of a patient
+#input: dictionary holding the data in record format, id of patient, desired visit date of record, the name of the column/attribute
+#output: single value int/str/float depending on the desired column
 def query_patient_value(dict, id, visit_date, column_name):
-  record_list = dict[id]
-  record = {}
-  for e in record_list:
-    if e['visit_date'] == visit_date:
-      record = e
-      print(e)
-  if record:
-    return record[column_name]
-  else:
-    return None
-  
-def query_risk(dataset, patient_id, disease, laterality, stage):
-    code = ""
+    record_list = dict[id]
+    record = {}
+    for e in record_list:
+        if e['visit_date'] == visit_date:
+            record = e
+    if record:
+        return record[column_name]
+    else:
+        return "NA"
+
+def encode_disease(disease):
+    code = ''
     if (disease == 'Diabetic Retinopathy'):
-        risk_col = laterality + '_diabetic_retinopathy_stage_' + str(stage)
-        # code = '_diabetic_retinopathy'
+        code = 'diabetic_retinopathy'
     elif (disease == 'Age-related Macular Degeneration'):
-        risk_col = laterality + '_ocular'
+        code = 'ocular'
     elif (disease == 'Glaucoma'):
-        # code = 'glaucoma'
-        risk_col = laterality + '_glaucoma'
-    req_risk = dataset[dataset['id'] == patient_id][risk_col]
-    return req_risk
+        code = 'glaucoma'
+    return code
+#def: this function queries last diagnosed date for a patient under a particular disease context
+#input: dictionary holding the data in record format, id of patient, desired visit date of record, disease ('d' for diabetic retinopathy, 'a' for age-related macular degen., 'g' for glaucoma)
+#output: single value int/str/float depending on the desired column
+def query_last_diagnosed_date(dict, id, visit_date, disease):
+    code = encode_disease(disease)
+    record_list = dict[id]
+    record = {}
+    for e in record_list:
+        if e['visit_date'] == visit_date:
+            record = e
+    if record:
+        search_col = "last_diagnosed_date_" + code
+        answer = record[search_col]
+        if str(answer)=="nan":
+            return "NA"
+        else:
+            return answer
+    else:
+        return "NA"
+  
+#def: this function returns a list of visit dates under a patient
+#input: dictionary holding the data in record format, id of patient
+#output: array of dates (str)
+def query_patient_visit_dates(dict, id):
+    record_list = dict[id]
+    date_list = []
+    for e in record_list:
+      date_list.append(e['visit_date'])
+    return date_list
+
+def query_risk(dict, id, visit_date, disease, laterality, stage):
+    code = encode_disease(disease)
+    if code == 'diabetic_retinopathy':
+        risk_col = laterality + '_' + code + '_stage_' + str(stage)
+    else:
+        risk_col = laterality + '_' + code
+    return query_patient_value(dict, id, visit_date, risk_col)
 
 def concat_tuples(x):
-    return x[0] + ' - ' + x[1]
+    return str(x[0]) + ' - ' + x[1]
 
 #demo variables
-patient_ids = map(str, patient_series_dict['id'])
+patient_ids = patient_series_dict['id']
 patient_names = patient_series_dict['name']
 #format id column as a string
 # patients['id'] = patient_ids
 disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
 # risk_levels = ['High', 'Medium', 'Low']
-stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
+# stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
 
 
 if st.session_state["authentication_status"]:
@@ -104,62 +141,57 @@ if st.session_state["authentication_status"]:
     with st.expander(label="Search and Filter", expanded=True):
         filter1, filter2, filter3 = st.columns(3)
         with filter1:
-            patient_w_id_options = zip(patient_ids, patient_names)
+            patient_w_id_options = list(set(zip(patient_ids, patient_names)))
+            patient_w_id_options.sort()
             selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient')
             selected_patient_id = selected_patient_id_selectbox[0]
         with filter2:
             selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
         with filter3:
-            selected_date = st.selectbox(label='Date', options=["12/09/21", "25/11/21", "03/05/22", "18/08/22", "30/01/23"], help='Select visit date')
+            selected_date = st.selectbox(label='Date', options=query_patient_visit_dates(patient_dict, selected_patient_id), help='Select visit date')
 
     info, left, right = st.columns([0.35, 0.275, 0.275])
-    temp_index = patients[patients['id'] == selected_patient_id]['id']
+    patient_id = selected_patient_id_selectbox[0]
     with info:
         st.subheader("Patient Details")
         st.write(f"**Patient ID:** {selected_patient_id}")
         #query patient's age
-        temp_age = patients[patients['id'] == selected_patient_id]['age'].astype(int).to_string(index=False)
+        temp_age =  query_patient_value(patient_dict, patient_id, selected_date, 'age')
         st.write(f"**Age:** {temp_age}")
         #query patient's sex
-        temp_sex = patients[patients['id'] == selected_patient_id]['sex'].to_string(index=False)
+        temp_sex = query_patient_value(patient_dict, patient_id, selected_date, 'sex')
         st.write(f"**Sex:** {temp_sex}")
         #query notes
-        temp_notes = patients[patients['id'] == selected_patient_id]['notes'].to_string(index=False)
+        temp_notes = query_patient_value(patient_dict, patient_id, selected_date, 'notes')
         st.markdown(f"**Notes:** {temp_notes}")
-        #query date
-        temp_upload_date = patients[patients['id'] == selected_patient_id]['last_upload_date'].to_string(index=False)
-        st.write(f"**Last Upload Date:** {temp_upload_date}")
+        # #query date
+        # temp_upload_date = query_patient_value(patient_dict, patient_id, selected_date, 'visit_date')
+        # st.write(f"**Last Upload Date:** {temp_upload_date}")
         #query diagnosed date
         #placeholder information for now
-        temp_diagnosed_date = patients[patients['id'] == selected_patient_id]['last_diagnosed_date'].to_string(index=False)
+        temp_diagnosed_date = query_last_diagnosed_date(patient_dict, patient_id, selected_date, selected_disease_type)
         st.write(f"**Diagnosed Date:** {temp_diagnosed_date}")
         
     with left:
         st.subheader("Left Fundus")
-        left_img_url = patients[patients['id'] == selected_patient_id]['left_eye_image'].to_string(index=False)
+        left_img_url = query_patient_value(patient_dict, patient_id, selected_date, 'left_eye_image')
         st.image(left_img_url, use_column_width="auto")
-        # right_risk = query_risk(patients, selected_patient_id, selected_disease_type, 'right', 1)*100
-        left_risk = query_risk(patients, selected_patient_id, selected_disease_type, 'left', 1)*100
-        # overall_risk = (right_risk+left_risk)/2
+        left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left', 0)
         stage, risk = st.columns([0.5, 0.5])
         with stage:
             st.metric("Most Probable Stage", 2)
         with risk:
-            st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%')
     with right:
         st.subheader("Right Fundus")
-        right_img_url = patients[patients['id'] == selected_patient_id]['right_eye_image'].to_string(index=False)
+        right_img_url = query_patient_value(patient_dict, patient_id, selected_date, 'right_eye_image')
         st.image(right_img_url, use_column_width="auto")
-        right_risk = query_risk(patients, selected_patient_id, selected_disease_type, 'right', 1)*100
-        # left_risk = query_risk(patients, selected_patient_id, selected_disease_type, 'left', 1)*100
-        # overall_risk = (right_risk+left_risk)/2
-        # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+        right_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right', 0)
         stage, risk = st.columns([0.5, 0.5])
         with stage:
             st.metric("Most Probable Stage", 2)
-        # st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
         with risk:
-            st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+            st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(random.randint(-5,5))+'%')
 
     st.divider()
     st.subheader("Risk Trend")
