@@ -14,8 +14,15 @@ const PatientHistory = sequelize.define(
       allowNull: false,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     date_of_birth: {
       type: DataTypes.DATEONLY,
+    },
+    age: {
+      type: DataTypes.INTEGER,
     },
     sex: {
       type: DataTypes.STRING,
@@ -49,6 +56,12 @@ const PatientHistory = sequelize.define(
     },
     right_glaucoma_prob: {
       type: DataTypes.FLOAT,
+    },
+    doctor_notes: {
+      type: DataTypes.STRING,
+    },
+    report_link: {
+      type: DataTypes.STRING,
     },
     visit_date: {
       type: DataTypes.DATE,

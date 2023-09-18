@@ -14,6 +14,7 @@ const addPatient = async (body) => {
   const patient = await Patient.create({
     date_of_birth: body.date_of_birth,
     sex: body.sex,
+    name: body.name,
     left_eye_image: body.left_eye_image,
     right_eye_image: body.right_eye_image,
     left_diabetic_retinography_stage: body.left_diabetic_retinography_stage,
@@ -24,6 +25,8 @@ const addPatient = async (body) => {
     right_ocular_prob: body.right_ocular_prob,
     left_glaucoma_prob: body.left_glaucoma_prob,
     right_glaucoma_prob: body.right_glaucoma_prob,
+    doctor_notes: body.doctor_notes,
+    report_link: body.report_link,
   });
   return patient;
 };
@@ -41,6 +44,8 @@ const updatePatient = async (id, body) => {
     right_ocular_prob: body.right_ocular_prob,
     left_glaucoma_prob: body.left_glaucoma_prob,
     right_glaucoma_prob: body.right_glaucoma_prob,
+    doctor_notes: body.doctor_notes,
+    report_link: body.report_link,
   });
   return patient;
 };
