@@ -28,15 +28,13 @@ jobs:
       - name: Generate Version Number
         id: version
         run: |
-          TIMESTAMP=$(TZ="Asia/Singapore" date +'%Y%m%d%H%M%S')
-          echo "VERSION=${TIMESTAMP}" >> $GITHUB_ENV
 
       - name: Build, tag, and push image to Amazon ECR
         working-directory: backend
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: staging
-          IMAGE_TAG: server-${{ env.VERSION }}
+          IMAGE_TAG: server-latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
