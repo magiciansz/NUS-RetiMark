@@ -1,7 +1,9 @@
 name: Staging - Deploy to ECR
 
 on:
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   build:
