@@ -45,8 +45,14 @@ const updatePatient = async (id, body) => {
   return patient;
 };
 
+const deletePatient = async (id) => {
+  const patient = await getPatientByID(id);
+  await patient.destroy();
+};
+
 module.exports = {
   getPatientByID,
   addPatient,
   updatePatient,
+  deletePatient,
 };
