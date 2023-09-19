@@ -1,10 +1,13 @@
+import altair as alt
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 import random
 import math
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
+from dash import Dash, dcc, html, Input, Output, no_update, callback
 from yaml.loader import SafeLoader
 
 # Streamlit app
@@ -86,15 +89,15 @@ def query_last_visit_date(curr_date, date_list):
     else:
         return sorted_dates[sorted_dates.index(curr_date)-1]
   
-#def: this function returns a list of visit dates under a patient
-#input: dictionary holding the data in record format, id of patient
-#output: array of dates (str)
-def query_patient_visit_dates(dict, id):
+#def: this function returns a list of linked values under a patient
+#input: dictionary holding the data in record format, id of patient, [desired columns]
+#output: array of array of values
+def query_patient_multiple(dict, id, col_list):
     record_list = dict[id]
-    date_list = []
-    for e in record_list:
-      date_list.append(e['visit_date'])
-    return date_list
+    result = []
+    for entry in record_list:
+      result.append([entry.get(col) for col in col_list])
+    return result
 
 def query_stage(dict, id, visit_date, disease, laterality):
     code = encode_disease(disease)
@@ -148,8 +151,9 @@ if st.session_state["authentication_status"]:
         with filter2:
             selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
         with filter3:
-            selected_patient_date_list = query_patient_visit_dates(patient_dict, selected_patient_id)
-            selected_date = st.selectbox(label='Date', options=selected_patient_date_list, help='Select visit date')
+            selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
+            selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
+            selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, help='Select visit date')
 
     info, left, right = st.columns([0.35, 0.275, 0.275])
     patient_id = selected_patient_id_selectbox[0]
@@ -163,14 +167,14 @@ if st.session_state["authentication_status"]:
         temp_sex = query_patient_value(patient_dict, patient_id, selected_date, 'sex')
         st.write(f"**Sex:** {temp_sex}")
         #query notes
-        temp_notes = query_patient_value(patient_dict, patient_id, selected_date, 'notes')
+        temp_notes = query_patient_value(patient_dict, patient_id, selected_date, 'doctor_notes')
         st.markdown(f"**Notes:** {temp_notes}")
         # #query date
         # temp_upload_date = query_patient_value(patient_dict, patient_id, selected_date, 'visit_date')
         # st.write(f"**Last Upload Date:** {temp_upload_date}")
         #query diagnosed date
         #placeholder information for now
-        temp_diagnosed_date = query_last_visit_date(selected_date, selected_patient_date_list)
+        temp_diagnosed_date = query_last_visit_date(selected_date, selected_patient_date_list_flatten)
         st.write(f"**Last Visit Date:** {temp_diagnosed_date}")
         
     with left:
@@ -198,7 +202,54 @@ if st.session_state["authentication_status"]:
 
     st.divider()
     st.subheader("Risk Trend")
-    st.line_chart(chart_data)
+
+    #extract date, risk value L, risk value R, image L, image R
+    risk_l_col = "left_" + encode_disease(selected_disease_type) + "_prob"
+    risk_r_col = "right_" + encode_disease(selected_disease_type) + "_prob"
+    chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
+    #extract x-axis(date)
+    # date_vals = [e[0] for e in chart_data]
+    # #extract y-axis1(risk value L)
+    # risk_l_vals = [e[1] for e in chart_data]
+    # #extract y-axis2(risk value R)
+    # risk_r_vals = [e[2] for e in chart_data]
+    # #extract tooltip info1(image L)
+    # image_l_vals = [e[3] for e in chart_data]
+    # #extract tooltip info2(image R)
+    # image_r_vals = [e[4] for e in chart_data]
+    
+    df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
+    melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
+    melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
+    melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
+    melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
+    melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
+    
+    base = alt.Chart(melted_res).mark_line(point=True).encode(
+    alt.X('date:T', axis=alt.Axis(format="%Y %B")),
+    alt.Y('risk:Q').axis(format='.2%'),
+    alt.Color('laterality'),
+    # alt.Tooltip('risk:Q', format="%", title="Valor"),
+    tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
+    ).interactive()
+    base = base.configure_axisX(labelAngle=0)
+
+#     rule = base.mark_rule().encode(
+#     y='average(price)',
+#     color='symbol',
+#     size=alt.value(2)
+# )
+    chart = base
+
+    st.altair_chart(chart, theme="streamlit", use_container_width=True)
+    # line = chart.mark_line().encode(
+    # x='date',
+    # y='risk_l'
+    # )
+    # fig = go.Figure([go.Scatter(x=date_vals, y=risk_l_vals)])
+    # fig.add_scatter(x=date_vals, y=risk_r_vals)
+
+    # st.plotly_chart(fig, use_container_width=True)
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
