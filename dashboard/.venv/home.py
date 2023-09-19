@@ -7,7 +7,7 @@ import math
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
-from dash import Dash, dcc, html, Input, Output, no_update, callback
+from PIL import Image
 from yaml.loader import SafeLoader
 
 # Streamlit app
@@ -224,11 +224,11 @@ if st.session_state["authentication_status"]:
     melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
     melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
     melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
-    
+    melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
     base = alt.Chart(melted_res).mark_line(point=True).encode(
     alt.X('date:T', axis=alt.Axis(format="%Y %B")),
     alt.Y('risk:Q').axis(format='.2%'),
-    alt.Color('laterality'),
+    alt.Color('laterality').scale(scheme="category10"),
     # alt.Tooltip('risk:Q', format="%", title="Valor"),
     tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
     ).interactive()
