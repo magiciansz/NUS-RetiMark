@@ -225,23 +225,62 @@ if st.session_state["authentication_status"]:
     melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
     melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
     melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
+    
+    # Create a selection that chooses the nearest point & selects based on x-value
+    nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
+
     base = alt.Chart(melted_res).mark_line(point=True).encode(
-    alt.X('date:T', axis=alt.Axis(format="%Y %B")),
-    alt.Y('risk:Q').axis(format='.2%'),
-    alt.Color('laterality').scale(scheme="category10"),
-    # alt.Tooltip('risk:Q', format="%", title="Valor"),
-    tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
-    ).interactive()
-    base = base.configure_axisX(labelAngle=0)
+        alt.X('date:T', axis=alt.Axis(format="%Y %B")),
+        alt.Y('risk:Q').axis(format='.2%'),
+        alt.Color('laterality').scale(scheme="category10"),
+        # alt.Tooltip('risk:Q', format="%", title="Valor"),
+        tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
+        )
+    
+    # base = base.configure_axisX(labelAngle=0)
+    # Transparent selectors across the chart. This is what tells us
+    # the x-value of the cursor
+    selectors = alt.Chart(melted_res).mark_point().encode(
+        x='date:T',
+        opacity=alt.value(0),
+    ).add_params(
+        nearest
+    )
 
-#     rule = base.mark_rule().encode(
-#     y='average(price)',
-#     color='symbol',
-#     size=alt.value(2)
-# )
-    chart = base
+    # Draw points on the line, and highlight based on selection
+    points = base.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
 
-    st.altair_chart(chart, theme="streamlit", use_container_width=True)
+    # Draw text labels near the points, and highlight based on selection
+    text = base.mark_text(align='left', dx=5, dy=-5).encode(
+        text=alt.condition(nearest, 'risk:Q', alt.value(' '))
+    )
+
+    # Draw a rule at the location of the selection
+    rules = alt.Chart(melted_res).mark_rule(color='gray').encode(
+        x='date:T',
+    ).transform_filter(
+        nearest
+    )
+    curr_date = alt.Chart(pd.DataFrame({
+    'Date': [selected_date],
+    'color': ['red']
+    })).mark_rule().encode(
+    x='Date:T',
+    color=alt.Color('color:N', scale=None)
+    )
+
+    # rules = alt.Chart(pd.DataFrame({
+    # 'Date': ['2012-12-01', '2012-12-12'],
+    # 'color': ['red', 'orange']
+    # })).mark_rule().encode(
+    # x='Date:T',
+    # color=alt.Color('color:N', scale=None)
+    # )
+
+
+    st.altair_chart((base+selectors+points+text+rules+curr_date), theme="streamlit", use_container_width=True)
     # line = chart.mark_line().encode(
     # x='date',
     # y='risk_l'
