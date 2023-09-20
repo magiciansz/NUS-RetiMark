@@ -3,11 +3,15 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import Modal from './doc-notes';
 
 import './report.css';
 
-function Report({patient, leftEyeImage, rightEyeImage}) {
+function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
     const reportRef = useRef(null);
+    const [docNotes, setDocNotes] = useState('')
+    const [openModal, setOpenModal] = useState(false)
+
     const handleDownloadPDF = () => {
         if (reportRef.current) {
             html2canvas(reportRef.current).then((canvas) => {
@@ -24,6 +28,22 @@ function Report({patient, leftEyeImage, rightEyeImage}) {
             });
         }
     };
+
+    const handleOpenModal = () => {
+		setOpenModal(true);
+	};
+
+    const closeModal = () => {
+		setOpenModal(false);
+	};
+
+    const doctorNotes = (value) => {
+		setDocNotes(value);
+	};
+
+    const handleSave = () => {
+	    onSave();
+	};
 
     return (
         <div>
@@ -71,6 +91,18 @@ function Report({patient, leftEyeImage, rightEyeImage}) {
                         <br/>
                         Probability of Glaucoma: 20%
                     </div>
+                    {docNotes && <div className='doc-notes'>
+                        <div className='sub-header'>
+                            Doctor's Notes
+                        </div>
+                        {docNotes}
+                    </div>}
+                </div>
+            </div>
+            <Modal isOpen={openModal} onClose={closeModal} doctorNotes={doctorNotes}/>
+            <div className='download-button'>
+                <div className='button' onClick={handleOpenModal}>
+                    Add Doctor's Note
                 </div>
             </div>
             <div className='download-button'>
@@ -78,6 +110,12 @@ function Report({patient, leftEyeImage, rightEyeImage}) {
                     Download PDF
                 </div>
             </div>
+            <div className='download-button'>
+                <div className='button' onClick={handleSave}>
+                    Save
+                </div>
+            </div>
+            
         </div>
     );
 }

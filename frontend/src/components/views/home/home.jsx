@@ -110,6 +110,10 @@ function Home() {
 	const rightEyeImage = (value) => {
 		setRightEye(value);
 	};
+
+	const closeReport = () => {
+        setShowReport(false);
+    };
 	return (
 		<div className='home-page'>
 			{!showReport && <div>
@@ -154,12 +158,12 @@ function Home() {
 				</div>
 				<Modal isOpen={isModalOpen} onClose={closeModal} showReport={handleShowReport} selectedPatient={selectedPatient} leftEyeImage={leftEyeImage} rightEyeImage={rightEyeImage}/>
 			</div>}
-			{showReport && <Report patient={patient} leftEyeImage={leftEye} rightEyeImage={rightEye}/>}
-			<div className='prediction-container'>
+			{showReport && <Report patient={patient} leftEyeImage={leftEye} rightEyeImage={rightEye} onSave={closeReport}/>}
+			{/* <div className='prediction-container'>
 				{showReport && <div className='new-prediction' onClick={handleNewPrediction}>
-					Make a new prediction
+					Save
 				</div>}
-			</div>
+			</div> */}
 		</div>
 	);
 }

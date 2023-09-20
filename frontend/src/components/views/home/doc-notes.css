@@ -1,0 +1,16 @@
+.custom-textarea {
+    width: 95%;
+    height: 150px;   
+}
+.save-notes {
+    margin-top: 20px;
+    border: 1px #e76d27 solid;
+    background-color: #e76d27;
+    color: white;
+    width: 200px;
+    padding: 10px;
+    border-radius: 8px; 
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 20px;
+}
