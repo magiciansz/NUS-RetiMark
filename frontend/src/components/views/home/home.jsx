@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {FaSearch} from "react-icons/fa"
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 
 import './home.css';
 import Report from './report'
@@ -28,6 +29,8 @@ function Home() {
 	const [existingPatient, setExistingPatient] = useState(false)
 	const [filteredPatients, setFilteredPatients] = useState([])
 	const [input, setInput] = useState("");
+	const [leftEye, setLeftEye] = useState(null);
+	const [rightEye, setRightEye] = useState(null);
 
 	const openModal = () => {
 		setIsModalOpen(true);
@@ -92,97 +95,66 @@ function Home() {
 		setFilteredPatients([])   
 	};
 
+	const handleShowReport = (value) => {
+		setShowReport(value);
+	};
+
+	const selectedPatient = (value) => {
+		setPatient(value);
+	};
+
+	const leftEyeImage = (value) => {
+		setLeftEye(value);
+	};
+
+	const rightEyeImage = (value) => {
+		setRightEye(value);
+	};
 	return (
 		<div className='home-page'>
-			<div className='info'>
-				<div className='title'>
-					Eye Disease Predictor
+			{!showReport && <div>
+				<div className='info'>
+					<div className='title'>
+						Eye Disease Predictor
+					</div>
+					<div className='description'>
+						The OcularRisk AI Predictor is a cutting-edge platform meticulously designed to analyze medical images of the eye with unparalleled precision. Leveraging the capabilities of advanced artificial intelligence, this system conducts a thorough examination of submitted ocular images to offer insightful predictions regarding potential ocular diseases.
+					</div>
 				</div>
-				<div className='description'>
-					The OcularRisk AI Predictor is a cutting-edge platform meticulously designed to analyze medical images of the eye with unparalleled precision. Leveraging the capabilities of advanced artificial intelligence, this system conducts a thorough examination of submitted ocular images to offer insightful predictions regarding potential ocular diseases.
-				</div>
-			</div>
-			{!showReport && <div className='image-input'>
+				<div className='instructions'>
 				<div className='image-requirements'>
-					To start, simply upload an image.
-					The uploaded image should be in line with the following examples: 
-				</div>
-				<div className='images'>
-					<div className='image'>
-						<img src={Placeholder} alt="Example" /> 
-						<div className='req'>
-							The image is clear
-						</div>
+						To start, simply upload an image.
+						The uploaded image should be in line with the following examples: 
 					</div>
-					<div className='image'>
-						<img src={Placeholder2} alt="Example" /> 
-						<div className='req'>
-							The eye is in the center of the image
-						</div>
-					</div>
-					<div className='image'>
-						<img src={Placeholder3} alt="Example" /> 
-						<div className='req'>
-							The background is plain
-						</div>
-					</div>
-				</div>
-				<div className='select-image'>
-					{existingPatient && <div>
-						<div className='input-container'>
-							<div className='input-wrapper'>
-								<input
-									className='input'
-									placeholder="Search patient"
-									value={input}
-									onChange={(e) => handleChange(e.target.value)}
-								/>
-								<div>
-									{input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
-								</div>
+					<div className='images'>
+						<div className='image'>
+							<img src={Placeholder} alt="Example" /> 
+							<div className='req'>
+								The image is clear
 							</div>
 						</div>
-						<div className='results-list'>
-							{filteredPatients && filteredPatients.map((p, id) => (
-								<div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
-							))}
-						</div>
-						<div>
-							{patient && <div className='selected-patient'> Selected patient: {patient.name} </div>}
-						</div>
-					</div>}
-					{previewImage && <div className='header'>
-						Your selected image for {patient.name}:
-					</div>}
-					{previewImage && <img src={previewImage} className='preview' alt="Preview" />}
-					{!existingPatient && <div>
-						<div className='run-test' onClick={openModal}>
-							New Patient
-						</div>
-						<div className='run-test' onClick={handleExistingPatient}>
-							Existing Patient
-						</div>	
-					</div>}
-					
-					<Modal isOpen={isModalOpen} onClose={closeModal} />
-					
-					
-					{patient && existingPatient && <div className='buttons'>
-						<div className="run-test">
-							<label className="add-button">
-							<input type="file" style={{display:'none'}} accept=".jpg, .png" onChange={handleFileChange} />
-							<div className="text">
-								{previewImage ? "Change Image" : "Select Image"}
+						<div className='image'>
+							<img src={Placeholder2} alt="Example" /> 
+							<div className='req'>
+								The eye is in the center of the image
 							</div>
-							</label>
 						</div>
-					</div>}
-					{previewImage && <div className='run-test' onClick={runPredictor}>
-						Run predictor
-					</div>}
+						<div className='image'>
+							<img src={Placeholder3} alt="Example" /> 
+							<div className='req'>
+								The background is plain
+							</div>
+						</div>
+					</div>
 				</div>
+				<div className='btn-div'>
+					<div className='run-test' onClick={openModal}>
+						Start
+					</div>
+				</div>
+				<Modal isOpen={isModalOpen} onClose={closeModal} showReport={handleShowReport} selectedPatient={selectedPatient} leftEyeImage={leftEyeImage} rightEyeImage={rightEyeImage}/>
 			</div>}
-			{showReport && <Report patient={patient} image={previewImage}/>}
+			{showReport && <Report patient={patient} leftEyeImage={leftEye} rightEyeImage={rightEye}/>}
 			<div className='prediction-container'>
 				{showReport && <div className='new-prediction' onClick={handleNewPrediction}>
 					Make a new prediction
