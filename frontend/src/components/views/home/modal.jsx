@@ -271,7 +271,6 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                             </label>
                             <input type="file" accept=".jpg, .png" onChange={(e) => handleFileChange(e, 'right')} />
                             {rightEye && <img src={rightEye} className='preview' alt="Preview" />}
-                    
                         </div>
                     </div>
                     <button className={`submit-btn ${!bothImagesUploaded() ? 'disabled' : ''}`} type="submit" disabled={!bothImagesUploaded()}>Run Predictor</button>   
