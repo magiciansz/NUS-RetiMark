@@ -8,6 +8,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    /* overflow-y: auto; */
 
     .modal-content {
         position: relative;
@@ -45,5 +46,62 @@
         float: right;
         cursor: pointer;
         font-weight: 600;
+    }
+    .submit-btn.disabled {
+        background-color: #ccc; /* Change the background color to gray */
+        cursor: not-allowed; /* Change the cursor to indicate it's not clickable */
+        pointer-events: none; /* Prevent click events on the button */
+        border: none;
+    }
+    .mode-btn {
+        margin-top: 40px;
+        border: 1px #e76d27 solid;
+        background-color: #e76d27;
+        color: white;
+        width: 300px;
+        padding: 40px;
+        border-radius: 8px; 
+        cursor: pointer;
+        text-align: center;
+        margin: 40px 20px 40px 20px;
+        font-size: 30px;
+        font-weight: 600;
+
+    }
+    .img-div {
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+    }
+    .mode-toggle {
+        display: flex;
+        justify-content: center;
+    }
+    .right-img-div {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .img-label {
+        margin-bottom: 10px;
+    }
+    .preview {
+        height: 150px;
+        width: 200px;
+        margin-top: 10px;
+    }
+    .vertical-line {
+        width: 2px;
+        background-color: #333; /* Color of the vertical line */
+        /* margin: 0 20px; */
+    }
+    .img-container {
+        gap: 50px;
+        display: flex;
+    }
+    .patient-name {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 10px;
     }
 }

@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
 
 import './report.css';
 
-function Report({patient, image}) {
+function Report({patient, leftEyeImage, rightEyeImage}) {
     const reportRef = useRef(null);
     const handleDownloadPDF = () => {
         if (reportRef.current) {
@@ -44,9 +44,22 @@ function Report({patient, image}) {
                     </div>
                     <div className='eye-image'>
                         <div className='sub-header'>
-                            Eye Image
+                            Eye Images
                         </div>
-                        <img src={image}/>
+                        <div className='eye-images'>
+                            <div className='indiv-eye'>
+                                <img src={leftEyeImage}/>
+                                <div className='img-caption'>
+                                    Left Eye
+                                </div>
+                            </div>
+                            <div className='indiv-eye'>
+                                <img src={rightEyeImage}/>
+                                <div className='img-caption'>
+                                    Right Eye
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div className='results'>
                         <div className='sub-header'>
