@@ -10,16 +10,22 @@ const Navi = () => {
                 alt="Logo"
                 className="logo"
             />
+            <div className='left-tabs'>
+                <Link to="/">
+                    <div className='tab'>Predictor</div>
+                </Link>
+                <Link to='/reports'>
+                    <div className='tab'>Past reports</div>
+                </Link>
+            </div>
         </div>
-        <div className='tabs'>
-          <Link to="/">
-            <div className='tab'>Predictor</div>
-          </Link>
-          <Link to='/reports'>
-            <div className='tab'>Past reports</div>
-          </Link>
+        <div className='login-tab'>
+            <Link to='/login'>
+                <div className='tab'>Logout</div>
+            </Link>
         </div>
-        <div className="logout">Logout</div>
+        
+        {/* <div className="logout">Logout</div> */}
     </div>
   )
 }
