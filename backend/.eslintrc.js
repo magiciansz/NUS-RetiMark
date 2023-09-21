@@ -15,6 +15,24 @@ module.exports = {
         sourceType: "script",
       },
     },
+    {
+      files: ["**/*.test.js", "**/setUpTestDB.js"],
+      env: {
+        jest: true,
+        "jest/globals": true,
+      },
+      // Can't extend in overrides: https://github.com/eslint/eslint/issues/8813
+      // "extends": ["plugin:jest/recommended"]
+      plugins: ["jest"],
+      extends: ["plugin:jest/recommended"],
+      rules: {
+        "jest/no-disabled-tests": "warn",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "jest/prefer-to-have-length": "warn",
+        "jest/valid-expect": "error",
+      },
+    },
   ],
   parserOptions: {
     ecmaVersion: "latest",

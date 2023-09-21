@@ -47,10 +47,7 @@ const verifyToken = async (token, type) => {
     },
   });
   if (!tokenDoc) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "Forbidden: Invalid or expired refresh token."
-    );
+    throw new Error("Please Authenticate.");
   }
   return tokenDoc;
 };

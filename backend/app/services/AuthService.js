@@ -45,19 +45,24 @@ const logout = async (refreshToken) => {
  * @returns {Promise<Object>}
  */
 const refreshAuth = async (refreshToken, timezone) => {
-  const refreshTokenDoc = await tokenService.verifyToken(
-    refreshToken,
-    tokenTypes.REFRESH
-  );
-  const user = await userService.getUserById(refreshTokenDoc.user_id);
-  if (!user) {
-    throw new ApiError(
-      httpStatus.NOT_FOUND,
-      "User authenticated to this token is not found in the database"
+  try {
+    const refreshTokenDoc = await tokenService.verifyToken(
+      refreshToken,
+      tokenTypes.REFRESH
     );
+    const user = await userService.getUserById(refreshTokenDoc.user_id);
+    if (!user) {
+      throw new Error();
+    }
+    await refreshTokenDoc.destroy();
+    return tokenService.generateAuthTokens(user, timezone);
+  } catch (error) {
+    if (error)
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Unauthorised: Invalid or expired refresh token."
+      );
   }
-  await refreshTokenDoc.destroy();
-  return tokenService.generateAuthTokens(user, timezone);
 };
 
 module.exports = {

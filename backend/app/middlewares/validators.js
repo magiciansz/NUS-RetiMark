@@ -55,8 +55,22 @@ const validatePatientID = [
 ];
 
 const validateLogin = [
-  body("username").not().isEmpty().withMessage("username cannot be empty."),
-  body("password").not().isEmpty().withMessage("password cannot be empty."),
+  body("username")
+    .not()
+    .isEmpty()
+    .withMessage("username cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("username has to be a string")
+    .bail(),
+  body("password")
+    .not()
+    .isEmpty()
+    .withMessage("password cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("password has to be a string")
+    .bail(),
   query("timezone")
     .not()
     .isEmpty()
@@ -97,12 +111,16 @@ const validateRefreshTokens = [
 ];
 
 // creating / updating user details
+// NOT USED
 
 const validateUserDetails = [
   body("username")
     .not()
     .isEmpty()
     .withMessage("username cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("username has to be a string")
     .bail()
     .isLength({
       min: 8,
@@ -117,6 +135,9 @@ const validateUserDetails = [
     .not()
     .isEmpty()
     .withMessage("password cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("password has to be a string")
     .bail()
     .isLength({
       min: 8,
@@ -132,7 +153,7 @@ const validateUserDetails = [
   },
 ];
 
-const validateUserDetailsAndTimezone = [
+const validateRegister = [
   query("timezone")
     .not()
     .isEmpty()
@@ -144,6 +165,9 @@ const validateUserDetailsAndTimezone = [
     .not()
     .isEmpty()
     .withMessage("username cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("username has to be a string")
     .bail()
     .isLength({
       min: 8,
@@ -159,6 +183,9 @@ const validateUserDetailsAndTimezone = [
     .isEmpty()
     .withMessage("password cannot be empty.")
     .bail()
+    .isString()
+    .withMessage("password has to be a string")
+    .bail()
     .isLength({
       min: 8,
     })
@@ -167,7 +194,19 @@ const validateUserDetailsAndTimezone = [
     )
     .bail()
     .custom((value) => !/\s/.test(value))
-    .withMessage("password cannot have blank spaces."),
+    .withMessage("password cannot have blank spaces.")
+    .bail()
+    .custom((value) => /[a-z]/.test(value))
+    .withMessage("password needs a lowercase letter")
+    .bail()
+    .custom((value) => /[A-Z]/.test(value))
+    .withMessage("password needs a uppercase letter")
+    .bail()
+    .custom((value) => /\d/.test(value))
+    .withMessage("password needs a number")
+    .bail()
+    .custom((value) => /[#.?!@$%^&*-]/.test(value))
+    .withMessage("password needs a special character #.-?!@$%^&*"),
   (req, res, next) => {
     return BadRequestError(req, res, next);
   },
@@ -187,7 +226,7 @@ module.exports = {
   validateLogin,
   validateUserDetails,
   validateUserId,
-  validateUserDetailsAndTimezone,
+  validateRegister,
   validateLogout,
   validateRefreshTokens,
 };

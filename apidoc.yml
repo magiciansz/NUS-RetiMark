@@ -78,8 +78,8 @@ paths:
               $ref: "#/components/schemas/LoginForm"
         required: true
       responses:
-        "200":
-          description: Success
+        "201":
+          description: Resource Created
           content:
             application/json:
               schema:
@@ -109,12 +109,14 @@ paths:
               $ref: "#/components/schemas/RefreshTokenForm"
         required: true
       responses:
-        "200":
-          description: Success
+        "204":
+          description: No content
+        "400":
+          description: Invalid data format or data that does not match the expected schema
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
+                $ref: "#/components/schemas/LogoutOrRefreshInvalidData"
         "404":
           description: Refresh Token not found
           content:
@@ -147,18 +149,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RefreshTokenResponse"
-        "403":
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutOrRefreshInvalidData"
+        "401":
           description: Invalid or expired refresh token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExpiredOrInvalidRefreshToken"
-        "404":
-          description: User authenticated to user not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RefreshTokenUserNotFound"
 
 components:
   schemas:
@@ -197,10 +199,10 @@ components:
           example: 403
         message:
           type: string
-          example: "Forbidden: Invalid or expired refresh token."
+          example: "Unauthorised: Invalid or expired refresh token."
         stack:
           type: string
-          example: "Error: Forbidden: Invalid or expired refresh token."
+          example: "Error: Unauthorised: Invalid or expired refresh token."
     LogoutTokenNotFound:
       type: object
       properties:
@@ -213,18 +215,6 @@ components:
         stack:
           type: string
           example: "Error: Token Not found, at Object.logout"
-    RefreshTokenUserNotFound:
-      type: object
-      properties:
-        status:
-          type: integer
-          example: 404
-        message:
-          type: string
-          example: "User authenticated to this token is not found in the database"
-        stack:
-          type: string
-          example: "Error: User authenticated to this token is not found in the database"
     LoginInvalidData:
       type: object
       properties:
@@ -232,22 +222,11 @@ components:
           type: integer
           example: 400
         message:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                example: "field"
-              msg:
-                type: string
-                example: "username cannot be empty."
-              path:
-                type: string
-                example: "username"
-              location:
-                type: string
-                example: "body"
+          type: string
+          example: '[{\"type\":\"field\",\"value\":\"\",\"msg\":\"timezone cannot be empty\",\"path\":\"timezone\",\"location\":\"query\"},{\"type\":\"field\",\"value\":1111111111,\"msg\":\"username has to be a string\",\"path\":\"username\",\"location\":\"body\"},{\"type\":\"field\",\"value\":\"xiangh an1\",\"msg\":\"password cannot have blank spaces.\",\"path\":\"password\",\"location\":\"body\"}]'
+        stack:
+          type: string
+          example: 'at BadRequestError (/Users/ngxianghan/Documents/Y4S1/BT4103/NUS-RetiMark/backend/app/middlewares/responseCodes.js:26:13)",'
     LoginIncorrectDetailsError:
       type: object
       properties:
@@ -260,6 +239,18 @@ components:
         stack:
           type: string
           example: "Error: Incorrect email or password, at Object.loginUserWithUsernameAndPassword"
+    LogoutOrRefreshInvalidData:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: '[{"type":"field","value":"","msg":"refreshToken cannot be empty.","path":"refreshToken","location":"body"}]'
+        stack:
+          type: string
+          example: "at BadRequestError (/Users/ngxianghan/Documents/Y4S1/BT4103/NUS-RetiMark/backend/app/middlewares/responseCodes.js:26:13)"
     RefreshTokenResponse:
       type: object
       properties:
