@@ -13,9 +13,31 @@ const User = sequelize.define(
     },
     password: {
       type: DataTypes.STRING,
+      validate: {
+        isLength: {
+          args: [8],
+          msg: "password has to be a length of at least 8 characters or numbers.",
+        },
+        noSpaces(password) {
+          if (password.indexOf(" ") >= 0) {
+            throw new Error("password cannot have blank spaces.");
+          }
+        },
+      },
     },
     username: {
       type: DataTypes.STRING,
+      validate: {
+        isLength: {
+          args: [8],
+          msg: "username has to be a length of at least 8 characters or numbers.",
+        },
+        noSpaces(username) {
+          if (username.indexOf(" ") >= 0) {
+            throw new Error("username cannot have blank spaces.");
+          }
+        },
+      },
     },
   },
   {

@@ -1,4 +1,6 @@
 const { check, validationResult } = require("express-validator");
+const httpStatus = require("http-status");
+const ApiError = require("../middlewares/ApiError");
 
 // 404
 const HttpNotFoundError = (req, res, next) => {
@@ -20,8 +22,13 @@ const ResourceNotFoundError = (req, res, next, message) => {
 const BadRequestError = (req, res, next) => {
   const errors = validationResult(req);
 
-  if (!errors.isEmpty())
-    return res.status(400).json({ status: 400, message: errors.array() });
+  if (!errors.isEmpty()) {
+    const error = new ApiError(
+      httpStatus.BAD_REQUEST,
+      JSON.stringify(errors.array())
+    );
+    return next(error);
+  }
   next();
 };
 

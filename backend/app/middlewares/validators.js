@@ -55,8 +55,40 @@ const validatePatientID = [
 ];
 
 const validateLogin = [
-  body("username").not().isEmpty().withMessage("username cannot be empty."),
-  body("password").not().isEmpty().withMessage("password cannot be empty."),
+  body("username")
+    .not()
+    .isEmpty()
+    .withMessage("username cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("username has to be a string")
+    .bail()
+    .isLength({
+      min: 8,
+    })
+    .withMessage(
+      "username has to be a length of at least 8 characters or numbers."
+    )
+    .bail()
+    .custom((value) => !/\s/.test(value))
+    .withMessage("username cannot have blank spaces."),
+  body("password")
+    .not()
+    .isEmpty()
+    .withMessage("password cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("password has to be a string")
+    .bail()
+    .isLength({
+      min: 8,
+    })
+    .withMessage(
+      "password has to be a length of at least 8 characters or numbers."
+    )
+    .bail()
+    .custom((value) => !/\s/.test(value))
+    .withMessage("password cannot have blank spaces."),
   query("timezone")
     .not()
     .isEmpty()
@@ -104,6 +136,9 @@ const validateUserDetails = [
     .isEmpty()
     .withMessage("username cannot be empty.")
     .bail()
+    .isString()
+    .withMessage("username has to be a string")
+    .bail()
     .isLength({
       min: 8,
     })
@@ -117,6 +152,9 @@ const validateUserDetails = [
     .not()
     .isEmpty()
     .withMessage("password cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("password has to be a string")
     .bail()
     .isLength({
       min: 8,
@@ -145,6 +183,9 @@ const validateUserDetailsAndTimezone = [
     .isEmpty()
     .withMessage("username cannot be empty.")
     .bail()
+    .isString()
+    .withMessage("username has to be a string")
+    .bail()
     .isLength({
       min: 8,
     })
@@ -158,6 +199,9 @@ const validateUserDetailsAndTimezone = [
     .not()
     .isEmpty()
     .withMessage("password cannot be empty.")
+    .bail()
+    .isString()
+    .withMessage("password has to be a string")
     .bail()
     .isLength({
       min: 8,
