@@ -3,11 +3,15 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import Modal from './doc-notes';
 
 import './report.css';
 
-function Report({patient, image}) {
+function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
     const reportRef = useRef(null);
+    const [docNotes, setDocNotes] = useState('')
+    const [openModal, setOpenModal] = useState(false)
+
     const handleDownloadPDF = () => {
         if (reportRef.current) {
             html2canvas(reportRef.current).then((canvas) => {
@@ -25,6 +29,22 @@ function Report({patient, image}) {
         }
     };
 
+    const handleOpenModal = () => {
+		setOpenModal(true);
+	};
+
+    const closeModal = () => {
+		setOpenModal(false);
+	};
+
+    const doctorNotes = (value) => {
+		setDocNotes(value);
+	};
+
+    const handleSave = () => {
+	    onSave();
+	};
+
     return (
         <div>
             <div className='report-container' id='report-container' ref={reportRef}>
@@ -36,17 +56,30 @@ function Report({patient, image}) {
                         <div className='sub-header'>
                             Patient details
                         </div>
-                        Name: {patient}
+                        Name: {patient.name}
                         <br/>
-                        Age: 22
+                        Age: {patient.age}
                         <br/>
-                        Sex: Female
+                        Sex: {patient.gender}
                     </div>
                     <div className='eye-image'>
                         <div className='sub-header'>
-                            Eye Image
+                            Eye Images
                         </div>
-                        <img src={image}/>
+                        <div className='eye-images'>
+                            <div className='indiv-eye'>
+                                <img src={leftEyeImage}/>
+                                <div className='img-caption'>
+                                    Left Eye
+                                </div>
+                            </div>
+                            <div className='indiv-eye'>
+                                <img src={rightEyeImage}/>
+                                <div className='img-caption'>
+                                    Right Eye
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div className='results'>
                         <div className='sub-header'>
@@ -58,6 +91,18 @@ function Report({patient, image}) {
                         <br/>
                         Probability of Glaucoma: 20%
                     </div>
+                    {docNotes && <div className='doc-notes'>
+                        <div className='sub-header'>
+                            Doctor's Notes
+                        </div>
+                        {docNotes}
+                    </div>}
+                </div>
+            </div>
+            <Modal isOpen={openModal} onClose={closeModal} doctorNotes={doctorNotes}/>
+            <div className='download-button'>
+                <div className='button' onClick={handleOpenModal}>
+                    Add Doctor's Note
                 </div>
             </div>
             <div className='download-button'>
@@ -65,6 +110,12 @@ function Report({patient, image}) {
                     Download PDF
                 </div>
             </div>
+            <div className='download-button'>
+                <div className='button' onClick={handleSave}>
+                    Save
+                </div>
+            </div>
+            
         </div>
     );
 }

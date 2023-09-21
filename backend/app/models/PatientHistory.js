@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../../config/database");
 
 const PatientHistory = sequelize.define(
@@ -14,6 +14,13 @@ const PatientHistory = sequelize.define(
       allowNull: false,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+    },
     age: {
       type: DataTypes.INTEGER,
     },
@@ -26,55 +33,37 @@ const PatientHistory = sequelize.define(
     right_eye_image: {
       type: DataTypes.STRING,
     },
-    left_eye_resized_image: {
+    left_diabetic_retinography_stage: {
+      type: DataTypes.TINYINT,
+    },
+    left_diabetic_retinography_prob: {
+      type: DataTypes.FLOAT,
+    },
+    right_diabetic_retinography_stage: {
+      type: DataTypes.TINYINT,
+    },
+    right_diabetic_retinography_prob: {
+      type: DataTypes.FLOAT,
+    },
+    left_ocular_prob: {
+      type: DataTypes.FLOAT,
+    },
+    right_ocular_prob: {
+      type: DataTypes.FLOAT,
+    },
+    left_glaucoma_prob: {
+      type: DataTypes.FLOAT,
+    },
+    right_glaucoma_prob: {
+      type: DataTypes.FLOAT,
+    },
+    doctor_notes: {
       type: DataTypes.STRING,
     },
-    right_eye_resized_image: {
+    report_link: {
       type: DataTypes.STRING,
     },
-    left_diabetic_retinography_stage_0: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_1: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_2: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_3: {
-      type: DataTypes.FLOAT,
-    },
-    left_diabetic_retinography_stage_4: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_0: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_1: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_2: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_3: {
-      type: DataTypes.FLOAT,
-    },
-    right_diabetic_retinography_stage_4: {
-      type: DataTypes.FLOAT,
-    },
-    left_ocular: {
-      type: DataTypes.TINYINT,
-    },
-    right_ocular: {
-      type: DataTypes.TINYINT,
-    },
-    left_glaucoma: {
-      type: DataTypes.TINYINT,
-    },
-    right_glaucoma: {
-      type: DataTypes.TINYINT,
-    },
-    created_date: {
+    visit_date: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mysqldb:
@@ -11,10 +11,13 @@ services:
       - ${MYSQLDB_LOCAL_PORT}:${MYSQLDB_DOCKER_PORT}
     volumes:
       - db:/var/lib/mysql
+    platform: linux/x86_64
   server:
     depends_on:
       - mysqldb
     build: ./backend
+    command: bash -c 'while !</dev/tcp/mysqldb/${MYSQLDB_DOCKER_PORT}; do sleep 1; done; npm start'
+
     # restart: unless-stopped
     ports:
       - ${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}
@@ -29,8 +32,11 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_BUCKET=${AWS_BUCKET}
+      - TOKEN_SECRET={TOKEN_SECRET}
+      - TOKEN_ACCESS_EXPIRATION_MINUTES={TOKEN_ACCESS_EXPIRATION_MINUTES}
+      - TOKEN_REFRESH_EXPIRATION_HOURS={TOKEN_REFRESH_EXPIRATION_HOURS}
     stdin_open: true
     tty: true
 
-volumes: 
+volumes:
   db:

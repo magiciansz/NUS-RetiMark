@@ -1,33 +1,14 @@
-import streamlit as st
-import pandas as pd
+import altair as alt
 import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
 import random
-# import matplotlib.pyplot as plt
-
-# Create some sample data
-chart_data = pd.DataFrame(
-    np.random.randn(20, 2),
-    columns=['left', 'right'])
-fundus_data = pd.read_csv("../test-data/sample_fundus_data.csv")
-
-#helper functions
-def query_risk(dataset, patient_id, disease, laterality, stage):
-    code = ""
-    if (disease == 'Diabetic Retinopathy'):
-        code = 'd'
-    elif (disease == 'Age-related Macular Degeneration'):
-        code = 'a'
-    elif (disease == 'Glaucoma'):
-        code = 'g'
-    risk_col = code + '-stage' + str(stage) + '-' +laterality + '-risk'
-    req_risk = dataset[dataset['patient-id'] == patient_id][risk_col]
-    return req_risk
-
-#demo variables
-patient_ids = fundus_data["patient-id"]
-disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
-# risk_levels = ['High', 'Medium', 'Low']
-stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
+import math
+import streamlit as st
+import streamlit_authenticator as stauth
+import yaml
+from PIL import Image
+from yaml.loader import SafeLoader
 
 # Streamlit app
 st.set_page_config(
@@ -35,148 +16,281 @@ st.set_page_config(
     page_icon=":eye:",
     layout="wide"
 )
-# st.markdown(
-#             f'''
-#             <style>
-#                 .reportview-container .sidebar-content {{
-#                     padding-top: {1}rem;
-#                 }}
-#                 .reportview-container .main .block-container {{
-#                     padding-top: {1}rem;
-#                 }}
-#             </style>
-#             ''',unsafe_allow_html=True)
 
-st.title('RetiMark Fundus Dashboard')
-# selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
-st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
+with open('../config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
 
-if st.sidebar.button('Log in', type="primary"):
-    st.sidebar.write('Welcome, Dr. Swift')
-st.sidebar.button("Sign out", type="secondary")
+name, authentication_status, username = authenticator.login('Login', 'main')
 
-# old filter code without sidebar
-# Filters
-with st.expander(label="Search and Filter", expanded=True):
-    filter1, filter2 = st.columns(2)
-    with filter1:
-        selected_patient_id = st.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
-    with filter2:
-        selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
+# Create some sample data
+chart_data = pd.DataFrame(
+    np.random.randn(20, 2),
+    columns=['left', 'right'])
+# patients = pd.read_csv("./test-data/sample_patients.csv")
+# patients = pd.read_csv("./test-data/patient.csv")
+patients_history = pd.read_csv("./test-data/patient_history_table.csv")
+
+#list like [{column -> value}, … , {column -> value}]
+patient_raw_dict = patients_history.to_dict(orient="records")
+#dict like {column -> [values]}
+patient_series_dict = patients_history.to_dict(orient="list")
+
+#group by id
+patient_dict = {}
+for d in patient_raw_dict:
+  if d['id'] not in patient_dict:
+    patient_dict[d['id']] = [d]
+  else:
+    patient_dict[d['id']].append(d)
 
 
-# Filters
-# selected_patient_id = st.sidebar.selectbox(label='Patient ID', options=patient_ids, help='Select patient ID')
-# selected_disease_type = st.sidebar.selectbox(label='Disease', options=disease_types, help='Select disease type')
+#helper functions
+#def: this function converts name of dieseases into a string format using in the column names of the databse
+#input: 'Diabetic Retinopathy', 'Age-related Macular Degeneration' or 'Glaucoma' only
+#output: formatted disease names for use in querying db
+def encode_disease(disease):
+    code = ''
+    if (disease == 'Diabetic Retinopathy'):
+        code = 'diabetic_retinopathy'
+    elif (disease == 'Age-related Macular Degeneration'):
+        code = 'ocular'
+    elif (disease == 'Glaucoma'):
+        code = 'glaucoma'
+    return code
 
-info, left, right = st.columns([0.35, 0.275, 0.275])
-temp_index = fundus_data[fundus_data['patient-id'] == selected_patient_id]['index'].to_string(index=False)
-with info:
-    st.subheader("Patient Details")
-    # st.write("**Patient ID:**" + selected_patient_id)
-    st.write(f"**Patient ID:** {selected_patient_id}")
-    # st.write(selected_patient_id)
-    #query patient's age
-    temp_age = fundus_data[fundus_data['patient-id'] == selected_patient_id]['age'].to_string(index=False)
-    st.write(f"**Age:** {temp_age}")
-    #query patient's sex
-    temp_sex = fundus_data[fundus_data['patient-id'] == selected_patient_id]['sex'].to_string(index=False)
-    st.write(f"**Sex:** {temp_sex}")
-    #query symptoms
-    temp_symptoms = fundus_data[fundus_data['patient-id'] == selected_patient_id]['symptoms'].to_string(index=False)
-    st.write(f"**Notes:** {temp_symptoms}")
-    #query date
-    temp_date = fundus_data[fundus_data['patient-id'] == selected_patient_id]['last-upload-date'].to_string(index=False)
-    st.write(f"**Last Upload Date:** {temp_date}")
+#def: this function queries a specific attribute (column) of a patient
+#input: dictionary holding the data in record format, id of patient, desired visit date of record, the name of the column/attribute
+#output: single value int/str/float depending on the desired column
+def query_patient_value(dict, id, visit_date, column_name):
+    record_list = dict[id]
+    record = {}
+    for e in record_list:
+        if e['visit_date'] == visit_date:
+            record = e
+    if record:
+        return record[column_name]
+    else:
+        return "NA"
+
+#def: this function queries last diagnosed date for a patient under a particular disease context
+#input: dictionary holding the data in record format, id of patient, desired visit date of record, disease ('d' for diabetic retinopathy, 'a' for age-related macular degen., 'g' for glaucoma)
+#output: single value int/str/float depending on the desired column
+def query_last_visit_date(curr_date, date_list):
+    sorted_dates = sorted(date_list)
+    if (sorted_dates.index(curr_date)==0):
+        return "NA"
+    else:
+        return sorted_dates[sorted_dates.index(curr_date)-1]
+  
+#def: this function returns a list of linked values under a patient
+#input: dictionary holding the data in record format, id of patient, [desired columns]
+#output: array of array of values
+def query_patient_multiple(dict, id, col_list):
+    record_list = dict[id]
+    result = []
+    for entry in record_list:
+      result.append([entry.get(col) for col in col_list])
+    return result
+
+def query_stage(dict, id, visit_date, disease, laterality):
+    code = encode_disease(disease)
+    if (code in ['ocular', 'glaucoma']):
+        return "Unknown"
+    else:
+        stage_col = laterality + '_' + code + '_stage'
+        return query_patient_value(dict, id, visit_date, stage_col)
+
+def query_risk(dict, id, visit_date, disease, laterality):
+    code = encode_disease(disease)
+    risk_col = laterality + '_' + code + '_prob'
+    return query_patient_value(dict, id, visit_date, risk_col)
+
+def concat_tuples(x):
+    return str(x[0]) + ' - ' + x[1]
+
+#demo variables
+patient_ids = patient_series_dict['id']
+patient_names = patient_series_dict['name']
+#format id column as a string
+# patients['id'] = patient_ids
+disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
+# risk_levels = ['High', 'Medium', 'Low']
+# stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
+
+
+if st.session_state["authentication_status"]:
+    st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
+    st.sidebar.write(f'Welcome, *{st.session_state["name"]}*')
+    authenticator.logout('Logout', 'sidebar', key='logout_button')
+    logo, title = st.columns([0.08,0.92])
+    with title:
+        st.title('RetiMark Fundus Dashboard')
+    with logo:
+        st.image("http://retimark.com/layout/images/common/logo_on.png")
+    # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
+
+    # if st.sidebar.button('Log in', type="primary"):
+    #     st.sidebar.write('Welcome, Dr. Swift')
+    # st.sidebar.button("Sign out", type="secondary")
+
+    # Filters
+    with st.expander(label="Search and Filter", expanded=True):
+        filter1, filter2, filter3 = st.columns(3)
+        with filter1:
+            patient_w_id_options = list(set(zip(patient_ids, patient_names)))
+            patient_w_id_options.sort()
+            selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient')
+            selected_patient_id = selected_patient_id_selectbox[0]
+        with filter2:
+            selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
+        with filter3:
+            selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
+            selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
+            selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, help='Select visit date')
+
+    info, left, right = st.columns([0.35, 0.275, 0.275])
+    patient_id = selected_patient_id_selectbox[0]
+    with info:
+        st.subheader("Patient Details")
+        st.write(f"**Patient ID:** {selected_patient_id}")
+        #query patient's age
+        temp_age =  query_patient_value(patient_dict, patient_id, selected_date, 'age')
+        st.write(f"**Age:** {temp_age}")
+        #query patient's sex
+        temp_sex = query_patient_value(patient_dict, patient_id, selected_date, 'sex')
+        st.write(f"**Sex:** {temp_sex}")
+        #query notes
+        temp_notes = query_patient_value(patient_dict, patient_id, selected_date, 'doctor_notes')
+        st.markdown(f"**Notes:** {temp_notes}")
+        # #query date
+        # temp_upload_date = query_patient_value(patient_dict, patient_id, selected_date, 'visit_date')
+        # st.write(f"**Last Upload Date:** {temp_upload_date}")
+        #query diagnosed date
+        #placeholder information for now
+        temp_diagnosed_date = query_last_visit_date(selected_date, selected_patient_date_list_flatten)
+        st.write(f"**Last Visit Date:** {temp_diagnosed_date}")
+        
+    with left:
+        st.subheader("Left Fundus")
+        left_img_url = query_patient_value(patient_dict, patient_id, selected_date, 'left_eye_image')
+        st.image(left_img_url, use_column_width="auto")
+        left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
+        left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
+        stage, risk = st.columns([0.5, 0.5])
+        with stage:
+            st.metric("Most Probable Stage", left_stage)
+        with risk:
+            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%')
+    with right:
+        st.subheader("Right Fundus")
+        right_img_url = query_patient_value(patient_dict, patient_id, selected_date, 'right_eye_image')
+        st.image(right_img_url, use_column_width="auto")
+        right_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
+        right_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
+        stage, risk = st.columns([0.5, 0.5])
+        with stage:
+            st.metric("Most Probable Stage", right_stage)
+        with risk:
+            st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(random.randint(-5,5))+'%')
+
+    st.divider()
+    st.subheader("Risk Trend")
+
+    #extract date, risk value L, risk value R, image L, image R
+    risk_l_col = "left_" + encode_disease(selected_disease_type) + "_prob"
+    risk_r_col = "right_" + encode_disease(selected_disease_type) + "_prob"
+    chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
+    #extract x-axis(date)
+    # date_vals = [e[0] for e in chart_data]
+    # #extract y-axis1(risk value L)
+    # risk_l_vals = [e[1] for e in chart_data]
+    # #extract y-axis2(risk value R)
+    # risk_r_vals = [e[2] for e in chart_data]
+    # #extract tooltip info1(image L)
+    # image_l_vals = [e[3] for e in chart_data]
+    # #extract tooltip info2(image R)
+    # image_r_vals = [e[4] for e in chart_data]
     
-with left:
-    st.subheader("Left")
-    st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
-    # st.caption("Left")
+    df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
+    melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
+    melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
+    melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
+    melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
+    melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
+    melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
     
-    right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
-    left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
-    overall_risk = (right_risk+left_risk)/2
-    # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    stage, risk = st.columns([0.5, 0.5])
-    with stage:
-        st.metric("Most Probable Stage", 2)
-    # st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    with risk:
-        st.metric("Left Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    # st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-with right:
-    st.subheader("Right")
-    st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
-    # st.caption("Right")
+    # Create a selection that chooses the nearest point & selects based on x-value
+    nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
+
+    base = alt.Chart(melted_res).mark_line(point=True).encode(
+        alt.X('date:T', axis=alt.Axis(format="%Y %B")),
+        alt.Y('risk:Q').axis(format='.2%'),
+        alt.Color('laterality').scale(scheme="category10"),
+        # alt.Tooltip('risk:Q', format="%", title="Valor"),
+        tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
+        )
     
-    right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
-    left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
-    overall_risk = (right_risk+left_risk)/2
-    # st.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    stage, risk = st.columns([0.5, 0.5])
-    with stage:
-        st.metric("Most Probable Stage", 2)
-    # st.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    with risk:
-        st.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-    # st.subheader("Fundus Images")
-    # with st.expander(label="View fundus images", expanded=True):
-    # left, right = st.columns(2)
-    
-    # with left:
-    #     st.image("../test-data/fundus-images/" + temp_index + "_left.jpg", use_column_width="auto")
-    #     st.caption("Left")
-    # with right:
-    #     st.image("../test-data/fundus-images/" + temp_index + "_right.jpg", use_column_width="auto")
-    #     st.caption("Right")
-st.divider()
-st.subheader("Risk Trend")
-st.line_chart(chart_data)
-    
-# metrics, chart = st.columns([0.5,0.5])    
-# with metrics:
-#     tab1, tab2, tab3 = st.tabs(stages)
-#     with tab1:
-#         col1, col2, col3 = st.columns(3)
-#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 1)*100
-#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 1)*100
-#         overall_risk = (right_risk+left_risk)/2
-#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-#     with tab2:
-#         col1, col2, col3 = st.columns(3)
-#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 2)*100
-#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 2)*100
-#         overall_risk = (right_risk+left_risk)/2
-#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    # base = base.configure_axisX(labelAngle=0)
+    # Transparent selectors across the chart. This is what tells us
+    # the x-value of the cursor
+    selectors = alt.Chart(melted_res).mark_point().encode(
+        x='date:T',
+        opacity=alt.value(0),
+    ).add_params(
+        nearest
+    )
 
-#     with tab3:
-#         col1, col2, col3 = st.columns(3)
-#         right_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'r', 3)*100
-#         left_risk = query_risk(fundus_data, selected_patient_id, selected_disease_type, 'l', 3)*100
-#         overall_risk = (right_risk+left_risk)/2
-#         col1.metric("Overall Risk", overall_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-#         col2.metric("Left Eye Risk", left_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
-#         col3.metric("Right Eye Risk", right_risk.to_string(index=False)+'%', str(random.randint(-5,5))+'%')
+    # Draw points on the line, and highlight based on selection
+    points = base.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
 
-# with chart:
-#     st.line_chart(chart_data)
-# filtered_data = data[data['Category'] == selected_category]
+    # Draw text labels near the points, and highlight based on selection
+    text = base.mark_text(align='left', dx=5, dy=-5).encode(
+        text=alt.condition(nearest, 'risk:Q', alt.value(' '))
+    )
 
-# # Placeholder line chart
-# st.subheader('Placeholder Line Chart')
-# st.line_chart(filtered_data.set_index('Date')['Value'])
+    # Draw a rule at the location of the selection
+    rules = alt.Chart(melted_res).mark_rule(color='gray').encode(
+        x='date:T',
+    ).transform_filter(
+        nearest
+    )
+    curr_date = alt.Chart(pd.DataFrame({
+    'Date': [selected_date],
+    'color': ['red']
+    })).mark_rule().encode(
+    x='Date:T',
+    color=alt.Color('color:N', scale=None)
+    )
 
-# # Bar chart
-# st.subheader('Bar Chart')
-# category_counts = filtered_data['Category'].value_counts()
-# st.bar_chart(category_counts)
+    # rules = alt.Chart(pd.DataFrame({
+    # 'Date': ['2012-12-01', '2012-12-12'],
+    # 'color': ['red', 'orange']
+    # })).mark_rule().encode(
+    # x='Date:T',
+    # color=alt.Color('color:N', scale=None)
+    # )
 
-# # Show the data
-# st.subheader('Filtered Data')
-# st.write(filtered_data)
 
+    st.altair_chart((base+selectors+points+text+rules+curr_date), theme="streamlit", use_container_width=True)
+    # line = chart.mark_line().encode(
+    # x='date',
+    # y='risk_l'
+    # )
+    # fig = go.Figure([go.Scatter(x=date_vals, y=risk_l_vals)])
+    # fig.add_scatter(x=date_vals, y=risk_r_vals)
+
+    # st.plotly_chart(fig, use_container_width=True)
+
+elif st.session_state["authentication_status"] is False:
+    st.error('Username/password is incorrect')
+elif st.session_state["authentication_status"] is None:
+    st.warning('Please enter your username and password')

@@ -1,20 +1,21 @@
-const crypto = require("crypto");
-const bcrypt = require("bcryptjs");
-const validator = require("validator");
 const Patient = require("../models/Patient");
+const catchAsync = require("../helpers/catchAsync");
 const PatientHistory = require("../models/PatientHistory");
-const Doctor = require("../models/Doctor");
 const DateUtil = require("../helpers/DateUtil");
 const AWS = require("aws-sdk");
+const httpStatus = require("http-status");
+
 const {
   SuccessResponse,
-  HttpNotFoundError,
   ResourceNotFoundError,
 } = require("../middlewares/responseCodes");
+
+const PatientService = require("../services/PatientService");
 const AWS_BUCKET = process.env.AWS_BUCKET;
 const s3 = new AWS.S3({ params: { Bucket: AWS_BUCKET } });
 
-exports.getImage = async (req, res, next) => {
+// refactor to use service and new error framework
+const getImage = async (req, res, next) => {
   try {
     const url = await s3.getSignedUrlPromise("getObject", {
       Key: req.query.url,
@@ -36,7 +37,9 @@ exports.getImage = async (req, res, next) => {
 // params: UserId,
 // query: category which takes in: left_eye_resized_image, right_eye_resized_image, left_eye_image, right_eye_image
 // body: imageBinary which contains base64 representation of image
-exports.addToBucketFromURL = async (req, res, next) => {
+// refactor to use service and new error framework
+
+const addToBucketFromURL = async (req, res, next) => {
   try {
     const patient = await Patient.findOne({ where: { id: req.params.userId } });
     if (!patient) {
@@ -53,7 +56,7 @@ exports.addToBucketFromURL = async (req, res, next) => {
     );
 
     const currentDate = DateUtil.getCurrentDateWithoutSpaces();
-    const result = await s3
+    await s3
       .putObject({
         Body: buf,
         Key: `/patient-images/${req.params.userId}/${req.query.category}/${currentDate}`,
@@ -67,4 +70,35 @@ exports.addToBucketFromURL = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+const index = catchAsync(async (req, res) => {
+  const patient = await PatientService.getPatientByID(req.params.id);
+  res.status(httpStatus.OK).send(patient);
+});
+
+// update with image processing, and put the actual S3 link inside. same for the probabilities
+
+const add = catchAsync(async (req, res) => {
+  const patient = await PatientService.addPatient(req.body);
+  res.status(httpStatus.OK).send(patient);
+});
+
+const update = catchAsync(async (req, res) => {
+  const patient = await PatientService.updatePatient(req.params.id, req.body);
+  res.status(httpStatus.OK).send(patient);
+});
+
+const remove = catchAsync(async (req, res) => {
+  await PatientService.deletePatient(req.params.id);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+module.exports = {
+  getImage,
+  addToBucketFromURL,
+  index,
+  update,
+  add,
+  remove,
 };

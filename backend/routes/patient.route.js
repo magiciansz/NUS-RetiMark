@@ -3,7 +3,7 @@ const router = express.Router();
 const PatientController = require("../app/controllers/PatientController");
 const {
   validateUploadImageParameters,
-  validateGetImageParameters,
+  validatePatientID,
 } = require("../app/middlewares/validators");
 
 router.post(
@@ -11,6 +11,13 @@ router.post(
   validateUploadImageParameters,
   PatientController.addToBucketFromURL
 );
-router.get("/get", validateGetImageParameters, PatientController.getImage);
+router.get("/:id", validatePatientID, PatientController.index);
+
+// add validation once confirm fields to add
+router.patch("/:id", PatientController.update);
+
+router.post("", PatientController.add);
+
+router.delete("/:id", PatientController.remove);
 
 module.exports = router;
