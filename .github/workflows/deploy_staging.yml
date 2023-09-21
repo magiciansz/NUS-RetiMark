@@ -1,16 +1,54 @@
-name: Build Image on ECR and deploy to ECS (Staging)
+name: CI/CD (Staging)
 
 on:
-  workflow_run:
-    workflows: ["Unit & Integration Tests (Staging)"]
-    branches: [develop]
-    types:
-      - completed
+  pull_request:
+    branches:
+      - develop
 
 jobs:
+  tests:
+    name: Unit & Integration Testing
+    permissions: write-all
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: retimark_db
+          MYSQL_ROOT_PASSWORD: 123456
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          npm install
+      - name: Run Tests
+        working-directory: backend
+        env:
+          TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
+          TOKEN_ACCESS_EXPIRATION_MINUTES: 60
+          TOKEN_REFRESH_EXPIRATION_HOURS: 4
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: retimark_db
+          DB_USERNAME: root
+          DB_PASSWORD: 123456
+        run: |
+          npm test
+      - name: Test Report
+        uses: dorny/test-reporter@v1.6.0
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: Test Report # Name of the check run which will be created
+          path: backend/report.xml # Path to test results
+          reporter: jest-junit # Format of test results
   build:
-    name: Build Image
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: tests
+    name: Build Image to ECR & deploy on ECS
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
