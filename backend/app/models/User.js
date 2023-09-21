@@ -23,6 +23,26 @@ const User = sequelize.define(
             throw new Error("password cannot have blank spaces.");
           }
         },
+        hasLowerCase(password) {
+          if (!/[a-z]/.test(password)) {
+            throw new Error("password needs a lowercase letter");
+          }
+        },
+        hasUpperCase(password) {
+          if (!/[A-Z]/.test(password)) {
+            throw new Error("password needs a uppercase letter");
+          }
+        },
+        hasNumber(password) {
+          if (!/\d/.test(password)) {
+            throw new Error("password needs a number");
+          }
+        },
+        hasSpecialCharacter(password) {
+          if (!/[#.?!@$%^&*-]/.test(password)) {
+            throw new Error("password needs a special character #.-?!@$%^&*");
+          }
+        },
       },
     },
     username: {
@@ -54,12 +74,12 @@ const User = sequelize.define(
           await bcrypt.hash(record.dataValues.password, 8)
         );
       },
-      beforeUpdate: async (record) => {
-        record.setDataValue(
-          "password",
-          await bcrypt.hash(record.dataValues.password, 8)
-        );
-      },
+      // beforeUpdate: async (record) => {
+      //   record.setDataValue(
+      //     "password",
+      //     await bcrypt.hash(record.dataValues.password, 8)
+      //   );
+      // },
     },
   }
 );

@@ -1,3 +1,4 @@
+const Token = require("../../app/models/Token");
 const sequelize = require("../../config/database");
 
 const setupTestDB = () => {

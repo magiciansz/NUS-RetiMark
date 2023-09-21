@@ -3,8 +3,7 @@ const User = require("../models/User");
 const ApiError = require("../middlewares/ApiError");
 
 const createUser = async (userBody) => {
-  const user = await User.findOne({ where: { username: userBody.username } });
-  if (user !== null) {
+  if (await User.isUsernameTaken(userBody.username)) {
     throw new ApiError(httpStatus.CONFLICT, "Username already taken");
   }
   await User.create(userBody);
@@ -30,32 +29,32 @@ const getUserByUsername = async (username, includePassword = false) => {
   return await User.findOne({ where: { username: username } });
 };
 
-const updateUserById = async (userId, updateBody) => {
-  const user = await getUserById(userId);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-  }
-  if (await User.isUsernameTaken(updateBody.username)) {
-    throw new ApiError(httpStatus.CONFLICT, "Username already taken");
-  }
-  user.set(updateBody);
-  await user.save();
-  return await getUserById(userId);
-};
+// const updateUserById = async (userId, updateBody) => {
+//   const user = await getUserById(userId);
+//   if (!user) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+//   }
+//   if (await User.isUsernameTaken(updateBody.username)) {
+//     throw new ApiError(httpStatus.CONFLICT, "Username already taken");
+//   }
+//   user.set(updateBody);
+//   await user.save();
+//   return await getUserById(userId);
+// };
 
-const deleteUserById = async (userId) => {
-  const user = await getUserById(userId);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-  }
-  await user.destroy();
-  return user;
-};
+// const deleteUserById = async (userId) => {
+//   const user = await getUserById(userId);
+//   if (!user) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+//   }
+//   await user.destroy();
+//   return user;
+// };
 
 module.exports = {
   createUser,
   getUserByUsername,
   getUserById,
-  deleteUserById,
-  updateUserById,
+  // deleteUserById,
+  // updateUserById,
 };

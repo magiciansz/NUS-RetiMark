@@ -32,7 +32,6 @@ const errorHandler = (error, req, res, next) => {
     stack: error.stack.split("\n"),
   });
 };
-
 app.use(errorHandler);
 
 module.exports = app;

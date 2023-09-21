@@ -109,12 +109,8 @@ paths:
               $ref: "#/components/schemas/RefreshTokenForm"
         required: true
       responses:
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LoginResponse"
+        "204":
+          description: No content
         "400":
           description: Invalid data format or data that does not match the expected schema
           content:
@@ -159,18 +155,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LogoutOrRefreshInvalidData"
-        "403":
+        "401":
           description: Invalid or expired refresh token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExpiredOrInvalidRefreshToken"
-        "404":
-          description: User authenticated to user not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RefreshTokenUserNotFound"
 
 components:
   schemas:
@@ -209,10 +199,10 @@ components:
           example: 403
         message:
           type: string
-          example: "Forbidden: Invalid or expired refresh token."
+          example: "Unauthorised: Invalid or expired refresh token."
         stack:
           type: string
-          example: "Error: Forbidden: Invalid or expired refresh token."
+          example: "Error: Unauthorised: Invalid or expired refresh token."
     LogoutTokenNotFound:
       type: object
       properties:
@@ -225,18 +215,6 @@ components:
         stack:
           type: string
           example: "Error: Token Not found, at Object.logout"
-    RefreshTokenUserNotFound:
-      type: object
-      properties:
-        status:
-          type: integer
-          example: 404
-        message:
-          type: string
-          example: "User authenticated to this token is not found in the database"
-        stack:
-          type: string
-          example: "Error: User authenticated to this token is not found in the database"
     LoginInvalidData:
       type: object
       properties:

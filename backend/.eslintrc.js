@@ -18,11 +18,13 @@ module.exports = {
     {
       files: ["**/*.test.js", "**/setUpTestDB.js"],
       env: {
-        jest: true, // now **/*.test.js files' env has both es6 *and* jest
+        jest: true,
+        "jest/globals": true,
       },
       // Can't extend in overrides: https://github.com/eslint/eslint/issues/8813
       // "extends": ["plugin:jest/recommended"]
       plugins: ["jest"],
+      extends: ["plugin:jest/recommended"],
       rules: {
         "jest/no-disabled-tests": "warn",
         "jest/no-focused-tests": "error",

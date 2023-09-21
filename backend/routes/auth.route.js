@@ -3,17 +3,13 @@ const router = express.Router();
 
 const AuthController = require("../app/controllers/AuthController");
 const {
-  validateUserDetailsAndTimezone,
+  validateRegister,
   validateLogout,
   validateLogin,
   validateRefreshTokens,
 } = require("../app/middlewares/validators");
 
-router.post(
-  "/register",
-  validateUserDetailsAndTimezone,
-  AuthController.register
-);
+router.post("/register", validateRegister, AuthController.register);
 router.post("/login", validateLogin, AuthController.login);
 
 router.post("/logout", validateLogout, AuthController.logout);
