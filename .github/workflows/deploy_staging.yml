@@ -1,15 +1,17 @@
-name: Staging - Deploy to ECR
+name: Build Image on ECR and deploy to ECS (Staging)
 
 on:
   workflow_run:
     workflows: ["Unit & Integration Tests (Staging)"]
-    types: [completed]
+    branches: [develop]
+    types:
+      - completed
 
 jobs:
   build:
     name: Build Image
-    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v2
