@@ -88,7 +88,13 @@ def query_last_visit_date(curr_date, date_list):
         return "NA"
     else:
         return sorted_dates[sorted_dates.index(curr_date)-1]
-  
+
+def get_cutoff_date(list_of_dates):
+    list_of_dates = sorted(list_of_dates, reverse=True)
+    if (len(list_of_dates)>10):
+        return list_of_dates[9]
+    else:
+        return list_of_dates[-1]
 #def: this function returns a list of linked values under a patient
 #input: dictionary holding the data in record format, id of patient, [desired columns]
 #output: array of array of values
@@ -226,6 +232,11 @@ if st.session_state["authentication_status"]:
     melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
     melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
     
+    #get 10th or latest date from this patient's record, whichever is smaller
+    date_cutoff = get_cutoff_date(selected_patient_date_list_flatten)
+    
+    melted_res_subset = melted_res[melted_res['date']>= date_cutoff]
+
     # Create a selection that chooses the nearest point & selects based on x-value
     nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
 
@@ -235,8 +246,8 @@ if st.session_state["authentication_status"]:
         alt.Color('laterality').scale(scheme="category10"),
         # alt.Tooltip('risk:Q', format="%", title="Valor"),
         tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
-        )
-    
+    )
+    # .transform_filter(alt.FieldGTEPredicate(field='date:T', gte=date_cutoff))
     # base = base.configure_axisX(labelAngle=0)
     # Transparent selectors across the chart. This is what tells us
     # the x-value of the cursor
@@ -280,7 +291,7 @@ if st.session_state["authentication_status"]:
     # )
 
 
-    st.altair_chart((base+selectors+points+text+rules+curr_date), theme="streamlit", use_container_width=True)
+    st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
     # line = chart.mark_line().encode(
     # x='date',
     # y='risk_l'
