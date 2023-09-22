@@ -265,8 +265,8 @@ if st.session_state["authentication_status"]:
     )
     curr_date = alt.Chart(pd.DataFrame({
     'date': [selected_date],
-    'laterality': ['#ff3333']
-    })).mark_rule(strokeDash=[6,6]).encode(
+    'laterality': ['red']
+    })).mark_rule().encode(
     x='date:T',
     color=alt.Color('laterality:N', scale=None)
     )
