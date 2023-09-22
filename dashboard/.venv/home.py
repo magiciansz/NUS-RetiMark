@@ -230,7 +230,7 @@ if st.session_state["authentication_status"]:
     nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
 
     base = alt.Chart(melted_res).mark_line(point=True).encode(
-        alt.X('date:T', axis=alt.Axis(format="%Y %B")),
+        alt.X('date:T', axis=alt.Axis(format="%b %Y")),
         alt.Y('risk:Q').axis(format='.2%'),
         alt.Color('laterality').scale(scheme="category10"),
         # alt.Tooltip('risk:Q', format="%", title="Valor"),
@@ -264,11 +264,11 @@ if st.session_state["authentication_status"]:
         nearest
     )
     curr_date = alt.Chart(pd.DataFrame({
-    'Date': [selected_date],
-    'color': ['red']
+    'date': [selected_date],
+    'laterality': ['red']
     })).mark_rule().encode(
-    x='Date:T',
-    color=alt.Color('color:N', scale=None)
+    x='date:T',
+    color=alt.Color('laterality:N', scale=None)
     )
 
     # rules = alt.Chart(pd.DataFrame({
