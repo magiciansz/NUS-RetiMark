@@ -29,12 +29,7 @@ authenticator = stauth.Authenticate(
 
 name, authentication_status, username = authenticator.login('Login', 'main')
 
-# Create some sample data
-chart_data = pd.DataFrame(
-    np.random.randn(20, 2),
-    columns=['left', 'right'])
-# patients = pd.read_csv("./test-data/sample_patients.csv")
-# patients = pd.read_csv("./test-data/patient.csv")
+
 patients_history = pd.read_csv("./test-data/patient_history_table.csv")
 
 #list like [{column -> value}, … , {column -> value}]
@@ -49,7 +44,6 @@ for d in patient_raw_dict:
     patient_dict[d['id']] = [d]
   else:
     patient_dict[d['id']].append(d)
-
 
 #helper functions
 #def: this function converts name of dieseases into a string format using in the column names of the databse
@@ -95,6 +89,7 @@ def get_cutoff_date(list_of_dates):
         return list_of_dates[9]
     else:
         return list_of_dates[-1]
+    
 #def: this function returns a list of linked values under a patient
 #input: dictionary holding the data in record format, id of patient, [desired columns]
 #output: array of array of values
@@ -125,11 +120,8 @@ def concat_tuples(x):
 patient_ids = patient_series_dict['id']
 patient_names = patient_series_dict['name']
 #format id column as a string
-# patients['id'] = patient_ids
-disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
-# risk_levels = ['High', 'Medium', 'Low']
-# stages = ['Stage 1 Risk', 'Stage 2 Risk', 'Stage 3 Risk']
 
+disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
 
 if st.session_state["authentication_status"]:
     st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
@@ -140,11 +132,6 @@ if st.session_state["authentication_status"]:
         st.title('RetiMark Fundus Dashboard')
     with logo:
         st.image("http://retimark.com/layout/images/common/logo_on.png")
-    # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
-
-    # if st.sidebar.button('Log in', type="primary"):
-    #     st.sidebar.write('Welcome, Dr. Swift')
-    # st.sidebar.button("Sign out", type="secondary")
 
     # Filters
     with st.expander(label="Search and Filter", expanded=True):
@@ -213,17 +200,7 @@ if st.session_state["authentication_status"]:
     risk_l_col = "left_" + encode_disease(selected_disease_type) + "_prob"
     risk_r_col = "right_" + encode_disease(selected_disease_type) + "_prob"
     chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
-    #extract x-axis(date)
-    # date_vals = [e[0] for e in chart_data]
-    # #extract y-axis1(risk value L)
-    # risk_l_vals = [e[1] for e in chart_data]
-    # #extract y-axis2(risk value R)
-    # risk_r_vals = [e[2] for e in chart_data]
-    # #extract tooltip info1(image L)
-    # image_l_vals = [e[3] for e in chart_data]
-    # #extract tooltip info2(image R)
-    # image_r_vals = [e[4] for e in chart_data]
-    
+
     df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
     melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
     melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
@@ -247,10 +224,7 @@ if st.session_state["authentication_status"]:
         # alt.Tooltip('risk:Q', format="%", title="Valor"),
         tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
     )
-    # .transform_filter(alt.FieldGTEPredicate(field='date:T', gte=date_cutoff))
-    # base = base.configure_axisX(labelAngle=0)
-    # Transparent selectors across the chart. This is what tells us
-    # the x-value of the cursor
+
     selectors = alt.Chart(melted_res).mark_point().encode(
         x='date:T',
         opacity=alt.value(0),
@@ -281,25 +255,7 @@ if st.session_state["authentication_status"]:
     x='date:T',
     color=alt.Color('laterality:N', scale=None)
     )
-
-    # rules = alt.Chart(pd.DataFrame({
-    # 'Date': ['2012-12-01', '2012-12-12'],
-    # 'color': ['red', 'orange']
-    # })).mark_rule().encode(
-    # x='Date:T',
-    # color=alt.Color('color:N', scale=None)
-    # )
-
-
     st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
-    # line = chart.mark_line().encode(
-    # x='date',
-    # y='risk_l'
-    # )
-    # fig = go.Figure([go.Scatter(x=date_vals, y=risk_l_vals)])
-    # fig.add_scatter(x=date_vals, y=risk_r_vals)
-
-    # st.plotly_chart(fig, use_container_width=True)
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
