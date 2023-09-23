@@ -1,10 +1,11 @@
 import altair as alt
+import datetime
 import extra_streamlit_components as stx
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import random
-import math
+import requests
 import streamlit as st
 
 # Streamlit app
@@ -13,34 +14,66 @@ st.set_page_config(
     page_icon=":eye:",
     layout="wide"
 )
-
 @st.cache_resource(hash_funcs={"_thread.RLock": lambda _: None})
-def init_router():
-      return stx.Router({"/login": login, "/home": home})
+def init_router(): 
+    return stx.Router({"/login": login, "/home": home})
 
 def login():
+    def process_successful_login(success_json):
+        user_dict = success_json['user']
+        tokens_dict = success_json['tokens']
+
+        user_id = user_dict['id']
+        user_username = user_dict['username']
+        access_token = tokens_dict['accessToken']['token']
+        access_token_expiry_time = tokens_dict['accessToken']['expires']
+        refresh_token = tokens_dict['refreshToken']['token']
+        refresh_token_expiry_time = tokens_dict['accessToken']['expires']
+        router.route("home")
+        return True
+                                                               
+    def attempt_login(username, password):
+        # return False
+        ##BEGIN API CALL
+        # tz_string = datetime.datetime.now().astimezone().tzinfo
+        tz_string = 'Asia/Singapore'
+        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/auth/login?timezone=Asia/Singapore"
+        # PARAMS = {'timezone':tz_string}
+        data = {
+            'username':username,
+            'password':password,
+        }
+        try:
+            # r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
+            r = requests.post(url=API_ENDPOINT, json=data)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            st.error(err)
+        else:
+            success_login = r.json()
+            return process_successful_login(success_login)
+
+        ##END API CALL
+        
     # Create an empty container
-    placeholder = st.empty()
-
-    actual_email = "email"
-    actual_password = "password"
-
+    landing = st.container()
     # Insert a form in the container
-    with placeholder.form("login"):
-        st.markdown("#### Enter your credentials")
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-        submit = st.form_submit_button("Login")
+    with landing:
+        with st.form("login"):
+            st.markdown("#### Login")
+            email = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            success = st.form_submit_button("Login", on_click=attempt_login, args=[email, password])
 
-    if submit and email == actual_email and password == actual_password:
-        # If the form is submitted and the email and password are correct,
-        # clear the form/container and display a success message
-        placeholder.empty()
-        st.success("Login successful")
-    elif submit and email != actual_email and password != actual_password:
-        st.error("Login failed")
-    else:
-        pass
+    # if success:
+    #     router.route("home")
+    #     # If the form is submitted and the email and password are correct,
+    #     # clear the form/container and display a success message
+    #     landing.empty()
+    #     st.success("Login successful")
+    # else:
+    #     st.error("Username/password is incorrect")
+    return landing
 
 def home():
     main = st.container()
@@ -59,6 +92,7 @@ def home():
                 patient_dict[d['id']] = [d]
             else:
                 patient_dict[d['id']].append(d)
+
 
         #helper functions
         #def: this function converts name of dieseases into a string format using in the column names of the databse
@@ -104,7 +138,6 @@ def home():
                 return list_of_dates[9]
             else:
                 return list_of_dates[-1]
-            
         #def: this function returns a list of linked values under a patient
         #input: dictionary holding the data in record format, id of patient, [desired columns]
         #output: array of array of values
@@ -113,7 +146,7 @@ def home():
             result = []
             for entry in record_list:
                 result.append([entry.get(col) for col in col_list])
-                return result
+            return result
 
         def query_stage(dict, id, visit_date, disease, laterality):
             code = encode_disease(disease)
@@ -131,11 +164,11 @@ def home():
         def concat_tuples(x):
             return str(x[0]) + ' - ' + x[1]
 
+        
         #demo variables
         patient_ids = patient_series_dict['id']
         patient_names = patient_series_dict['name']
         #format id column as a string
-
         disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
 
         st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
@@ -146,6 +179,11 @@ def home():
             st.title('RetiMark Fundus Dashboard')
         with logo:
             st.image("http://retimark.com/layout/images/common/logo_on.png")
+        # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
+
+        # if st.sidebar.button('Log in', type="primary"):
+        #     st.sidebar.write('Welcome, Dr. Swift')
+        # st.sidebar.button("Sign out", type="secondary")
 
         # Filters
         with st.expander(label="Search and Filter", expanded=True):
@@ -159,22 +197,22 @@ def home():
                 selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
             with filter3:
                 selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
-                selected_patient_date_list_flatten = sorted(list(map(lambda x:x[0]), selected_patient_date_list), reverse=True)
+                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
                 selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, help='Select visit date')
 
         info, left, right = st.columns([0.35, 0.275, 0.275])
-        patient_id = selected_patient_id_selectbox[0]
+
         with info:
             st.subheader("Patient Details")
             st.write(f"**Patient ID:** {selected_patient_id}")
             #query patient's age
-            temp_age =  query_patient_value(patient_dict, patient_id, selected_date, 'age')
+            temp_age =  query_patient_value(patient_dict, selected_patient_id, selected_date, 'age')
             st.write(f"**Age:** {temp_age}")
             #query patient's sex
-            temp_sex = query_patient_value(patient_dict, patient_id, selected_date, 'sex')
+            temp_sex = query_patient_value(patient_dict, selected_patient_id, selected_date, 'sex')
             st.write(f"**Sex:** {temp_sex}")
             #query notes
-            temp_notes = query_patient_value(patient_dict, patient_id, selected_date, 'doctor_notes')
+            temp_notes = query_patient_value(patient_dict, selected_patient_id, selected_date, 'doctor_notes')
             st.markdown(f"**Notes:** {temp_notes}")
             # #query date
             # temp_upload_date = query_patient_value(patient_dict, patient_id, selected_date, 'visit_date')
@@ -186,7 +224,7 @@ def home():
             
         with left:
             st.subheader("Left Fundus")
-            left_img_url = query_patient_value(patient_dict, patient_id, selected_date, 'left_eye_image')
+            left_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'left_eye_image')
             st.image(left_img_url, use_column_width="auto")
             left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
             left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
@@ -197,7 +235,7 @@ def home():
                 st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%')
         with right:
             st.subheader("Right Fundus")
-            right_img_url = query_patient_value(patient_dict, patient_id, selected_date, 'right_eye_image')
+            right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
             st.image(right_img_url, use_column_width="auto")
             right_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
             right_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
@@ -267,8 +305,8 @@ def home():
         x='date:T',
         color=alt.Color('laterality:N', scale=None)
         )
-        st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
 
+        st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
     return main
 
 router = init_router()
@@ -288,7 +326,4 @@ with c2:
 with c3:
     st.header("Session state")
     st.write(st.session_state)
-
-
-
 
