@@ -274,6 +274,33 @@ if st.session_state["authentication_status"]:
     ).transform_filter(
         nearest
     )
+    
+    mean_l = alt.Chart(melted_res).mark_rule(color='#1f77b4').encode(
+    y='mean(risk):Q',
+    opacity=alt.value(0.4),
+    strokeWidth=alt.value(2)
+    ).transform_filter(alt.FieldEqualPredicate(field='laterality', equal="left"))
+
+    text_l = mean_l.mark_text(
+        align='left',
+        baseline='bottom',
+        dx=7,
+        text='left average'
+    )
+
+    mean_r = alt.Chart(melted_res).mark_rule(color='#ff7f0e').encode(
+    y='mean(risk):Q',
+    opacity=alt.value(0.4),
+    strokeWidth=alt.value(2),
+    ).transform_filter(alt.FieldEqualPredicate(field='laterality', equal="right"))
+
+    text_r = mean_r.mark_text(
+        align='left',
+        baseline='bottom',
+        dx=7,
+        text='right average'
+    )
+
     curr_date = alt.Chart(pd.DataFrame({
     'date': [selected_date],
     'laterality': ['red']
@@ -291,7 +318,7 @@ if st.session_state["authentication_status"]:
     # )
 
 
-    st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
+    st.altair_chart((base+selectors+points+text+rules+mean_l+text_l+mean_r+text_r+curr_date.interactive()), theme="streamlit", use_container_width=True)
     # line = chart.mark_line().encode(
     # x='date',
     # y='risk_l'
