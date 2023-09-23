@@ -1,6 +1,10 @@
 const Patient = require("../models/Patient");
 const ApiError = require("../middlewares/ApiError");
 const httpStatus = require("http-status");
+const {
+  uploadPatientFiles,
+  formatPatientOutput,
+} = require("../helpers/PatientUtil");
 
 const getPatientByID = async (id) => {
   const patient = await Patient.findOne({ where: { id: id } });
@@ -10,13 +14,11 @@ const getPatientByID = async (id) => {
   return patient;
 };
 
-const addPatient = async (body) => {
+const addPatient = async (body, files, timezone = "UTC") => {
   const patient = await Patient.create({
     date_of_birth: body.date_of_birth,
     sex: body.sex,
     name: body.name,
-    left_eye_image: body.left_eye_image,
-    right_eye_image: body.right_eye_image,
     left_diabetic_retinography_stage: body.left_diabetic_retinography_stage,
     left_diabetic_retinography_prob: body.left_diabetic_retinography_prob,
     right_diabetic_retinography_stage: body.right_diabetic_retinography_stage,
@@ -25,9 +27,9 @@ const addPatient = async (body) => {
     right_ocular_prob: body.right_ocular_prob,
     left_glaucoma_prob: body.left_glaucoma_prob,
     right_glaucoma_prob: body.right_glaucoma_prob,
-    doctor_notes: body.doctor_notes,
-    report_link: body.report_link,
   });
+  const urls = await uploadPatientFiles(patient, files);
+  await (await patient.update(urls)).reload();
   return patient;
 };
 

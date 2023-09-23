@@ -6,7 +6,7 @@ const auth = require("../app/middlewares/auth");
 const {
   validateUserDetails,
   validateUserId,
-} = require("../app/middlewares/validators");
+} = require("../app/middlewares/validators/UserValidator");
 
 // for testing + admin users (if the need ever arises)
 

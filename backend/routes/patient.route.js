@@ -1,14 +1,22 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const upload = multer(); // Remove storage configuration
+
 const PatientController = require("../app/controllers/PatientController");
 const {
   validateUploadImageParameters,
   validatePatientID,
-} = require("../app/middlewares/validators");
+} = require("../app/middlewares/validators/UserValidator");
+
+const {
+  validateCreatePatient,
+} = require("../app/middlewares/validators/PatientValidator");
 
 router.post(
   "/import/:userId",
   validateUploadImageParameters,
+
   PatientController.addToBucketFromURL
 );
 router.get("/:id", validatePatientID, PatientController.index);
@@ -16,7 +24,16 @@ router.get("/:id", validatePatientID, PatientController.index);
 // add validation once confirm fields to add
 router.patch("/:id", PatientController.update);
 
-router.post("", PatientController.add);
+router.post(
+  "",
+  upload.fields([
+    { name: "report_pdf" },
+    { name: "left_eye_image" },
+    { name: "right_eye_image" },
+  ]),
+  validateCreatePatient,
+  PatientController.add
+);
 
 router.delete("/:id", PatientController.remove);
 

@@ -5,6 +5,7 @@ const Token = require("../models/Token");
 const ApiError = require("../middlewares/ApiError");
 const { tokenTypes } = require("../../config/tokens");
 const { Op } = require("sequelize");
+const { formatDateTime } = require("../helpers/DateUtil");
 
 const generateToken = (
   userId,
@@ -90,11 +91,11 @@ const generateAuthTokens = async (user, timezone) => {
     accessToken: {
       token: accessToken,
       // take in an appropriate timezone
-      expires: accessTokenExpires.tz(timezone).format(),
+      expires: formatDateTime(accessTokenExpires, timezone),
     },
     refreshToken: {
       token: refreshToken,
-      expires: refreshTokenExpires.tz(timezone).format(),
+      expires: formatDateTime(refreshTokenExpires, timezone),
     },
   };
 };

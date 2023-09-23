@@ -41,7 +41,7 @@ const Patient = sequelize.define(
     version: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1,
+      defaultValue: 0,
     },
     name: {
       type: DataTypes.STRING,
@@ -49,48 +49,124 @@ const Patient = sequelize.define(
     },
     date_of_birth: {
       type: DataTypes.DATEONLY,
+      validate: {
+        isDate: {
+          format: "YYYY-MM-DD",
+          strictMode: true,
+        },
+        isBeforeToday(date) {
+          if (new Date(date) >= new Date()) {
+            throw new Error("The date must be before today.");
+          }
+        },
+      },
     },
     age: {
       type: DataTypes.INTEGER,
     },
     sex: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM,
+      values: ["M", "F"],
+      validate: {
+        isValidGender(gender) {
+          if (!((gender === "M") | (gender === "F"))) {
+            throw new Error("The gender is not valid.");
+          }
+        },
+      },
     },
     left_eye_image: {
       type: DataTypes.STRING,
+      validate: {
+        isURL: true,
+      },
     },
     right_eye_image: {
       type: DataTypes.STRING,
+      validate: {
+        isURL: true,
+      },
     },
     left_diabetic_retinography_stage: {
       type: DataTypes.TINYINT,
+      validate: {
+        isInt: {
+          min: 0,
+          max: 4,
+        },
+      },
     },
     left_diabetic_retinography_prob: {
       type: DataTypes.FLOAT,
+      validate: {
+        isFloat: {
+          min: 0.0,
+          max: 1.0,
+        },
+      },
     },
     right_diabetic_retinography_stage: {
       type: DataTypes.TINYINT,
+      validate: {
+        isInt: {
+          min: 0,
+          max: 4,
+        },
+      },
     },
     right_diabetic_retinography_prob: {
       type: DataTypes.FLOAT,
+      validate: {
+        isFloat: {
+          min: 0.0,
+          max: 1.0,
+        },
+      },
     },
     left_ocular_prob: {
       type: DataTypes.FLOAT,
+      validate: {
+        isFloat: {
+          min: 0.0,
+          max: 1.0,
+        },
+      },
     },
     right_ocular_prob: {
       type: DataTypes.FLOAT,
+      validate: {
+        isFloat: {
+          min: 0.0,
+          max: 1.0,
+        },
+      },
     },
     left_glaucoma_prob: {
       type: DataTypes.FLOAT,
+      validate: {
+        isFloat: {
+          min: 0.0,
+          max: 1.0,
+        },
+      },
     },
     right_glaucoma_prob: {
       type: DataTypes.FLOAT,
+      validate: {
+        isFloat: {
+          min: 0.0,
+          max: 1.0,
+        },
+      },
     },
     doctor_notes: {
       type: DataTypes.STRING,
     },
     report_link: {
       type: DataTypes.STRING,
+      validate: {
+        isURL: true,
+      },
     },
     visit_date: {
       type: DataTypes.DATE,
@@ -111,10 +187,6 @@ const Patient = sequelize.define(
         record.setDataValue("age", Math.abs(ageDate.getUTCFullYear() - 1970));
       },
       afterUpdate: async (record, options) => {
-        const { transaction } = options;
-        await afterCreateUpdateHandler(record, transaction);
-      },
-      afterCreate: async (record, options) => {
         const { transaction } = options;
         await afterCreateUpdateHandler(record, transaction);
       },

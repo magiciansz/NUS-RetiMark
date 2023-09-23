@@ -74,19 +74,23 @@ const addToBucketFromURL = async (req, res, next) => {
 
 const index = catchAsync(async (req, res) => {
   const patient = await PatientService.getPatientByID(req.params.id);
-  res.status(httpStatus.OK).send(patient);
+  res.status(httpStatus.OK).send({ patient });
 });
 
 // update with image processing, and put the actual S3 link inside. same for the probabilities
 
 const add = catchAsync(async (req, res) => {
-  const patient = await PatientService.addPatient(req.body);
-  res.status(httpStatus.OK).send(patient);
+  const patient = await PatientService.addPatient(
+    req.body,
+    req.files,
+    req.query.timezone
+  );
+  res.status(httpStatus.CREATED).send({ patient });
 });
 
 const update = catchAsync(async (req, res) => {
   const patient = await PatientService.updatePatient(req.params.id, req.body);
-  res.status(httpStatus.OK).send(patient);
+  res.status(httpStatus.OK).send({ patient });
 });
 
 const remove = catchAsync(async (req, res) => {
