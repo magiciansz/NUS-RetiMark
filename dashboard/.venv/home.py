@@ -3,7 +3,6 @@ import datetime
 import extra_streamlit_components as stx
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import random
 import requests
 import streamlit as st
@@ -18,19 +17,55 @@ st.set_page_config(
 def init_router(): 
     return stx.Router({"/login": login, "/home": home})
 
-def login():
-    def process_successful_login(success_json):
-        user_dict = success_json['user']
-        tokens_dict = success_json['tokens']
+@st.cache_resource(experimental_allow_widgets=True)
+def get_manager():
+    return stx.CookieManager()
 
-        user_id = user_dict['id']
-        user_username = user_dict['username']
-        access_token = tokens_dict['accessToken']['token']
-        access_token_expiry_time = tokens_dict['accessToken']['expires']
-        refresh_token = tokens_dict['refreshToken']['token']
-        refresh_token_expiry_time = tokens_dict['accessToken']['expires']
-        router.route("home")
-        return True
+cookie_manager = get_manager()
+
+st.subheader("All Cookies:")
+cookies = cookie_manager.get_all()
+st.write(cookies)
+
+def get_region_from_UTC_offset(val):
+    regions = {"+08": "Asia/Singapore", "+09": "Asia/Tokyo"}
+    return regions[val]
+
+timezone = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
+
+# initialize session state variables
+cookie_manager.set(key='time_zone', cookie='time_zone', val=timezone)
+# cookie_manager.set(key='login_status', cookie='login_status', val=False)
+# cookie_manager.set(key='user_username', cookie='user_username', val=None)
+# cookie_manager.set(key='access_token', cookie='access_token', val="test")
+# cookie_manager.set(key='access_token_expiry_time', cookie='access_token_expiry_time', val=None)
+# cookie_manager.set(key='refresh_token', cookie='refresh_token', val=None)
+# cookie_manager.set(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time', val=None)
+
+# def validate_login():
+#     cookie_manager.set(key='login_status', cookie='login_status', val=True)
+    
+def login():
+    # cookie_manager.set('login_status', False)
+    # def process_successful_login(success_json):
+    #     user_dict = success_json['user']
+    #     tokens_dict = success_json['tokens']
+
+    #     user_id = user_dict['id']
+    #     user_username = user_dict['username']
+    #     access_token = tokens_dict['accessToken']['token']
+    #     access_token_expiry_time = datetime.datetime.fromisoformat(tokens_dict['accessToken']['expires']).isoformat()
+    #     refresh_token = tokens_dict['refreshToken']['token']
+    #     refresh_token_expiry_time = datetime.datetime.fromisoformat(tokens_dict['accessToken']['expires']).isoformat()
+
+    #     cookie_manager.set(key='user_username', cookie='user_username', val=user_username)
+    #     cookie_manager.set(key='access_token', cookie='access_token', val=access_token)
+    #     cookie_manager.set(key='access_token_expiry_time', cookie='access_token_expiry_time', val=access_token_expiry_time)
+    #     cookie_manager.set(key='refresh_token', cookie='refresh_token', val=refresh_token)
+    #     cookie_manager.set(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time', val=refresh_token_expiry_time)
+    #     validate_login()
+    #     router.route("home")
+    #     return True
                                                                
     def attempt_login(username, password):
         # return False
@@ -50,8 +85,26 @@ def login():
         except requests.exceptions.HTTPError as err:
             st.error(err)
         else:
-            success_login = r.json()
-            return process_successful_login(success_login)
+            success_json = r.json()
+            user_dict = success_json['user']
+            tokens_dict = success_json['tokens']
+
+            user_id = user_dict['id']
+            user_username = user_dict['username']
+            access_token = tokens_dict['accessToken']['token']
+            access_token_expiry_time = datetime.datetime.fromisoformat(tokens_dict['accessToken']['expires']).isoformat()
+            refresh_token = tokens_dict['refreshToken']['token']
+            refresh_token_expiry_time = datetime.datetime.fromisoformat(tokens_dict['accessToken']['expires']).isoformat()
+
+            cookie_manager.set(key='user_username', cookie='user_username', val=user_username)
+            cookie_manager.set(key='access_token', cookie='access_token', val=access_token)
+            cookie_manager.set(key='access_token_expiry_time', cookie='access_token_expiry_time', val=access_token_expiry_time)
+            cookie_manager.set(key='refresh_token', cookie='refresh_token', val=refresh_token)
+            cookie_manager.set(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time', val=refresh_token_expiry_time)
+            
+            # validate_login()
+            cookie_manager.set(key='login_status', cookie='login_status', val=True)
+            return True
 
         ##END API CALL
         
@@ -65,14 +118,14 @@ def login():
             password = st.text_input("Password", type="password")
             success = st.form_submit_button("Login", on_click=attempt_login, args=[email, password])
 
-    # if success:
-    #     router.route("home")
-    #     # If the form is submitted and the email and password are correct,
-    #     # clear the form/container and display a success message
-    #     landing.empty()
-    #     st.success("Login successful")
+    if (cookie_manager.get(cookie="login_status")):
+        router.route("home")
+        # If the form is submitted and the email and password are correct,
+        # clear the form/container and display a success message
+        landing.empty()
+        st.success("Login successful")
     # else:
-    #     st.error("Username/password is incorrect")
+        # st.error("Username/password is incorrect")
     return landing
 
 def home():
@@ -172,7 +225,7 @@ def home():
         disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
 
         st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
-        # st.sidebar.write(f'Welcome, *{st.session_state["name"]}*')
+        # st.sidebar.write(f'Welcome, *{cookie_manager.set"name"]}*')
         # authenticator.logout('Logout', 'sidebar', key='logout_button')
         logo, title = st.columns([0.08,0.92])
         with title:
@@ -313,7 +366,6 @@ router = init_router()
 router.show_route_view()
 
 c1, c2, c3 = st.columns(3)
-
 with c1:
     st.header("Current route")
     current_route = router.get_url_route()
