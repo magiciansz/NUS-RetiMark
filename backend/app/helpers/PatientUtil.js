@@ -1,12 +1,7 @@
 const ApiError = require("../middlewares/ApiError");
 const httpStatus = require("http-status");
 const moment = require("moment-timezone");
-const AWS = require("aws-sdk");
-const env = require("dotenv");
-env.config();
-
-const AWS_BUCKET = process.env.AWS_BUCKET;
-const s3 = new AWS.S3({ params: { Bucket: AWS_BUCKET } });
+const s3 = require("./AwsUtil");
 
 const {
   formatDateTime,
@@ -28,7 +23,7 @@ const formatPatientOutput = (patient, timezone) => {
 };
 
 const uploadPatientFiles = async (patient, files) => {
-  if (!files["report_pdf"]) {
+  if (!files["right_eye_image"]) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
       "Please upload a report_pdf file."

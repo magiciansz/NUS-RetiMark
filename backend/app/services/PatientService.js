@@ -27,10 +27,11 @@ const addPatient = async (body, files, timezone = "UTC") => {
     right_ocular_prob: body.right_ocular_prob,
     left_glaucoma_prob: body.left_glaucoma_prob,
     right_glaucoma_prob: body.right_glaucoma_prob,
+    doctor_notes: body.doctor_notes,
   });
   const urls = await uploadPatientFiles(patient, files);
   await (await patient.update(urls)).reload();
-  return patient;
+  return formatPatientOutput(patient, timezone);
 };
 
 const updatePatient = async (id, body) => {

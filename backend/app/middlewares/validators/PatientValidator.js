@@ -45,20 +45,6 @@ const validateCreatePatient = [
       return (value === "M") | (value === "F");
     })
     .withMessage("sex has to be either M or F."),
-  // body("left_eye_image")
-  //   .not()
-  //   .isEmpty()
-  //   .withMessage("left_eye_image cannot be empty")
-  //   .bail(),
-  // .isBase64()
-  // .withMessage("left_eye_image has to be a base64 string"),
-  // body("right_eye_image")
-  //   .not()
-  //   .isEmpty()
-  //   .withMessage("right_eye_image cannot be empty")
-  //   .bail(),
-  // .isBase64()
-  // .withMessage("right_eye_image has to be a base64 string"),
   body("left_diabetic_retinography_stage")
     .not()
     .isEmpty()
@@ -121,14 +107,6 @@ const validateCreatePatient = [
     .not()
     .isEmpty()
     .withMessage("doctor_notes cannot be empty"),
-  // body("report_pdf")
-  //   .not()
-  //   .isEmpty()
-  //   .withMessage("report_pdf cannot be empty")
-  //   .bail(),
-  // .isBase64()
-  // .withMessage("report_link has to be a base64 string"),
-
   (req, res, next) => {
     return BadRequestError(req, res, next);
   },

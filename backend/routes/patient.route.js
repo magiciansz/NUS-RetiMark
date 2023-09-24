@@ -5,20 +5,12 @@ const upload = multer(); // Remove storage configuration
 
 const PatientController = require("../app/controllers/PatientController");
 const {
-  validateUploadImageParameters,
   validatePatientID,
 } = require("../app/middlewares/validators/UserValidator");
 
 const {
   validateCreatePatient,
 } = require("../app/middlewares/validators/PatientValidator");
-
-router.post(
-  "/import/:userId",
-  validateUploadImageParameters,
-
-  PatientController.addToBucketFromURL
-);
 router.get("/:id", validatePatientID, PatientController.index);
 
 // add validation once confirm fields to add
