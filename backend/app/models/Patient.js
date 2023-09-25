@@ -200,4 +200,11 @@ const Patient = sequelize.define(
   }
 );
 
+Patient.isDuplicate = async function (name, date_of_birth) {
+  const patient = await Patient.findOne({
+    where: { name: name, date_of_birth: date_of_birth },
+  });
+  return patient !== null;
+};
+
 module.exports = Patient;

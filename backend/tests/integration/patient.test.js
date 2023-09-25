@@ -193,6 +193,55 @@ describe("Patient Routes", () => {
       });
       expect(patientHistory).toMatchObject(createdPatient);
     });
+
+    test("should return 409 if user is already in the database", async () => {
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.CREATED);
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.CONFLICT);
+    });
     test("should return 400 if timezone specified is invalid", async () => {
       await request(app)
         .post("/api/v1/patient")
@@ -435,7 +484,7 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if left_eye_image is empty", async () => {
+    test("should return 400 if left_eye_image is empty, and insertion should be rolled back", async () => {
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -455,8 +504,12 @@ describe("Patient Routes", () => {
         .field(patient)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
+      const res = await Patient.findOne({
+        where: { name: patient.name, date_of_birth: patient.date_of_birth },
+      });
+      expect(res).toBeNull();
     });
-    test("should return 400 if right_eye_image is empty", async () => {
+    test("should return 400 if right_eye_image is empty, and insertion should be rolled back", async () => {
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -476,8 +529,12 @@ describe("Patient Routes", () => {
         .field(patient)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
+      const res = await Patient.findOne({
+        where: { name: patient.name, date_of_birth: patient.date_of_birth },
+      });
+      expect(res).toBeNull();
     });
-    test("should return 400 if report_pdf is empty", async () => {
+    test("should return 400 if report_pdf is empty, and insertion should be rolled back", async () => {
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -492,6 +549,10 @@ describe("Patient Routes", () => {
         .field(patient)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
+      const res = await Patient.findOne({
+        where: { name: patient.name, date_of_birth: patient.date_of_birth },
+      });
+      expect(res).toBeNull();
     });
     test("should return 400 if left_diabetic_retinography_stage is empty", async () => {
       delete patient["left_diabetic_retinography_stage"];

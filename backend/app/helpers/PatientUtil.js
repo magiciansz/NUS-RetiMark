@@ -26,7 +26,7 @@ const uploadPatientFiles = async (patient, files) => {
   if (!files["right_eye_image"]) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      "Please upload a report_pdf file."
+      "Please upload a right_eye_image"
     );
   }
   if (!files["left_eye_image"]) {
@@ -36,10 +36,7 @@ const uploadPatientFiles = async (patient, files) => {
     );
   }
   if (!files["report_pdf"]) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Please upload a right_eye_image."
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST, "Please upload a report_pdf.");
   }
   const left_eye_image = files["left_eye_image"][0];
   const right_eye_image = files["right_eye_image"][0];
