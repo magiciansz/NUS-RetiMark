@@ -11,6 +11,7 @@ const {
 const {
   validateCreatePatient,
 } = require("../app/middlewares/validators/PatientValidator");
+const auth = require("../app/middlewares/auth");
 router.get("/:id", validatePatientID, PatientController.index);
 
 // add validation once confirm fields to add
@@ -23,6 +24,7 @@ router.post(
     { name: "left_eye_image" },
     { name: "right_eye_image" },
   ]),
+  auth(),
   validateCreatePatient,
   PatientController.add
 );

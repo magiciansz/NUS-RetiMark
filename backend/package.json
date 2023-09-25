@@ -4,7 +4,7 @@
   "description": "A boilerplate for Node.js web applications with express and MySQL",
   "main": "index.js",
   "scripts": {
-    "test": "jest -i --colors --verbose --detectOpenHandles --coverage",
+    "test": "export NODE_ENV=TEST && jest -i --colors --verbose --detectOpenHandles --coverage",
     "start": "nodemon index.js",
     "postinstall": "cp .env-example .env"
   },

@@ -77,14 +77,18 @@ const Patient = sequelize.define(
     },
     left_eye_image: {
       type: DataTypes.STRING,
-      isURL: {
-        require_tld: false,
+      validate: {
+        isURL: {
+          require_tld: false,
+        },
       },
     },
     right_eye_image: {
       type: DataTypes.STRING,
-      isURL: {
-        require_tld: false,
+      validate: {
+        isURL: {
+          require_tld: false,
+        },
       },
     },
     left_diabetic_retinography_stage: {

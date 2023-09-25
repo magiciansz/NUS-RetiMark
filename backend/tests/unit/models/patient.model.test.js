@@ -186,15 +186,15 @@ describe("Patient Model", () => {
     });
 
     test("should throw validation error if left_eye_image is not a URL", async () => {
-      patient.set("left_eye_image", "testingtesting");
+      patient.set("left_eye_image", "/relative/path");
       await expect(patient.validate()).rejects.toThrow();
     });
     test("should throw validation error if right_eye_image is not a URL", async () => {
-      patient.set("right_eye_image", "testingtesting");
+      patient.set("right_eye_image", "/relative/path");
       await expect(patient.validate()).rejects.toThrow();
     });
     test("should throw validation error if report_link is not a URL", async () => {
-      patient.set("report_link", "testingtesting");
+      patient.set("report_link", "/relative/path");
       await expect(patient.validate()).rejects.toThrow();
     });
   });

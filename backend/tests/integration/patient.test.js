@@ -1,12 +1,15 @@
 const setUpTestDB = require("../utils/setUpTestDB");
 const Patient = require("../../app/models/Patient");
-process.env.NODE_ENV = "TEST";
 const request = require("supertest");
 const app = require("../../appconfig");
 const httpStatus = require("http-status");
 const PatientHistory = require("../../app/models/PatientHistory");
 const s3 = require("../../app/helpers/AwsUtil");
 const path = require("path");
+const User = require("../../app/models/User");
+const moment = require("moment-timezone");
+const TokenService = require("../../app/services/TokenService");
+const { tokenTypes } = require("../../config/tokens");
 
 setUpTestDB();
 
@@ -24,6 +27,8 @@ describe("Patient Routes", () => {
   let left_glaucoma_prob = 0.36;
   let right_glaucoma_prob = 0.55;
   let doctor_notes = "This patient is healthy.";
+  let user;
+  let accessToken;
   beforeEach(async () => {
     patient = {
       name: name,
@@ -39,6 +44,19 @@ describe("Patient Routes", () => {
       right_glaucoma_prob: right_glaucoma_prob,
       doctor_notes: doctor_notes,
     };
+    user = await User.create({
+      username: "testinguser",
+      password: "mMM@123455",
+    });
+    const expires = moment().add(
+      process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
+      "minutes"
+    );
+    accessToken = TokenService.generateToken(
+      user.id,
+      expires,
+      tokenTypes.ACCESS
+    );
   });
   describe("POST /api/v1/patient", () => {
     test("should return 201 and successfully register user if request data is ok, with visit_date in default timezone", async () => {
@@ -62,6 +80,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.CREATED);
       const ageDate = new Date(Date.now() - new Date(date_of_birth));
       const createdPatient = {
@@ -136,6 +155,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.CREATED);
       const ageDate = new Date(Date.now() - new Date(date_of_birth));
       const createdPatient = {
@@ -195,6 +215,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if name is empty", async () => {
@@ -220,7 +241,68 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
+    });
+
+    test("should return 401 if access token is not attached", async () => {
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    test("should return 401 if access token is not valid", async () => {
+      const expiry = moment().subtract(
+        process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
+        "minutes"
+      );
+      const newAccessToken = TokenService.generateToken(
+        user.id,
+        expiry,
+        tokenTypes.ACCESS
+      );
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${newAccessToken}`)
+        .expect(httpStatus.UNAUTHORIZED);
     });
 
     test("should return 400 if date_of_birth is empty", async () => {
@@ -246,6 +328,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if date_of_birth is not in a date format", async () => {
@@ -271,6 +354,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if date_of_birth is not a valid date", async () => {
@@ -296,6 +380,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if sex is empty", async () => {
@@ -321,6 +406,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if sex is invalid", async () => {
@@ -346,6 +432,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_eye_image is empty", async () => {
@@ -366,6 +453,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_eye_image is empty", async () => {
@@ -386,6 +474,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if report_pdf is empty", async () => {
@@ -401,6 +490,7 @@ describe("Patient Routes", () => {
           path.join(__dirname, "..", "files", "docker.jpeg")
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_diabetic_retinography_stage is empty", async () => {
@@ -426,6 +516,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_diabetic_retinography_stage is not a valid value between 0 and 4", async () => {
@@ -451,6 +542,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_diabetic_retinography_prob is empty", async () => {
@@ -476,6 +568,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_diabetic_retinography_prob is not a valid value between 0 and 1", async () => {
@@ -501,6 +594,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_diabetic_retinography_stage is empty", async () => {
@@ -526,6 +620,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_diabetic_retinography_stage is not a valid value between 0 and 4", async () => {
@@ -551,6 +646,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_diabetic_retinography_prob is empty", async () => {
@@ -576,6 +672,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_diabetic_retinography_prob is not a valid value between 0 and 1", async () => {
@@ -601,6 +698,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_ocular_prob is empty", async () => {
@@ -626,6 +724,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_ocular_prob is not a valid value between 0 and 1", async () => {
@@ -651,6 +750,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_ocular_prob is empty", async () => {
@@ -676,6 +776,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_ocular_prob is not a valid value between 0 and 1", async () => {
@@ -701,6 +802,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_glaucoma_prob is empty", async () => {
@@ -726,6 +828,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if left_glaucoma_prob is not a valid value between 0 and 1", async () => {
@@ -751,6 +854,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_glaucoma_prob is empty", async () => {
@@ -776,6 +880,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if right_glaucoma_prob is not a valid value between 0 and 1", async () => {
@@ -801,6 +906,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
     test("should return 400 if doctor_notes is empty", async () => {
@@ -826,6 +932,7 @@ describe("Patient Routes", () => {
           )
         )
         .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
   });
