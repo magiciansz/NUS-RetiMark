@@ -7,7 +7,7 @@ const {
   validateLogout,
   validateLogin,
   validateRefreshTokens,
-} = require("../app/middlewares/validators");
+} = require("../app/middlewares/validators/UserValidator");
 
 router.post("/register", validateRegister, AuthController.register);
 router.post("/login", validateLogin, AuthController.login);
