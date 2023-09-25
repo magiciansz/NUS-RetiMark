@@ -200,6 +200,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnauthorisedRequest"
+        "409":
+          description: Duplicate Patient exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDuplicatePatient"
 
 components:
   schemas:
@@ -215,7 +221,20 @@ components:
         stack:
           type: string
           example: "Error: Please Authenticate"
-      
+
+    CreateDuplicatePatient:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 409
+        message:
+          type: string
+          example: "This patient has already been created."
+        stack:
+          type: string
+          example: "Error: This patient has already been created."
+
     CreatePatientBadRequest:
       type: object
       properties:
@@ -224,17 +243,17 @@ components:
           example: 400
         message:
           type: string
-          example: "[{\"type\":\"field\",\"value\":\"1999/09/21\",\"msg\":\"date_of_birth has to be a valid date with format YYYY-MM-DD\",\"path\":\"date_of_birth\",\"location\":\"body\"}]"
+          example: '[{"type":"field","value":"1999/09/21","msg":"date_of_birth has to be a valid date with format YYYY-MM-DD","path":"date_of_birth","location":"body"}]'
         stack:
           type: string
-          example: "Error: [{\"type\":\"field\",\"value\":\"1999/09/21\",\"msg\":\"date_of_birth has to be a valid date with format YYYY-MM-DD\",\"path\":\"date_of_birth\",\"location\":\"body\"}]"
+          example: 'Error: [{"type":"field","value":"1999/09/21","msg":"date_of_birth has to be a valid date with format YYYY-MM-DD","path":"date_of_birth","location":"body"}]'
     CreatePatientResponse:
       type: object
       properties:
         patient:
           type: object
           properties:
-            id: 
+            id:
               type: integer
               example: 1
             version:
@@ -297,9 +316,9 @@ components:
         name:
           type: string
           default: "Tan Jun Jie"
-          enum: 
-          - Tan Jun Jie
-          - testStr2
+          enum:
+            - Tan Jun Jie
+            - testStr2
         date_of_birth:
           type: string
           example: "1999-09-21"
