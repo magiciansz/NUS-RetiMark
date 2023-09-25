@@ -18,6 +18,8 @@ servers:
 tags:
   - name: Authentication
     description: User Management
+  - name: Patient
+    description: Patient APIs
 
 paths:
   /auth/login:
@@ -161,9 +163,186 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExpiredOrInvalidRefreshToken"
+  /patient:
+    post:
+      tags:
+        - Patient
+      summary: Create a Patient
+      description: Create patient given all parameters
+      parameters:
+        - name: timezone
+          in: query
+          description: timezone to return creation date of patient
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreatePatientForm"
+        required: true
+      responses:
+        "201":
+          description: Successfully Created Patient
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePatientResponse"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePatientBadRequest"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
 
 components:
   schemas:
+    UnauthorisedRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: "Please Authenticate"
+        stack:
+          type: string
+          example: "Error: Please Authenticate"
+      
+    CreatePatientBadRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "[{\"type\":\"field\",\"value\":\"1999/09/21\",\"msg\":\"date_of_birth has to be a valid date with format YYYY-MM-DD\",\"path\":\"date_of_birth\",\"location\":\"body\"}]"
+        stack:
+          type: string
+          example: "Error: [{\"type\":\"field\",\"value\":\"1999/09/21\",\"msg\":\"date_of_birth has to be a valid date with format YYYY-MM-DD\",\"path\":\"date_of_birth\",\"location\":\"body\"}]"
+    CreatePatientResponse:
+      type: object
+      properties:
+        patient:
+          type: object
+          properties:
+            id: 
+              type: integer
+              example: 1
+            version:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: "Tan Jun Jie"
+            date_of_birth:
+              type: string
+              example: "1999-09-21"
+            age:
+              type: integer
+              example: 24
+            sex:
+              type: string
+              example: "M"
+            left_eye_image:
+              type: string
+              example: "tests3bucket.com"
+            right_eye_image:
+              type: string
+              example: "tests3bucket.com"
+            left_diabetic_retinography_stage:
+              type: integer
+              example: 1
+            left_diabetic_retinography_prob:
+              type: number
+              example: 0.56
+            right_diabetic_retinography_stage:
+              type: integer
+              example: 1
+            right_diabetic_retinography_prob:
+              type: number
+              example: 0.11
+            left_ocular_prob:
+              type: number
+              example: 0.11
+            right_ocular_prob:
+              type: number
+              example: 0.11
+            left_glaucoma_prob:
+              type: number
+              example: 0.11
+            right_glaucoma_prob:
+              type: number
+              example: 0.11
+            doctor_notes:
+              type: string
+              example: "This patient is healthy."
+            report_pdf:
+              type: string
+              example: "testreportlink.com"
+            visit_date:
+              type: string
+              example: "2023-09-23T18:14:45+08:00"
+    CreatePatientForm:
+      type: object
+      properties:
+        name:
+          type: string
+          default: "Tan Jun Jie"
+          enum: 
+          - Tan Jun Jie
+          - testStr2
+        date_of_birth:
+          type: string
+          example: "1999-09-21"
+        sex:
+          type: string
+          example: "M"
+        left_eye_image:
+          type: string
+          format: binary
+        right_eye_image:
+          type: string
+          format: binary
+        left_diabetic_retinography_stage:
+          type: integer
+          example: 1
+        left_diabetic_retinography_prob:
+          type: number
+          example: 0.56
+        right_diabetic_retinography_stage:
+          type: integer
+          example: 1
+        right_diabetic_retinography_prob:
+          type: number
+          example: 0.11
+        left_ocular_prob:
+          type: number
+          example: 0.11
+        right_ocular_prob:
+          type: number
+          example: 0.11
+        left_glaucoma_prob:
+          type: number
+          example: 0.11
+        right_glaucoma_prob:
+          type: number
+          example: 0.11
+        doctor_notes:
+          type: string
+          example: "This patient is healthy."
+        report_pdf:
+          type: string
+          format: binary
+
     CreateUserUsernameTaken:
       type: object
       properties:
@@ -262,7 +441,7 @@ components:
               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NDkwMTM1LCJ0eXBlIjoiYWNjZXNzIn0.RfkK1wzZnwx037E7P37gDBPJ49zCEGTFv27SQ-B_lzA"
             expires:
               type: string
-              example: "Tue Sep 12 2023 11:42:15 GMT+0800"
+              example: "2023-09-23T17:29:08+08:00"
         refreshToken:
           type: object
           properties:
@@ -271,7 +450,7 @@ components:
               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NTAwOTM1LCJ0eXBlIjoicmVmcmVzaCJ9.NSX9bPKOJagAqoBpDU2SoQMFE2ST0qhYpVyR20-Z5CQ"
             expires:
               type: string
-              example: "Tue Sep 12 2023 14:42:15 GMT+0800"
+              example: "2023-09-23T21:29:08+08:00"
     LoginResponse:
       type: object
       properties:
@@ -295,7 +474,7 @@ components:
                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NDkwMTM1LCJ0eXBlIjoiYWNjZXNzIn0.RfkK1wzZnwx037E7P37gDBPJ49zCEGTFv27SQ-B_lzA"
                 expires:
                   type: string
-                  example: "Tue Sep 12 2023 11:42:15 GMT+0800"
+                  example: "2023-09-23T17:29:08+08:00"
             refreshToken:
               type: object
               properties:
@@ -304,4 +483,4 @@ components:
                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NTAwOTM1LCJ0eXBlIjoicmVmcmVzaCJ9.NSX9bPKOJagAqoBpDU2SoQMFE2ST0qhYpVyR20-Z5CQ"
                 expires:
                   type: string
-                  example: "Tue Sep 12 2023 14:42:15 GMT+0800"
+                  example: "2023-09-23T21:29:08+08:00"
