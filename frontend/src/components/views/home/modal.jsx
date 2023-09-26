@@ -4,6 +4,11 @@ import React, {
 
 import './modal.css';
 import {FaSearch} from "react-icons/fa"
+
+import PatientApi from '../../../apis/PatientApi';
+import Cookies from 'js-cookie';
+
+
 const patients = [
 	{name: 'jiahui', age: '22', gender: 'F'},
 	{name: 'xianghan', age: '24', gender: 'M'},
@@ -26,7 +31,22 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 
     if (!isOpen) return null;
     // Handle form submission
-    const handleSubmit = (e) => {
+
+    const addPatient = async (accessToken, rightEye) => {
+        console.log("running adding patient func")
+        const requestParams = {
+            accessToken,
+            rightEye: rightEye.blob,
+        };
+        try {
+            const res = await PatientApi.createPatient(requestParams);
+            console.log("res from create", res)
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         // call postapi to backend 
@@ -44,6 +64,19 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         rightEyeImage(rightEye)
         clearInputs()
         // navigate.push('/reports');
+
+        const accessTokenData = Cookies.get('accessToken');
+        console.log("access", accessTokenData)
+        if (accessTokenData) {
+            const parsedAccessTokenData = JSON.parse(accessTokenData);
+            const accessToken = parsedAccessTokenData.token;
+            const accessTokenExpiry = parsedAccessTokenData.expires;
+            await addPatient(accessToken, rightEye)
+        }
+
+
+
+
         onClose();
     };
 
