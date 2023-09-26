@@ -6,6 +6,7 @@ import pandas as pd
 import random
 import requests
 import streamlit as st
+import time
 
 # Streamlit app
 st.set_page_config(
@@ -13,6 +14,9 @@ st.set_page_config(
     page_icon=":eye:",
     layout="wide"
 )
+
+_DEBUG = True
+
 @st.cache_resource(hash_funcs={"_thread.RLock": lambda _: None})
 def init_router(): 
     return stx.Router({"/login": login, "/home": home})
@@ -23,68 +27,74 @@ def get_manager():
 
 cookie_manager = get_manager()
 
-st.subheader("All Cookies:")
-cookies = cookie_manager.get_all()
-st.write(cookies)
+if (_DEBUG):
+    st.subheader("All Cookies:")
+    cookies = cookie_manager.get_all()
+    st.write(cookies)
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.subheader("Get Cookie:")
+        cookie = st.text_input("Cookie", key="0")
+        clicked = st.button("Get")
+        if clicked:
+            value = cookie_manager.get(cookie=cookie)
+            st.write(value)
+    with c2:
+        st.subheader("Set Cookie:")
+        cookie = st.text_input("Cookie", key="1")
+        val = st.text_input("Value")
+        if st.button("Add"):
+            cookie_manager.set(cookie, val) # Expires in a day by default
+    with c3:
+        st.subheader("Delete Cookie:")
+        cookie = st.text_input("Cookie", key="2")
+        if st.button("Delete"):
+            cookie_manager.delete(cookie)
 
 def get_region_from_UTC_offset(val):
     regions = {"+08": "Asia/Singapore", "+09": "Asia/Tokyo"}
     return regions[val]
 
-timezone = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
+# timezone = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
 
 # initialize session state variables
-cookie_manager.set(key='time_zone', cookie='time_zone', val=timezone)
-# cookie_manager.set(key='login_status', cookie='login_status', val=False)
-# cookie_manager.set(key='user_username', cookie='user_username', val=None)
-# cookie_manager.set(key='access_token', cookie='access_token', val="test")
-# cookie_manager.set(key='access_token_expiry_time', cookie='access_token_expiry_time', val=None)
-# cookie_manager.set(key='refresh_token', cookie='refresh_token', val=None)
-# cookie_manager.set(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time', val=None)
 
-# def validate_login():
-#     cookie_manager.set(key='login_status', cookie='login_status', val=True)
-    
+
+def submitted():
+    st.session_state.submitted_login = True
+def reset():
+    st.session_state.submitted_login = False
 def login():
-    # cookie_manager.set('login_status', False)
-    # def process_successful_login(success_json):
-    #     user_dict = success_json['user']
-    #     tokens_dict = success_json['tokens']
-
-    #     user_id = user_dict['id']
-    #     user_username = user_dict['username']
-    #     access_token = tokens_dict['accessToken']['token']
-    #     access_token_expiry_time = datetime.datetime.fromisoformat(tokens_dict['accessToken']['expires']).isoformat()
-    #     refresh_token = tokens_dict['refreshToken']['token']
-    #     refresh_token_expiry_time = datetime.datetime.fromisoformat(tokens_dict['accessToken']['expires']).isoformat()
-
-    #     cookie_manager.set(key='user_username', cookie='user_username', val=user_username)
-    #     cookie_manager.set(key='access_token', cookie='access_token', val=access_token)
-    #     cookie_manager.set(key='access_token_expiry_time', cookie='access_token_expiry_time', val=access_token_expiry_time)
-    #     cookie_manager.set(key='refresh_token', cookie='refresh_token', val=refresh_token)
-    #     cookie_manager.set(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time', val=refresh_token_expiry_time)
-    #     validate_login()
-    #     router.route("home")
-    #     return True
+    if 'submitted_login' not in st.session_state:
+        st.session_state['submitted_login'] = False
                                                                
     def attempt_login(username, password):
-        # return False
         ##BEGIN API CALL
         # tz_string = datetime.datetime.now().astimezone().tzinfo
-        tz_string = 'Asia/Singapore'
-        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/auth/login?timezone=Asia/Singapore"
-        # PARAMS = {'timezone':tz_string}
+        tz_string = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
+        cookie_manager.set(key='time_zone', cookie='time_zone', val=tz_string)
+        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/auth/login"
+        PARAMS = {'timezone':tz_string}
         data = {
-            'username':username,
-            'password':password,
+            "username":username,
+            "password":password
         }
         try:
-            # r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
-            r = requests.post(url=API_ENDPOINT, json=data)
+            if (_DEBUG):   
+                st.write("Entered Try block")
+            r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
+            # r = requests.post(url=API_ENDPOINT, json=data)
             r.raise_for_status()
+
         except requests.exceptions.HTTPError as err:
+            if (_DEBUG):
+                st.write("Entered Except block")
+            st.json(r.json)
             st.error(err)
         else:
+            if (_DEBUG):
+                st.write("Entered Else block")
             success_json = r.json()
             user_dict = success_json['user']
             tokens_dict = success_json['tokens']
@@ -105,7 +115,6 @@ def login():
             # validate_login()
             cookie_manager.set(key='login_status', cookie='login_status', val=True)
             return True
-
         ##END API CALL
         
     # Create an empty container
@@ -114,119 +123,172 @@ def login():
     with landing:
         with st.form("login"):
             st.markdown("#### Login")
-            email = st.text_input("Username")
+            username = st.text_input("Username")
             password = st.text_input("Password", type="password")
-            success = st.form_submit_button("Login", on_click=attempt_login, args=[email, password])
-
-    if (cookie_manager.get(cookie="login_status")):
-        router.route("home")
-        # If the form is submitted and the email and password are correct,
-        # clear the form/container and display a success message
-        landing.empty()
-        st.success("Login successful")
-    # else:
-        # st.error("Username/password is incorrect")
+            success = st.form_submit_button("Login", on_click=submitted)
+            # success = st.form_submit_button("Login", on_click=attempt_login, args=[username, password])
+    if (st.session_state.submitted_login):
+        attempt_login(username, password)
+        if (cookie_manager.get(cookie="login_status")):
+            router.route("home")
+            # If the form is submitted and the email and password are correct,
+            # clear the form/container and display a success message
+            landing.empty()
+            st.success("Login successful")
+    elif (not st.session_state.submitted_login):
+          return st.warning("Please enter your credentials")
+    else:
+        st.error("Username/password is incorrect")
     return landing
 
 def home():
+    if 'submitted_logout' not in st.session_state:
+        st.session_state['submitted_logout'] = False
+    
+    st.session_state['submitted_login'] = False
+
+    patients_history = pd.read_csv("./test-data/patient_history_table.csv")
+
+    #list like [{column -> value}, … , {column -> value}]
+    patient_raw_dict = patients_history.to_dict(orient="records")
+    #dict like {column -> [values]}
+    patient_series_dict = patients_history.to_dict(orient="list")
+
+    #group by id
+    patient_dict = {}
+    for d in patient_raw_dict:
+        if d['id'] not in patient_dict:
+            patient_dict[d['id']] = [d]
+        else:
+            patient_dict[d['id']].append(d)
+
+
+    #helper functions
+    #def: this function converts name of dieseases into a string format using in the column names of the databse
+    #input: 'Diabetic Retinopathy', 'Age-related Macular Degeneration' or 'Glaucoma' only
+    #output: formatted disease names for use in querying db
+    def encode_disease(disease):
+        code = ''
+        if (disease == 'Diabetic Retinopathy'):
+            code = 'diabetic_retinopathy'
+        elif (disease == 'Age-related Macular Degeneration'):
+            code = 'ocular'
+        elif (disease == 'Glaucoma'):
+            code = 'glaucoma'
+        return code
+
+    #def: this function queries a specific attribute (column) of a patient
+    #input: dictionary holding the data in record format, id of patient, desired visit date of record, the name of the column/attribute
+    #output: single value int/str/float depending on the desired column
+    def query_patient_value(dict, id, visit_date, column_name):
+        record_list = dict[id]
+        record = {}
+        for e in record_list:
+            if e['visit_date'] == visit_date:
+                record = e
+        if record:
+            return record[column_name]
+        else:
+            return "NA"
+
+    #def: this function queries last diagnosed date for a patient under a particular disease context
+    #input: dictionary holding the data in record format, id of patient, desired visit date of record, disease ('d' for diabetic retinopathy, 'a' for age-related macular degen., 'g' for glaucoma)
+    #output: single value int/str/float depending on the desired column
+    def query_last_visit_date(curr_date, date_list):
+        sorted_dates = sorted(date_list)
+        if (sorted_dates.index(curr_date)==0):
+            return "NA"
+        else:
+            return sorted_dates[sorted_dates.index(curr_date)-1]
+
+    def get_cutoff_date(list_of_dates):
+        list_of_dates = sorted(list_of_dates, reverse=True)
+        if (len(list_of_dates)>10):
+            return list_of_dates[9]
+        else:
+            return list_of_dates[-1]
+    
+    #def: this function returns a list of linked values under a patient
+    #input: dictionary holding the data in record format, id of patient, [desired columns]
+    #output: array of array of values
+    def query_patient_multiple(dict, id, col_list):
+        record_list = dict[id]
+        result = []
+        for entry in record_list:
+            result.append([entry.get(col) for col in col_list])
+        return result
+
+    def query_stage(dict, id, visit_date, disease, laterality):
+        code = encode_disease(disease)
+        if (code in ['ocular', 'glaucoma']):
+            return "Unknown"
+        else:
+            stage_col = laterality + '_' + code + '_stage'
+            return query_patient_value(dict, id, visit_date, stage_col)
+
+    def query_risk(dict, id, visit_date, disease, laterality):
+        code = encode_disease(disease)
+        risk_col = laterality + '_' + code + '_prob'
+        return query_patient_value(dict, id, visit_date, risk_col)
+
+    def concat_tuples(x):
+        return str(x[0]) + ' - ' + x[1]
+    def submitted_logout():
+        st.session_state.submitted_logout = True
+    def logout():
+        ##BEGIN API CALL
+        # tz_string = datetime.datetime.now().astimezone().tzinfo
+        # tz_string = 'Asia/Singapore'
+        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/auth/logout"
+        # PARAMS = {'timezone':tz_string}
+        # HEADERS={"Content-Type": "application/json"}
+        HEADERS = {
+            "Authorization": "Bearer " + cookie_manager.get(cookie='access_token')
+        }
+        data = {
+            "refreshToken":cookie_manager.get(cookie='refresh_token')
+        }
+        try:
+            if (_DEBUG):   
+                st.write("Entered Try block")
+            # r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
+            r = requests.post(url=API_ENDPOINT, headers=HEADERS, json=data)
+            r.raise_for_status()
+
+        except requests.exceptions.HTTPError as err:
+            if (_DEBUG):
+                st.write("Entered Except block")
+            st.json(r.json)
+            st.error(err)
+        else:
+            if (_DEBUG):
+                st.write("Entered Else block")
+            cookie_manager.set(key='login_status', cookie='login_status', val=False)
+            st.session_state.submitted_logout = False
+
+            cookie_manager.delete(key='user_username', cookie='user_username')
+            cookie_manager.delete(key='access_token', cookie='access_token')
+            cookie_manager.delete(key='access_token_expiry_date', cookie='access_token_expiry_time')
+            cookie_manager.delete(key='refresh_token', cookie='refresh_token')
+            cookie_manager.delete(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time')
+
+            router.route('login')
+            # st.experimental_rerun()
+            return True
+
+    ##END API CALL
+
+    #demo variables
+    patient_ids = patient_series_dict['id']
+    patient_names = patient_series_dict['name']
+    #format id column as a string
+    disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
+    
     main = st.container()
     with main:
-        patients_history = pd.read_csv("./test-data/patient_history_table.csv")
-
-        #list like [{column -> value}, … , {column -> value}]
-        patient_raw_dict = patients_history.to_dict(orient="records")
-        #dict like {column -> [values]}
-        patient_series_dict = patients_history.to_dict(orient="list")
-
-        #group by id
-        patient_dict = {}
-        for d in patient_raw_dict:
-            if d['id'] not in patient_dict:
-                patient_dict[d['id']] = [d]
-            else:
-                patient_dict[d['id']].append(d)
-
-
-        #helper functions
-        #def: this function converts name of dieseases into a string format using in the column names of the databse
-        #input: 'Diabetic Retinopathy', 'Age-related Macular Degeneration' or 'Glaucoma' only
-        #output: formatted disease names for use in querying db
-        def encode_disease(disease):
-            code = ''
-            if (disease == 'Diabetic Retinopathy'):
-                code = 'diabetic_retinopathy'
-            elif (disease == 'Age-related Macular Degeneration'):
-                code = 'ocular'
-            elif (disease == 'Glaucoma'):
-                code = 'glaucoma'
-            return code
-
-        #def: this function queries a specific attribute (column) of a patient
-        #input: dictionary holding the data in record format, id of patient, desired visit date of record, the name of the column/attribute
-        #output: single value int/str/float depending on the desired column
-        def query_patient_value(dict, id, visit_date, column_name):
-            record_list = dict[id]
-            record = {}
-            for e in record_list:
-                if e['visit_date'] == visit_date:
-                    record = e
-            if record:
-                return record[column_name]
-            else:
-                return "NA"
-
-        #def: this function queries last diagnosed date for a patient under a particular disease context
-        #input: dictionary holding the data in record format, id of patient, desired visit date of record, disease ('d' for diabetic retinopathy, 'a' for age-related macular degen., 'g' for glaucoma)
-        #output: single value int/str/float depending on the desired column
-        def query_last_visit_date(curr_date, date_list):
-            sorted_dates = sorted(date_list)
-            if (sorted_dates.index(curr_date)==0):
-                return "NA"
-            else:
-                return sorted_dates[sorted_dates.index(curr_date)-1]
-
-        def get_cutoff_date(list_of_dates):
-            list_of_dates = sorted(list_of_dates, reverse=True)
-            if (len(list_of_dates)>10):
-                return list_of_dates[9]
-            else:
-                return list_of_dates[-1]
-        #def: this function returns a list of linked values under a patient
-        #input: dictionary holding the data in record format, id of patient, [desired columns]
-        #output: array of array of values
-        def query_patient_multiple(dict, id, col_list):
-            record_list = dict[id]
-            result = []
-            for entry in record_list:
-                result.append([entry.get(col) for col in col_list])
-            return result
-
-        def query_stage(dict, id, visit_date, disease, laterality):
-            code = encode_disease(disease)
-            if (code in ['ocular', 'glaucoma']):
-                return "Unknown"
-            else:
-                stage_col = laterality + '_' + code + '_stage'
-                return query_patient_value(dict, id, visit_date, stage_col)
-
-        def query_risk(dict, id, visit_date, disease, laterality):
-            code = encode_disease(disease)
-            risk_col = laterality + '_' + code + '_prob'
-            return query_patient_value(dict, id, visit_date, risk_col)
-
-        def concat_tuples(x):
-            return str(x[0]) + ' - ' + x[1]
-
-        
-        #demo variables
-        patient_ids = patient_series_dict['id']
-        patient_names = patient_series_dict['name']
-        #format id column as a string
-        disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
-
         st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
-        # st.sidebar.write(f'Welcome, *{cookie_manager.set"name"]}*')
-        # authenticator.logout('Logout', 'sidebar', key='logout_button')
+        st.sidebar.write(f'Welcome, *{cookie_manager.get(cookie="user_username")}*')
+        st.sidebar.button(label='Logout', on_click=submitted_logout, key='logout_button')
         logo, title = st.columns([0.08,0.92])
         with title:
             st.title('RetiMark Fundus Dashboard')
@@ -360,22 +422,34 @@ def home():
         )
 
         st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
+
+        if (st.session_state.submitted_logout):
+            logout()
+            if (_DEBUG):
+                st.write("Routing to login")
+            # if (cookie_manager.get(cookie="login_status") == False):
+                
+            #     router.route('login')
+            
     return main
 
 router = init_router()
 router.show_route_view()
 
-c1, c2, c3 = st.columns(3)
-with c1:
-    st.header("Current route")
-    current_route = router.get_url_route()
-    st.write(f"{current_route}")
-with c2:
-    st.header("Set route")
-    new_route = st.text_input("route")
-    if st.button("Route now!"):
-        router.route(new_route)
-with c3:
-    st.header("Session state")
-    st.write(st.session_state)
+#routing
+if (_DEBUG):
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.header("Current route")
+        current_route = router.get_url_route()
+        st.write(f"{current_route}")
+    with c2:
+        st.header("Set route")
+        new_route = st.text_input("route")
+        if st.button("Route now!"):
+            router.route(new_route)
+    with c3:
+        st.header("Session state")
+        st.write(st.session_state)
+
 
