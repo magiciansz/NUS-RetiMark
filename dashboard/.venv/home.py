@@ -15,7 +15,7 @@ st.set_page_config(
     layout="wide"
 )
 
-_DEBUG = True
+_DEBUG = False
 
 @st.cache_resource(hash_funcs={"_thread.RLock": lambda _: None})
 def init_router(): 
@@ -26,6 +26,7 @@ def get_manager():
     return stx.CookieManager()
 
 cookie_manager = get_manager()
+cookies = cookie_manager.get_all()
 
 if (_DEBUG):
     st.subheader("All Cookies:")
@@ -93,8 +94,14 @@ def login():
         except requests.exceptions.HTTPError as err:
             if (_DEBUG):
                 st.write("Entered Except block")
-            st.json(r.json)
-            st.error(err)
+                st.json(r.json)
+            error_code = r.status_code
+            if (error_code==400):
+                st.error("Please provide a valid username and password.")
+            elif (error_code==401):
+                st.error("Wrong username or password.")
+            else:
+                st.error("Oops, something went wrong, please contact your administrator: " + str(err))
         else:
             if (_DEBUG):
                 st.write("Entered Else block")
@@ -261,8 +268,13 @@ def home():
         except requests.exceptions.HTTPError as err:
             if (_DEBUG):
                 st.write("Entered Except block")
-            st.json(r.json)
-            st.error(err)
+            # st.json(r.json)
+            # error_code = r.status_code
+            # if (error_code=="400"):
+            #     st.error("Please provide a valid username and password.")
+            # elif (error_code=="401"):
+            #     st.error("Wrong username or password.")
+            st.error("Oops, something went wrong, please contact your administrator: " + str(err))
         else:
             if (_DEBUG):
                 st.write("Entered Else block")
@@ -433,8 +445,11 @@ def home():
             # if (cookie_manager.get(cookie="login_status") == False):
                 
             #     router.route('login')
-            
-    return main
+    if (cookie_manager.get(cookie='login_status')):   
+        return main
+    else:
+        router.route("login")
+        st.warning("You must log in first")
 
 router = init_router()
 router.show_route_view()
