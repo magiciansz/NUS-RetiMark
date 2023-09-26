@@ -60,6 +60,7 @@ function Login() {
                 sameSite: 'strict',
                 expires: new Date(refreshToken.expiry), // Convert expiry time to a Date object
             });
+            navigate("/")
 
             // kiv the httpOnly true below. it doesnt save it in cookies 
             // Cookies.set('refreshToken', refreshToken, {

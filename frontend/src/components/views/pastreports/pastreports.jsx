@@ -3,6 +3,8 @@ import {FaSearch} from "react-icons/fa"
 import Cookies from 'js-cookie';
 import PatientApi from '../../../apis/PatientApi';
 import { getAccessToken } from '../../auth/Auth'
+import { BrowserRouter as Router, Route, Link, Switch, useNavigate } from 'react-router-dom';
+
 import './pastreports.css';
 
 
@@ -15,6 +17,7 @@ const patients = [
 ]
 
 const PastReports = () => {
+    const navigate = useNavigate();
     const [selectedFile, setSelectedFile] = useState(null);
 	const [previewImage, setPreviewImage] = useState(null);
 	const [showReport, setShowReport] = useState(false);
@@ -72,22 +75,11 @@ const PastReports = () => {
     }, []);
 
     const handleSearch = async () => {
-        // console.log("finding tokens")
-        // const accessTokenData = Cookies.get('accessToken');
-        // console.log("access", accessTokenData)
-        // if (accessTokenData) {
-        //     const parsedAccessTokenData = JSON.parse(accessTokenData);
-        //     const accessToken = parsedAccessTokenData.token;
-        //     const accessTokenExpiry = parsedAccessTokenData.expires;
-        //     console.log("accessTokenExpiry",accessTokenExpiry )
-        //     await addPatient(accessToken)
-        // }        
         const accessToken = await getAccessToken();
         if (accessToken) {
-            // Use the valid access token to make API requests here
             console.log('Access token:', accessToken);
         } else {
-            // Handle the case when there's no valid access token (e.g., log out the user)
+            navigate("/login")
             console.log('No valid access token.');
         }
 
