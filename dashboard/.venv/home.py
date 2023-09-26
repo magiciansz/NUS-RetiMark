@@ -52,13 +52,16 @@ if (_DEBUG):
         if st.button("Delete"):
             cookie_manager.delete(cookie)
 
+
+
+
+
 def get_region_from_UTC_offset(val):
     regions = {"+08": "Asia/Singapore", "+09": "Asia/Tokyo"}
     return regions[val]
 
 # timezone = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
 
-# initialize session state variables
 
 
 def submitted():
@@ -436,6 +439,7 @@ def home():
 router = init_router()
 router.show_route_view()
 
+
 #routing
 if (_DEBUG):
     c1, c2, c3 = st.columns(3)
@@ -451,5 +455,6 @@ if (_DEBUG):
     with c3:
         st.header("Session state")
         st.write(st.session_state)
-
+if (st.session_state['stx_router_route'] =="/"):
+    router.route("login")
 
