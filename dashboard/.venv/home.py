@@ -97,9 +97,9 @@ def login():
                 st.json(r.json)
             error_code = r.status_code
             if (error_code==400):
-                st.error("Please provide a valid username and password.")
+                st.error("Please provide a valid username and password")
             elif (error_code==401):
-                st.error("Wrong username or password.")
+                st.error("Wrong username or password")
             else:
                 st.error("Oops, something went wrong, please contact your administrator: " + str(err))
         else:
