@@ -1,6 +1,7 @@
 import React, {
     useState, useEffect, useCallback, useRef, useNavigate 
   } from 'react';
+
 import './modal.css';
 import {FaSearch} from "react-icons/fa"
 const patients = [
@@ -19,8 +20,9 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
     const [patient, setPatient] = useState()
     const [leftEye, setLeftEye] = useState(null);
     const [rightEye, setRightEye] = useState(null);
-    const [navigateBack, setNavigateBack] = useState(false);
-    // const navigate = useNavigate();
+    const [errorMessageLeftEye, setErrorMessageLeftEye] = useState('');
+    const [errorMessageRightEye, setErrorMessageRightEye] = useState('');
+    
 
     if (!isOpen) return null;
     // Handle form submission
@@ -128,13 +130,54 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 
     const handleFileChange = (event, eye) => {
 		const file = event.target.files[0];
-		if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-            if (eye === 'left') {
-                setLeftEye(URL.createObjectURL(file));
-            } else {
-                setRightEye(URL.createObjectURL(file));
-            }
-		}
+        console.log("uploading file")
+        if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+            const img = new Image();
+            img.onload = function () {
+                const width = this.width;
+                const height = this.height;
+                
+                // Define your image resolution and dimensions requirements
+                const minWidth = 100; // Minimum width in pixels
+                const minHeight = 100; // Minimum height in pixels
+                const maxWidth = 800; // Maximum width in pixels
+                const maxHeight = 800; // Maximum height in pixels
+                const minDpi = 95; // Minimum DPI
+            
+                // Calculate DPI based on image dimensions
+                const dpi = Math.round((width / (width * 0.0254)));
+                console.log("dpi", dpi)
+                console.log("width, height", width, height)
+
+                if (
+                    width >= minWidth &&
+                    height >= minHeight &&
+                    width <= maxWidth &&
+                    height <= maxHeight
+                ) {
+                    if (eye === 'left') {
+                        setLeftEye(URL.createObjectURL(file));
+                        setErrorMessageLeftEye("")
+                    } else {
+                        setRightEye(URL.createObjectURL(file));
+                        setErrorMessageRightEye("")
+                    }
+                } else {
+                    // Image does not meet the requirements
+                    console.log("image doesnt fit size")
+                    event.target.value = '';
+                    if (eye === 'left') {
+                        setLeftEye(null)
+                        setErrorMessageLeftEye("Image of left eye doesn't follow the requirements. Please upload another image.")
+                    } else {
+                        setRightEye(null)
+                        setErrorMessageRightEye("Image of right eye doesn't follow the requirements. Please upload another image.") 
+                    }
+                    
+                }
+            };
+            img.src = URL.createObjectURL(file);
+        } 
 	};
 
     const isFormValid = () => {
@@ -261,6 +304,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 Image of left eye
                             </label>
                             <input type="file" accept=".jpg, .png" onChange={(e) => handleFileChange(e, 'left')} />
+                            {errorMessageLeftEye && <p className="error-message">{errorMessageLeftEye}</p>}
                             {leftEye && <img src={leftEye} className='preview' alt="Preview" />}
                     
                         </div>
@@ -270,6 +314,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 Image of right eye
                             </label>
                             <input type="file" accept=".jpg, .png" onChange={(e) => handleFileChange(e, 'right')} />
+                            {errorMessageRightEye && <p className="error-message">{errorMessageRightEye}</p>}
                             {rightEye && <img src={rightEye} className='preview' alt="Preview" />}
                         </div>
                     </div>

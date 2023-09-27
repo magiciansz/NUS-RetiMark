@@ -472,4 +472,3 @@ if (_DEBUG):
         st.write(st.session_state)
 if (st.session_state['stx_router_route'] =="/"):
     router.route("login")
-

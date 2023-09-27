@@ -1,5 +1,5 @@
 const { query, param, body } = require("express-validator");
-const { BadRequestError } = require("./responseCodes");
+const { BadRequestError } = require("../responseCodes");
 const moment = require("moment-timezone");
 
 const validateUploadImageParameters = [
@@ -53,6 +53,8 @@ const validatePatientID = [
     return BadRequestError(req, res, next);
   },
 ];
+
+// clear all stuff above after patient is done
 
 const validateLogin = [
   body("username")
