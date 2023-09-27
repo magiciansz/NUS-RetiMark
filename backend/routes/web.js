@@ -20,6 +20,10 @@ const defaultRoutes = [
     path: "/api/v1/user",
     route: userRoute,
   },
+  {
+    path: "/api/v1/patient-history",
+    route: PatientHistoryRoute,
+  },
 ];
 
 defaultRoutes.forEach((route) => {

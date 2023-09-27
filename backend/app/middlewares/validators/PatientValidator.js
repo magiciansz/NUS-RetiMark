@@ -1,4 +1,4 @@
-const { query, param, body } = require("express-validator");
+const { query, body } = require("express-validator");
 const { BadRequestError } = require("../responseCodes");
 const moment = require("moment-timezone");
 
