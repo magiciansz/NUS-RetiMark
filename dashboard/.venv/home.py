@@ -30,7 +30,7 @@ cookies = cookie_manager.get_all()
 
 if (_DEBUG):
     st.subheader("All Cookies:")
-    cookies = cookie_manager.get_all()
+    # cookies = cookie_manager.get_all()
     st.write(cookies)
     c1, c2, c3 = st.columns(3)
 
@@ -362,7 +362,7 @@ def home():
             with stage:
                 st.metric("Most Probable Stage", left_stage)
             with risk:
-                st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%')
+                st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%', delta_color="inverse")
         with right:
             st.subheader("Right Fundus")
             right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
@@ -373,7 +373,7 @@ def home():
             with stage:
                 st.metric("Most Probable Stage", right_stage)
             with risk:
-                st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(random.randint(-5,5))+'%')
+                st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(random.randint(-5,5))+'%', delta_color="inverse")
 
         st.divider()
         st.subheader("Risk Trend")
@@ -472,3 +472,5 @@ if (_DEBUG):
         st.write(st.session_state)
 if (st.session_state['stx_router_route'] =="/"):
     router.route("login")
+if (st.session_state['stx_router_route'] =="/login" and cookie_manager.get(cookie='login_status')):
+    router.route("home")
