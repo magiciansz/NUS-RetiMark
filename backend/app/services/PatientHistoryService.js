@@ -7,7 +7,7 @@ const getPatientHistory = async (timezone = "UTC") => {
   const patientHistory = await PatientHistory.findAll({
     order: [
       ["id", "ASC"],
-      ["version", "ASC"],
+      ["version", "DESC"],
     ],
   });
   return convertPatientHistoryFormat(patientHistory, timezone);
