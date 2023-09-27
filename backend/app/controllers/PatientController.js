@@ -1,5 +1,4 @@
 const catchAsync = require("../helpers/catchAsync");
-const PatientHistory = require("../models/PatientHistory");
 const httpStatus = require("http-status");
 
 const PatientService = require("../services/PatientService");

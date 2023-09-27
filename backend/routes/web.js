@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const patientRoute = require("./patient.route");
-const authRoute = require("./auth.route");
-const userRoute = require("./user.route");
+const patientRoute = require("./PatientRoute");
+const authRoute = require("./AuthRoute");
+const userRoute = require("./UserRoute");
+const PatientHistoryRoute = require("./PatientHistoryRoute");
 const ApiError = require("../app/middlewares/ApiError");
 const httpStatus = require("http-status");
 
