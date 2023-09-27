@@ -20,6 +20,8 @@ tags:
     description: User Management
   - name: Patient
     description: Patient APIs
+  - name: Patient History
+    description: Patient History APIs
 
 paths:
   /auth/login:
@@ -207,8 +209,117 @@ paths:
               schema:
                 $ref: "#/components/schemas/CreateDuplicatePatient"
 
+  /patient-history:
+    get:
+      tags:
+        - Patient History
+      summary: Get All Patient History
+      description: Get Patient History for all patients
+      parameters:
+        - name: timezone
+          in: query
+          description: timezone to return visit date of patients
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully Retrieved Patient History
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPatientHistoryResponse"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPatientHistoryBadRequest"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
+
 components:
   schemas:
+    GetPatientHistoryBadRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: '[{\"type\":\"field\",\"value\":\"Asia/Singapor\",\"msg\":\"timezone is not valid\",\"path\":\"timezone\",\"location\":\"query\"}]'
+        stack:
+          type: string
+          example: 'Error: [{\"type\":\"field\",\"value\":\"Asia/Singapor\",\"msg\":\"timezone is not valid\",\"path\":\"timezone\",\"location\":\"query\"}]'
+    GetPatientHistoryResponse:
+      type: object
+      properties:
+        1:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              version:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "Tan Jun Jie"
+              date_of_birth:
+                type: string
+                example: "1999-09-21"
+              age:
+                type: integer
+                example: 24
+              sex:
+                type: string
+                example: "M"
+              left_eye_image:
+                type: string
+                example: "tests3bucket.com"
+              right_eye_image:
+                type: string
+                example: "tests3bucket.com"
+              left_diabetic_retinography_stage:
+                type: integer
+                example: 1
+              left_diabetic_retinography_prob:
+                type: number
+                example: 0.56
+              right_diabetic_retinography_stage:
+                type: integer
+                example: 1
+              right_diabetic_retinography_prob:
+                type: number
+                example: 0.11
+              left_ocular_prob:
+                type: number
+                example: 0.11
+              right_ocular_prob:
+                type: number
+                example: 0.11
+              left_glaucoma_prob:
+                type: number
+                example: 0.11
+              right_glaucoma_prob:
+                type: number
+                example: 0.11
+              doctor_notes:
+                type: string
+                example: "This patient is healthy."
+              report_pdf:
+                type: string
+                example: "testreportlink.com"
+              visit_date:
+                type: string
+                example: "2023-09-23T18:14:45+08:00"
     UnauthorisedRequest:
       type: object
       properties:
