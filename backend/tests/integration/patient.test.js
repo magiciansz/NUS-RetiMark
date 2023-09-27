@@ -300,66 +300,6 @@ describe("Patient Routes", () => {
         .expect(httpStatus.BAD_REQUEST);
     });
 
-    test("should return 401 if access token is not attached", async () => {
-      await request(app)
-        .post("/api/v1/patient")
-        .query({ timezone: "Asia/Singapore" })
-        .attach(
-          "left_eye_image",
-          path.join(__dirname, "..", "files", "docker.jpeg")
-        )
-        .attach(
-          "right_eye_image",
-          path.join(__dirname, "..", "files", "react.png")
-        )
-        .attach(
-          "report_pdf",
-          path.join(
-            __dirname,
-            "..",
-            "files",
-            "BT4103 project proposal presentation guidelines.pdf"
-          )
-        )
-        .field(patient)
-        .expect(httpStatus.UNAUTHORIZED);
-    });
-
-    test("should return 401 if access token is not valid", async () => {
-      const expiry = moment().subtract(
-        process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
-        "minutes"
-      );
-      const newAccessToken = TokenService.generateToken(
-        user.id,
-        expiry,
-        tokenTypes.ACCESS
-      );
-      await request(app)
-        .post("/api/v1/patient")
-        .query({ timezone: "Asia/Singapore" })
-        .attach(
-          "left_eye_image",
-          path.join(__dirname, "..", "files", "docker.jpeg")
-        )
-        .attach(
-          "right_eye_image",
-          path.join(__dirname, "..", "files", "react.png")
-        )
-        .attach(
-          "report_pdf",
-          path.join(
-            __dirname,
-            "..",
-            "files",
-            "BT4103 project proposal presentation guidelines.pdf"
-          )
-        )
-        .field(patient)
-        .set("Authorization", `Bearer ${newAccessToken}`)
-        .expect(httpStatus.UNAUTHORIZED);
-    });
-
     test("should return 400 if date_of_birth is empty", async () => {
       delete patient["date_of_birth"];
       await request(app)
@@ -550,6 +490,98 @@ describe("Patient Routes", () => {
         )
         .attach(
           "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.BAD_REQUEST);
+      const res = await Patient.findOne({
+        where: { name: patient.name, date_of_birth: patient.date_of_birth },
+      });
+      expect(res).toBeNull();
+    });
+    test("should return 400 if left_eye_image is not a valid format, and insertion should be rolled back", async () => {
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "right_eye_image",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.BAD_REQUEST);
+      const res = await Patient.findOne({
+        where: { name: patient.name, date_of_birth: patient.date_of_birth },
+      });
+      expect(res).toBeNull();
+    });
+    test("should return 400 if right_eye_image is not a valid format, and insertion should be rolled back", async () => {
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.BAD_REQUEST);
+      const res = await Patient.findOne({
+        where: { name: patient.name, date_of_birth: patient.date_of_birth },
+      });
+      expect(res).toBeNull();
+    });
+    test("should return 400 if report_pdf is not a valid format, and insertion should be rolled back", async () => {
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "report_pdf",
           path.join(__dirname, "..", "files", "docker.jpeg")
         )
         .field(patient)
@@ -1001,6 +1033,65 @@ describe("Patient Routes", () => {
         .field(patient)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
+    });
+    test("should return 401 if access token is not attached", async () => {
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    test("should return 401 if access token is not valid", async () => {
+      const expiry = moment().subtract(
+        process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
+        "minutes"
+      );
+      const newAccessToken = TokenService.generateToken(
+        user.id,
+        expiry,
+        tokenTypes.ACCESS
+      );
+      await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${newAccessToken}`)
+        .expect(httpStatus.UNAUTHORIZED);
     });
   });
   describe("PATCH /api/v1/patient/:id", () => {

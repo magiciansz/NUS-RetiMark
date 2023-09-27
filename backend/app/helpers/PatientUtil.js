@@ -41,6 +41,24 @@ const uploadPatientFiles = async (patient, files) => {
   const left_eye_image = files["left_eye_image"][0];
   const right_eye_image = files["right_eye_image"][0];
   const report_pdf = files["report_pdf"][0];
+  if (!left_eye_image.mimetype.startsWith("image/")) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Your left_eye_image has to be in either jpg / png format."
+    );
+  }
+  if (!right_eye_image.mimetype.startsWith("image/")) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Your right_eye_image has to be in either jpg / png format."
+    );
+  }
+  if (report_pdf.mimetype !== "application/pdf") {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Your report_pdf has to be a pdf."
+    );
+  }
   const currentDate = getCurrentDateWithoutSpaces();
   // version committed is always +1 of the current version
   const version = patient.version + 1;
