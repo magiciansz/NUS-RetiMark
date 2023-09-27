@@ -59,7 +59,12 @@ const add = catchAsync(async (req, res) => {
 });
 
 const update = catchAsync(async (req, res) => {
-  const patient = await PatientService.updatePatient(req.params.id, req.body);
+  const patient = await PatientService.updatePatient(
+    req.params.id,
+    req.body,
+    req.files,
+    req.query.timezone
+  );
   res.status(httpStatus.OK).send({ patient });
 });
 

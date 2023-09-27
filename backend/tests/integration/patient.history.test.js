@@ -127,6 +127,90 @@ describe("Patient History Routes", () => {
         .expect(httpStatus.OK);
       expect(res.body[1][0].visit_date).toMatch("+00:00");
     });
+    test("Should return 200 and return history in ascending ID order", async () => {
+      patient.name = "Xi Gua";
+      await request(app)
+        .post("/api/v1/patient")
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.CREATED);
+      const res = await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(Object.keys(res.body)).toHaveLength(2);
+      expect(Object.keys(res.body)[0]).toBe("1");
+      expect(Object.keys(res.body)[1]).toBe("2");
+    });
+    test("Should return 200 and return history in descending version order for each ID", async () => {
+      patient.name = "Xi Gua";
+      const createdPatient = await request(app)
+        .post("/api/v1/patient")
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.CREATED);
+      await request(app)
+        .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "testimage1.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "testimage2.jpeg")
+        )
+        .attach(
+          "report_pdf",
+          path.join(__dirname, "..", "files", "testpdf.pdf")
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      const res = await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(Object.keys(res.body)).toHaveLength(2);
+      expect(Object.keys(res.body)[0]).toBe("1");
+      expect(Object.keys(res.body)[1]).toBe("2");
+      expect(res.body[2]).toHaveLength(2);
+      expect(res.body[2][0].version).toBe(2);
+      expect(res.body[2][1].version).toBe(1);
+    });
     test("Should return 400 if timezone is not valid", async () => {
       await request(app)
         .get("/api/v1/patient-history")
@@ -138,6 +222,22 @@ describe("Patient History Routes", () => {
       await request(app)
         .get("/api/v1/patient-history")
         .query({ timezone: "Asia/Singapore" })
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+    test("should return 401 if access token is not valid", async () => {
+      const expiry = moment().subtract(
+        process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
+        "minutes"
+      );
+      const newAccessToken = TokenService.generateToken(
+        user.id,
+        expiry,
+        tokenTypes.ACCESS
+      );
+      await request(app)
+        .get("/api/v1/patient-history")
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${newAccessToken}`)
         .expect(httpStatus.UNAUTHORIZED);
     });
   });
