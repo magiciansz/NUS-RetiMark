@@ -10,12 +10,23 @@ const {
 
 const {
   validateCreatePatient,
+  validateUpdatePatient,
 } = require("../app/middlewares/validators/PatientValidator");
 const auth = require("../app/middlewares/auth");
 router.get("/:id", validatePatientID, PatientController.index);
 
 // add validation once confirm fields to add
-router.patch("/:id", PatientController.update);
+router.patch(
+  "/:id",
+  upload.fields([
+    { name: "report_pdf" },
+    { name: "left_eye_image" },
+    { name: "right_eye_image" },
+  ]),
+  auth(),
+  validateUpdatePatient,
+  PatientController.update
+);
 
 router.post(
   "",

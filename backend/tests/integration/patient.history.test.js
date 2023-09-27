@@ -140,5 +140,21 @@ describe("Patient History Routes", () => {
         .query({ timezone: "Asia/Singapore" })
         .expect(httpStatus.UNAUTHORIZED);
     });
+    test("should return 401 if access token is not valid", async () => {
+      const expiry = moment().subtract(
+        process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
+        "minutes"
+      );
+      const newAccessToken = TokenService.generateToken(
+        user.id,
+        expiry,
+        tokenTypes.ACCESS
+      );
+      await request(app)
+        .get("/api/v1/patient-history")
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${newAccessToken}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
   });
 });

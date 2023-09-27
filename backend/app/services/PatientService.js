@@ -49,11 +49,10 @@ const addPatient = async (body, files, timezone = "UTC") => {
   return formatPatientOutput(patient, timezone);
 };
 
-const updatePatient = async (id, body) => {
+const updatePatient = async (id, body, files, timezone = "UTC") => {
   const patient = await getPatientByID(id);
+  const urls = await uploadPatientFiles(patient, files);
   await patient.update({
-    left_eye_image: body.left_eye_image,
-    right_eye_image: body.right_eye_image,
     left_diabetic_retinography_stage: body.left_diabetic_retinography_stage,
     left_diabetic_retinography_prob: body.left_diabetic_retinography_prob,
     right_diabetic_retinography_stage: body.right_diabetic_retinography_stage,
@@ -63,9 +62,10 @@ const updatePatient = async (id, body) => {
     left_glaucoma_prob: body.left_glaucoma_prob,
     right_glaucoma_prob: body.right_glaucoma_prob,
     doctor_notes: body.doctor_notes,
-    report_link: body.report_link,
+    ...urls,
   });
-  return patient;
+  await patient.reload();
+  return formatPatientOutput(patient, timezone);
 };
 
 const deletePatient = async (id) => {
