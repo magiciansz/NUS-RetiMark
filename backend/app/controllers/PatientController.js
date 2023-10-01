@@ -73,9 +73,15 @@ const remove = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const search = catchAsync(async (req, res) => {
+  const results = await PatientService.searchPatient(req.query.query);
+  res.status(httpStatus.OK).send(results);
+});
+
 module.exports = {
   index,
   update,
   add,
   remove,
+  search,
 };

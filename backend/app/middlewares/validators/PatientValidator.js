@@ -190,4 +190,7 @@ const validateUpdatePatient = [
   },
 ];
 
-module.exports = { validateCreatePatient, validateUpdatePatient };
+module.exports = {
+  validateCreatePatient,
+  validateUpdatePatient,
+};

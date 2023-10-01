@@ -6,6 +6,7 @@ const {
   formatPatientOutput,
 } = require("../helpers/PatientUtil");
 const sequelize = require("../../config/database");
+const { Sequelize } = require("sequelize");
 
 const getPatientByID = async (id) => {
   const patient = await Patient.findOne({ where: { id: id } });
@@ -73,9 +74,22 @@ const deletePatient = async (id) => {
   await patient.destroy();
 };
 
+const searchPatient = async (query) => {
+  const patients = await Patient.findAll({
+    where: Sequelize.literal("MATCH (name) AGAINST (:name)"),
+    replacements: {
+      name: query,
+    },
+    order: [["id", "ASC"]],
+    attributes: ["id", "name", "date_of_birth"],
+  });
+  return { patients, totalCount: patients.length };
+};
+
 module.exports = {
   getPatientByID,
   addPatient,
   updatePatient,
   deletePatient,
+  searchPatient,
 };

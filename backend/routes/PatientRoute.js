@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const upload = multer(); // Remove storage configuration
+const auth = require("../app/middlewares/auth");
 
 const PatientController = require("../app/controllers/PatientController");
 const {
@@ -12,10 +13,10 @@ const {
   validateCreatePatient,
   validateUpdatePatient,
 } = require("../app/middlewares/validators/PatientValidator");
-const auth = require("../app/middlewares/auth");
+router.get("/search", auth(), PatientController.search);
+
 router.get("/:id", validatePatientID, PatientController.index);
 
-// add validation once confirm fields to add
 router.patch(
   "/:id",
   upload.fields([
