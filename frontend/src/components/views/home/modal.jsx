@@ -7,7 +7,7 @@ import {FaSearch} from "react-icons/fa"
 
 import PatientApi from '../../../apis/PatientApi';
 import Cookies from 'js-cookie';
-
+import { getAccessToken } from '../../auth/Auth';
 
 const patients = [
 	{name: 'jiahui', age: '22', gender: 'F'},
@@ -27,6 +27,8 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
     const [rightEye, setRightEye] = useState(null);
     const [errorMessageLeftEye, setErrorMessageLeftEye] = useState('');
     const [errorMessageRightEye, setErrorMessageRightEye] = useState('');
+    const [accessToken, setAccessToken] = useState(null);
+    const [loading, setLoading] = useState(true);
     
 
     if (!isOpen) return null;
@@ -65,13 +67,23 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         clearInputs()
         // navigate.push('/reports');
 
-        const accessTokenData = Cookies.get('accessToken');
-        console.log("access", accessTokenData)
+        const accessTokenData = await getAccessToken();
+        console.log("access on modal", accessTokenData)
         if (accessTokenData) {
-            const parsedAccessTokenData = JSON.parse(accessTokenData);
-            const accessToken = parsedAccessTokenData.token;
-            const accessTokenExpiry = parsedAccessTokenData.expires;
-            await addPatient(accessToken, rightEye)
+            console.log("right eye:", rightEye)
+            const rightEyeBlob = await fetch(rightEye).then((response) => response.blob());
+
+            const requestParams = {
+                accessToken: accessTokenData,
+                rightEye: rightEyeBlob,
+            };
+            try {
+                const res = await PatientApi.createPatient(requestParams);
+                console.log("res from create", res)
+            } catch (err) {
+                console.log("failed to call endpoint")
+                console.error(err);
+            }
         }
 
 
@@ -79,6 +91,12 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 
         onClose();
     };
+
+    async function fetchAccessToken() {
+        const token = await getAccessToken();
+        setAccessToken(token);
+        setLoading(false);
+    }
 
     const clearInputs = () => {
         setUserEdit({gender: ''})
