@@ -15,6 +15,7 @@ function Login() {
         username: '',
         password: '',
     });
+    const [errorMessage, setErrorMessage] = useState('')
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -28,6 +29,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         // Print username and password to the console
+        setErrorMessage('')
         console.log('Username:', formData.username);
         console.log('Password:', formData.password);
         setFormData({username: '', password: ''})
@@ -71,6 +73,7 @@ function Login() {
             // });
         } catch (err) {
             console.error(err);
+            setErrorMessage('Wrong username or password')
         }
     }, [formData]);
 
@@ -101,23 +104,24 @@ function Login() {
                     <div className="form-group">
                         <label className='label-title'>Password</label>
                         <div>
-                        <input
-                            className="text-input"
-                            type={showPassword ? 'text' : 'password'}
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            required
-                        />
-                        <span className="password-toggle" onClick={handleTogglePassword}>
-                            {showPassword ? 'Hide' : 'Show'} Password
-                        </span>
+                            <input
+                                className="text-input"
+                                type={showPassword ? 'text' : 'password'}
+                                id="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <span className="password-toggle" onClick={handleTogglePassword}>
+                                {showPassword ? 'Hide' : 'Show'} Password
+                            </span>
                         </div>
                     </div>
                     <button className='login-btn' type="submit">Login</button>
                 </form>
             </div>
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
         </div>
     );
 }
