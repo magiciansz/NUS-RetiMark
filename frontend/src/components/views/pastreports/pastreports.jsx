@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {FaSearch} from "react-icons/fa"
+import Cookies from 'js-cookie';
+import PatientApi from '../../../apis/PatientApi';
+import { getAccessToken } from '../../auth/Auth'
+import { BrowserRouter as Router, Route, Link, Switch, useNavigate } from 'react-router-dom';
 
 import './pastreports.css';
 
@@ -13,6 +17,7 @@ const patients = [
 ]
 
 const PastReports = () => {
+    const navigate = useNavigate();
     const [selectedFile, setSelectedFile] = useState(null);
 	const [previewImage, setPreviewImage] = useState(null);
 	const [showReport, setShowReport] = useState(false);
@@ -55,7 +60,29 @@ const PastReports = () => {
         setFilteredPatients([])     
 	};
 
-    const handleSearch = () => {
+    const addPatient = useCallback(async (accessToken, rightEye) => {
+        console.log("running adding patient func")
+        const requestParams = {
+            accessToken,
+            rightEye
+        };
+        try {
+            const res = await PatientApi.createPatient(requestParams);
+            console.log("res from create", res)
+        } catch (err) {
+            console.error(err);
+        }
+    }, []);
+
+    const handleSearch = async () => {
+        const accessToken = await getAccessToken();
+        if (accessToken) {
+            console.log('Access token:', accessToken);
+        } else {
+            navigate("/login")
+            console.log('No valid access token.');
+        }
+
         setPatient(input);
     };
     return (

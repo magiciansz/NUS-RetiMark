@@ -3,6 +3,7 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    flex-direction: column;
 }
 
 .login-container {
@@ -71,4 +72,14 @@ input {
 
 .label-title {
     font-weight: 500;
+}
+.error-message {
+    background-color: #ebc8c4;
+    color: #ab373c;
+    border-radius: 4px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border: #cbb5b3;
+    width: 70%;
 }
