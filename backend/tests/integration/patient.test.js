@@ -1916,7 +1916,7 @@ describe("Patient Routes", () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
   });
-  describe("PATCH /api/v1/patient/search", () => {
+  describe("GET /api/v1/patient/search", () => {
     let createdPatient;
     beforeEach(async () => {
       createdPatient = await request(app)
@@ -1955,6 +1955,7 @@ describe("Patient Routes", () => {
         id: createdPatient.body.patient.id,
         name: createdPatient.body.patient.name,
         date_of_birth: createdPatient.body.patient.date_of_birth,
+        sex: createdPatient.body.patient.sex,
       });
     });
     test("should return 200 and search results for partial match", async () => {
@@ -1970,6 +1971,7 @@ describe("Patient Routes", () => {
         id: createdPatient.body.patient.id,
         name: createdPatient.body.patient.name,
         date_of_birth: createdPatient.body.patient.date_of_birth,
+        sex: createdPatient.body.patient.sex,
       });
     });
     test("should return 200 and search results for incomplete word match", async () => {
@@ -1985,6 +1987,7 @@ describe("Patient Routes", () => {
         id: createdPatient.body.patient.id,
         name: createdPatient.body.patient.name,
         date_of_birth: createdPatient.body.patient.date_of_birth,
+        sex: createdPatient.body.patient.sex,
       });
     });
     test("should return 200 and search results even if there are no matches", async () => {
@@ -2033,11 +2036,13 @@ describe("Patient Routes", () => {
         id: createdPatient.body.patient.id,
         name: createdPatient.body.patient.name,
         date_of_birth: createdPatient.body.patient.date_of_birth,
+        sex: createdPatient.body.patient.sex,
       });
       expect(res.body.patients[1]).toMatchObject({
         id: secondPatient.body.patient.id,
         name: secondPatient.body.patient.name,
         date_of_birth: secondPatient.body.patient.date_of_birth,
+        sex: secondPatient.body.patient.sex,
       });
       expect(res.body.patients[0].id).toBe(1);
       expect(res.body.patients[1].id).toBe(2);

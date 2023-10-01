@@ -83,7 +83,7 @@ const searchPatient = async (query) => {
       },
     },
     order: [["id", "ASC"]],
-    attributes: ["id", "name", "date_of_birth"],
+    attributes: ["id", "name", "date_of_birth", "sex"],
   });
   return { patients, totalCount: patients.length };
 };

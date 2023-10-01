@@ -335,6 +335,9 @@ components:
               date_of_birth:
                 type: string
                 example: "1999-09-21"
+              sex:
+                type: string
+                example: "M"
         totalCount:
           type: integer
           example: 1
