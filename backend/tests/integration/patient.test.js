@@ -1916,4 +1916,156 @@ describe("Patient Routes", () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
   });
+  describe("PATCH /api/v1/patient/search", () => {
+    let createdPatient;
+    beforeEach(async () => {
+      createdPatient = await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`);
+    });
+    test("should return 200 and search results for full match", async () => {
+      const res = await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .query({ query: name })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(1);
+      expect(res.body.patients).toHaveLength(1);
+      expect(res.body.patients[0]).toMatchObject({
+        id: createdPatient.body.patient.id,
+        name: createdPatient.body.patient.name,
+        date_of_birth: createdPatient.body.patient.date_of_birth,
+      });
+    });
+    test("should return 200 and search results for partial match", async () => {
+      const res = await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .query({ query: "Tan Jun" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(1);
+      expect(res.body.patients).toHaveLength(1);
+      expect(res.body.patients[0]).toMatchObject({
+        id: createdPatient.body.patient.id,
+        name: createdPatient.body.patient.name,
+        date_of_birth: createdPatient.body.patient.date_of_birth,
+      });
+    });
+    test("should return 200 and search results for incomplete word match", async () => {
+      const res = await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .query({ query: "Ta" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(1);
+      expect(res.body.patients).toHaveLength(1);
+      expect(res.body.patients[0]).toMatchObject({
+        id: createdPatient.body.patient.id,
+        name: createdPatient.body.patient.name,
+        date_of_birth: createdPatient.body.patient.date_of_birth,
+      });
+    });
+    test("should return 200 and search results even if there are no matches", async () => {
+      const res = await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ query: "Ng" })
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(0);
+      expect(res.body.patients).toHaveLength(0);
+    });
+    test("should return 200 and search results in ascending ID, if there's more than 1 result returned", async () => {
+      patient.name = "Ng Jun Jie";
+      const secondPatient = await request(app)
+        .post("/api/v1/patient")
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`);
+      const res = await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ query: "Jun Jie" })
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(2);
+      expect(res.body.patients).toHaveLength(2);
+      expect(res.body.patients[0]).toMatchObject({
+        id: createdPatient.body.patient.id,
+        name: createdPatient.body.patient.name,
+        date_of_birth: createdPatient.body.patient.date_of_birth,
+      });
+      expect(res.body.patients[1]).toMatchObject({
+        id: secondPatient.body.patient.id,
+        name: secondPatient.body.patient.name,
+        date_of_birth: secondPatient.body.patient.date_of_birth,
+      });
+      expect(res.body.patients[0].id).toBe(1);
+      expect(res.body.patients[1].id).toBe(2);
+    });
+    test("should return 401 if access token is not attached", async () => {
+      await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .query({ query: "Tan" })
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    test("should return 401 if access token is not valid", async () => {
+      const expiry = moment().subtract(
+        process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
+        "minutes"
+      );
+      const newAccessToken = TokenService.generateToken(
+        user.id,
+        expiry,
+        tokenTypes.ACCESS
+      );
+      await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${newAccessToken}`)
+        .query({ query: "Tan" })
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+  });
 });

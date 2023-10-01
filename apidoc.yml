@@ -257,6 +257,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PatientNotFound"
+  /search:
+    get:
+      tags:
+        - Patient
+      summary: Search for a Patient
+      description: Search patient given query
+      parameters:
+        - name: query
+          in: query
+          description: search query for name of patient
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchPatientResult"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
 
   /patient-history:
     get:
@@ -292,6 +318,26 @@ paths:
 
 components:
   schemas:
+    SearchPatientResult:
+      type: object
+      properties:
+        patients:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "Tan Jun Jie"
+              date_of_birth:
+                type: string
+                example: "1999-09-21"
+        totalCount:
+          type: integer
+          example: 1
     PatientNotFound:
       type: object
       properties:
