@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Modal from './doc-notes';
+import { getAccessToken } from '../../auth/Auth';
+import PatientApi from '../../../apis/PatientApi';
+
 
 import './report.css';
 
@@ -16,18 +19,17 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
         if (reportRef.current) {
             html2canvas(reportRef.current).then((canvas) => {
                 const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]); // Use canvas dimensions for PDF
                 
                 // Add the captured image to the PDF
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
                 
                 // Save the PDF
                 pdf.save('report.pdf');
             });
         }
     };
+      
 
     const handleOpenModal = () => {
 		setOpenModal(true);
@@ -41,14 +43,56 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
 		setDocNotes(value);
 	};
 
-    const handleSave = () => {
-	    onSave();
-	};
+    // const handleSave = () => {
+	//     onSave();
+	// };
+
+    const handleSave = async () => {
+        // First, capture the content of the report as a PDF
+        console.log("saving report")
+        if (reportRef.current) {
+          html2canvas(reportRef.current).then(async (canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]); // Use canvas dimensions for PDF
+            
+            // Add the captured image to the PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      
+            // Convert the PDF to a blob
+            const pdfBlob = pdf.output('blob');
+      
+            // Now, send the PDF blob to the API
+            const accessTokenData = await getAccessToken();
+            if (accessTokenData) {
+                console.log("theres access token", accessTokenData)
+                const rightEyeBlob = await fetch(rightEyeImage).then((response) => response.blob());
+                const leftEyeBlob = await fetch(leftEyeImage).then((response) => response.blob());
+
+                const requestParams = {
+                    accessToken: accessTokenData,
+                    leftEye: leftEyeBlob,
+                    rightEye: rightEyeBlob,
+                    report: pdfBlob,
+                };
+                try {
+                    const res = await PatientApi.createPatient(requestParams);
+                    console.log("res from create in save report", res)
+                } catch (err) {
+                    console.log("failed to call endpoint")
+                    console.error(err);
+                }
+              
+            }
+          });
+        }
+        onSave();
+    };
+      
 
     return (
         <div>
-            <div className='report-container' id='report-container' ref={reportRef}>
-                <div className='report'>
+            <div className='report-container' id='report-container' >
+                <div className='report' ref={reportRef}> 
                     <div className='report-header'>
                         REPORT
                     </div>
