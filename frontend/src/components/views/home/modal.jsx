@@ -67,24 +67,24 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         clearInputs()
         // navigate.push('/reports');
 
-        const accessTokenData = await getAccessToken();
-        console.log("access on modal", accessTokenData)
-        if (accessTokenData) {
-            console.log("right eye:", rightEye)
-            const rightEyeBlob = await fetch(rightEye).then((response) => response.blob());
+        // const accessTokenData = await getAccessToken();
+        // console.log("access on modal", accessTokenData)
+        // if (accessTokenData) {
+        //     console.log("right eye:", rightEye)
+        //     const rightEyeBlob = await fetch(rightEye).then((response) => response.blob());
 
-            const requestParams = {
-                accessToken: accessTokenData,
-                rightEye: rightEyeBlob,
-            };
-            try {
-                const res = await PatientApi.createPatient(requestParams);
-                console.log("res from create", res)
-            } catch (err) {
-                console.log("failed to call endpoint")
-                console.error(err);
-            }
-        }
+        //     const requestParams = {
+        //         accessToken: accessTokenData,
+        //         rightEye: rightEyeBlob,
+        //     };
+        //     try {
+        //         const res = await PatientApi.createPatient(requestParams);
+        //         console.log("res from create", res)
+        //     } catch (err) {
+        //         console.log("failed to call endpoint")
+        //         console.error(err);
+        //     }
+        // }
 
 
 
