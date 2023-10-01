@@ -1972,6 +1972,21 @@ describe("Patient Routes", () => {
         date_of_birth: createdPatient.body.patient.date_of_birth,
       });
     });
+    test("should return 200 and search results for incomplete word match", async () => {
+      const res = await request(app)
+        .get("/api/v1/patient/search")
+        .query({ timezone: "Asia/Singapore" })
+        .query({ query: "Ta" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(1);
+      expect(res.body.patients).toHaveLength(1);
+      expect(res.body.patients[0]).toMatchObject({
+        id: createdPatient.body.patient.id,
+        name: createdPatient.body.patient.name,
+        date_of_birth: createdPatient.body.patient.date_of_birth,
+      });
+    });
     test("should return 200 and search results even if there are no matches", async () => {
       const res = await request(app)
         .get("/api/v1/patient/search")

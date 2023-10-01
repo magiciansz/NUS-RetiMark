@@ -7,6 +7,7 @@ const {
 } = require("../helpers/PatientUtil");
 const sequelize = require("../../config/database");
 const { Sequelize } = require("sequelize");
+const Op = Sequelize.Op;
 
 const getPatientByID = async (id) => {
   const patient = await Patient.findOne({ where: { id: id } });
@@ -76,9 +77,10 @@ const deletePatient = async (id) => {
 
 const searchPatient = async (query) => {
   const patients = await Patient.findAll({
-    where: Sequelize.literal("MATCH (name) AGAINST (:name)"),
-    replacements: {
-      name: query,
+    where: {
+      name: {
+        [Op.like]: `%${query}%`,
+      },
     },
     order: [["id", "ASC"]],
     attributes: ["id", "name", "date_of_birth"],

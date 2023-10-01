@@ -197,7 +197,6 @@ const Patient = sequelize.define(
         await afterCreateUpdateHandler(record, transaction);
       },
     },
-    indexes: [{ type: "FULLTEXT", name: "text_idx", fields: ["name"] }],
   }
 );
 
