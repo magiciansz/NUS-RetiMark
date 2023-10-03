@@ -11,7 +11,7 @@ import PatientApi from '../../../apis/PatientApi';
 
 import './report.css';
 
-function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
+function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
     const reportRef = useRef(null);
     const [docNotes, setDocNotes] = useState('')
     const [openModal, setOpenModal] = useState(false)
@@ -85,13 +85,27 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
                     report: pdfBlob,
                 };
                 try {
-                    const res = await PatientApi.createPatient(requestParams);
+                    if (!newPatient) {
+                        // Include the 'id' field conditionally
+                        requestParams.id = 42;
+                    }
+                    console.log("request params", requestParams)
+                    // const res = await PatientApi.createPatient(requestParams);
+                    const res = newPatient
+                        ? await PatientApi.createPatient(requestParams)
+                        : await PatientApi.updatePatient(requestParams);
                     console.log("res from create in save report", res)
                     setModalMessage("Successfully saved!")
                 } catch (err) {
                     console.log("failed to call endpoint")
-                    setModalMessage(err.response.data.status === 401 ? "Save failed. Authentication failed." : 
-                    "Save failed. A patient with the same name and DOB has been created before.");
+                    // last error is 404 error from update patient 
+                    if (err.response.data.status === 401) {
+                        setModalMessage("Save failed. Authentication failed.");
+                    } else if (err.response.data.status === 409) {
+                        setModalMessage("Save failed. A patient with the same name and DOB has been created before.");
+                    } else {
+                        setModalMessage("Patient not found. Failed to update the patient's record.");
+                    }
                     console.log(err.response.data.message)
                     console.error(err);
                 }
@@ -101,6 +115,8 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
         }
         // onSave();
     };
+
+    console.log("is new pateint?", newPatient)
       
 
     return (

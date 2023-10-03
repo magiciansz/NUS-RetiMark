@@ -17,7 +17,7 @@ const patients = [
 	{name: 'josiah', age: '24', gender: 'M'},
 ]
 
-function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage}) {
+function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage, newPatient}) {
     const [userEdit, setUserEdit] = useState({gender: ''});
     const [mode, setMode] = useState('');
     const [input, setInput] = useState("");
@@ -89,6 +89,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
     const switchToCreateMode = () => {
         setMode('create');
         setUserEdit({ gender: '' }); // Clear the userEdit data when switching modes
+        newPatient(true)
     };
     
     const switchToSearchMode = () => {
@@ -96,6 +97,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         setInput(''); // Clear the search text when switching modes
         setPatient()
         setFilteredPatients([])
+        newPatient(false)
     };
 
     const switchToNextMode = () => {
