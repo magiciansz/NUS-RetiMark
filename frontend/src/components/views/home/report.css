@@ -34,15 +34,39 @@
         margin: 10px;
     }
 }
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    .pdf-button {
+        display: flex;
+        justify-content: center;
+        margin: 4px;
+        .button {
+            border: 1px #e76d27 solid;
+            background-color: #e76d27;
+            color: white;
+            width: 200px;
+            padding: 10px;
+            border-radius: 8px; 
+            cursor: pointer;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #e76d27c7;
+        }
+    }
+}
 .download-button {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 8px;
+    margin-bottom: 20px;
     .button {
         border: 1px #e76d27 solid;
         background-color: #e76d27;
         color: white;
-        width: 400px;
+        width: 430px;
         padding: 10px;
         border-radius: 8px; 
         cursor: pointer;

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Modal from './doc-notes';
+import SaveModal from './save-modal';
 import { getAccessToken } from '../../auth/Auth';
 import PatientApi from '../../../apis/PatientApi';
 
@@ -14,6 +15,8 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
     const reportRef = useRef(null);
     const [docNotes, setDocNotes] = useState('')
     const [openModal, setOpenModal] = useState(false)
+    const [openSaveModal, setOpenSaveModal] = useState(false)
+    const [modalMessage, setModalMessage] = useState('Saving In Progress')
 
     const handleDownloadPDF = () => {
         if (reportRef.current) {
@@ -43,6 +46,11 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
 		setDocNotes(value);
 	};
 
+    const closeSaveModal = () => {
+		setOpenSaveModal(false);
+        onSave();
+	};
+
     // const handleSave = () => {
 	//     onSave();
 	// };
@@ -50,6 +58,8 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
     const handleSave = async () => {
         // First, capture the content of the report as a PDF
         console.log("saving report")
+        setModalMessage('Saving In Progress')
+        setOpenSaveModal(true)
         if (reportRef.current) {
           html2canvas(reportRef.current).then(async (canvas) => {
             const imgData = canvas.toDataURL('image/png');
@@ -77,15 +87,19 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
                 try {
                     const res = await PatientApi.createPatient(requestParams);
                     console.log("res from create in save report", res)
+                    setModalMessage("Successfully saved!")
                 } catch (err) {
                     console.log("failed to call endpoint")
+                    setModalMessage(err.response.data.status === 401 ? "Save failed. Authentication failed." : 
+                    "Save failed. A patient with the same name and DOB has been created before.");
+                    console.log(err.response.data.message)
                     console.error(err);
                 }
               
             }
           });
         }
-        onSave();
+        // onSave();
     };
       
 
@@ -144,16 +158,19 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
                 </div>
             </div>
             <Modal isOpen={openModal} onClose={closeModal} doctorNotes={doctorNotes}/>
-            <div className='download-button'>
-                <div className='button' onClick={handleOpenModal}>
-                    Add Doctor's Note
+            <div className='button-container'>
+                <div className='pdf-button'>
+                    <div className='button' onClick={handleOpenModal}>
+                        Add Doctor's Note
+                    </div>
+                </div>
+                <div className='pdf-button'>
+                    <div className='button' onClick={handleDownloadPDF}>
+                        Download PDF
+                    </div>
                 </div>
             </div>
-            <div className='download-button'>
-                <div className='button' onClick={handleDownloadPDF}>
-                    Download PDF
-                </div>
-            </div>
+            <SaveModal isOpen={openSaveModal} onClose={closeSaveModal} modalMessage={modalMessage}/>
             <div className='download-button'>
                 <div className='button' onClick={handleSave}>
                     Save

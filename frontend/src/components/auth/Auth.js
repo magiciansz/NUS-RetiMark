@@ -3,6 +3,10 @@ import AuthApi from '../../apis/AuthApi';
 
 // Function to check if the access token has expired
 const isAccessTokenExpired = (accessTokenExpiry) => {
+  console.log('access token expiry checking', accessTokenExpiry);
+  if (!accessTokenExpiry) {
+    return false;
+  }
   const expiryDate = new Date(accessTokenExpiry);
   const currentTime = new Date();
 
