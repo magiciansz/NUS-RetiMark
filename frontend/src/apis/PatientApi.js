@@ -3,7 +3,7 @@ import axios from 'axios';
 async function createPatient({ accessToken, leftEye, rightEye, report }) {
   console.log('in api', rightEye);
   const formData = new FormData();
-  formData.append('name', 'jiahui6');
+  formData.append('name', 'jiahui7');
   formData.append('date_of_birth', '2001-02-02');
   formData.append('sex', 'F');
   formData.append('left_diabetic_retinography_stage', 0);
