@@ -26,6 +26,7 @@ function SaveModal({ isOpen, onClose, modalMessage}) {
         'Successfully saved!': Check,
         'Save failed. Authentication failed.': Cross, 
         'Save failed. A patient with the same name and DOB has been created before.': Cross,
+        "Patient not found. Failed to update the patient's record.": Cross, 
     }
 
     return (

@@ -3,7 +3,7 @@ import axios from 'axios';
 async function createPatient({ accessToken, leftEye, rightEye, report }) {
   console.log('in api', rightEye);
   const formData = new FormData();
-  formData.append('name', 'jiahui7');
+  formData.append('name', 'jiahui9');
   formData.append('date_of_birth', '2001-02-02');
   formData.append('sex', 'F');
   formData.append('left_diabetic_retinography_stage', 0);
@@ -18,7 +18,7 @@ async function createPatient({ accessToken, leftEye, rightEye, report }) {
   formData.append('right_eye_image', rightEye);
   formData.append('left_eye_image', leftEye);
   formData.append('report_pdf', report);
-  console.log('form data');
+  console.log('form data for create patient');
   formData.forEach((value, key) => {
     console.log('Field:', key, 'Value:', value);
   });
@@ -33,6 +33,36 @@ async function createPatient({ accessToken, leftEye, rightEye, report }) {
   );
 }
 
+async function updatePatient({ accessToken, id, leftEye, rightEye, report }) {
+  const formData = new FormData();
+  formData.append('left_diabetic_retinography_stage', 0);
+  formData.append('right_diabetic_retinography_stage', 0);
+  formData.append('left_diabetic_retinography_prob', 0);
+  formData.append('right_diabetic_retinography_prob', 0);
+  formData.append('left_ocular_prob', 0);
+  formData.append('right_ocular_prob', 0);
+  formData.append('left_glaucoma_prob', 0);
+  formData.append('right_glaucoma_prob', 0);
+  formData.append('doctor_notes', 'hi');
+  formData.append('right_eye_image', rightEye);
+  formData.append('left_eye_image', leftEye);
+  formData.append('report_pdf', report);
+  console.log('form data for update patient');
+  formData.forEach((value, key) => {
+    console.log('Field:', key, 'Value:', value);
+  });
+
+  return axios.patch(
+    `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient/${id}?timezone=Asia/Singapore`,
+    formData,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      'Content-Type': 'multipart/form-data',
+    }
+  );
+}
+
 export default {
   createPatient,
+  updatePatient,
 };
