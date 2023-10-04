@@ -11,6 +11,7 @@ import { getAccessToken } from '../../auth/Auth';
 
 const patients = [
 	{name: 'jiahui', age: '22', gender: 'F'},
+    {name: 'tanjiahui', age: '22', gender: 'F'},
 	{name: 'xianghan', age: '24', gender: 'M'},
 	{name: 'jiajun', age: '24', gender: 'M'},
 	{name: 'glenn', age: '24', gender: 'M'},
@@ -109,15 +110,17 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
             const { name, gender, dateOfBirth } = userEdit;
             
             // Calculate age based on date of birth
-            const dob = new Date(dateOfBirth);
-            const today = new Date();
-            const age = today.getFullYear() - dob.getFullYear();
+            // const dob = new Date(dateOfBirth);
+            // const today = new Date();
+            // const age = today.getFullYear() - dob.getFullYear();
         
-            setPatient({
-              name,
-              gender,
-              age,
-            })
+            // setPatient({
+            //   name,
+            //   gender,
+            //   age,
+            // })
+
+            setPatient(userEdit)
         }
         setMode('next');
     };
@@ -256,12 +259,12 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                             <select
                                 className="text-input"
                                 onChange={(e) => { setUserEdit({ ...userEdit, gender: e.target.value }); }}
-                                value={userEdit?.gender?.toLowerCase()}
+                                value={userEdit?.gender}
                                 required
                             >
                                 <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
                             </select>
                         </div>
                         <div>

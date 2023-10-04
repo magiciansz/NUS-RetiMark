@@ -1,11 +1,17 @@
 import axios from 'axios';
 
-async function createPatient({ accessToken, leftEye, rightEye, report }) {
-  console.log('in api', rightEye);
+async function createPatient({
+  accessToken,
+  patient,
+  leftEye,
+  rightEye,
+  docNotes,
+  report,
+}) {
   const formData = new FormData();
-  formData.append('name', 'jiahui9');
-  formData.append('date_of_birth', '2001-02-02');
-  formData.append('sex', 'F');
+  formData.append('name', patient.name);
+  formData.append('date_of_birth', patient.dateOfBirth);
+  formData.append('sex', patient.gender);
   formData.append('left_diabetic_retinography_stage', 0);
   formData.append('right_diabetic_retinography_stage', 0);
   formData.append('left_diabetic_retinography_prob', 0);
@@ -14,7 +20,7 @@ async function createPatient({ accessToken, leftEye, rightEye, report }) {
   formData.append('right_ocular_prob', 0);
   formData.append('left_glaucoma_prob', 0);
   formData.append('right_glaucoma_prob', 0);
-  formData.append('doctor_notes', 'hi');
+  formData.append('doctor_notes', docNotes);
   formData.append('right_eye_image', rightEye);
   formData.append('left_eye_image', leftEye);
   formData.append('report_pdf', report);
