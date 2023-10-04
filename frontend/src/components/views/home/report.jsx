@@ -83,6 +83,8 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
                     leftEye: leftEyeBlob,
                     rightEye: rightEyeBlob,
                     report: pdfBlob,
+                    patient, 
+                    docNotes,
                 };
                 try {
                     if (!newPatient) {
@@ -116,7 +118,7 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
         // onSave();
     };
 
-    console.log("is new pateint?", newPatient)
+    console.log("patient detials", patient)
       
 
     return (
