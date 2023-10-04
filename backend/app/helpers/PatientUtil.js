@@ -100,11 +100,12 @@ const getBaseURLForS3 = async (key) => {
     Key: key,
   });
   const parts = url.split("/");
-  const s3BaseURL = parts.slice(0, 3).join("/");
+  const s3BaseURL = parts.slice(0, 4).join("/");
   return s3BaseURL;
 };
 
 module.exports = {
   formatPatientOutputTimezone,
   uploadPatientFiles,
+  getBaseURLForS3,
 };
