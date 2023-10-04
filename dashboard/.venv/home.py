@@ -94,7 +94,7 @@ def login():
         except requests.exceptions.HTTPError as err:
             if (_DEBUG):
                 st.write("Entered Except block")
-                st.json(r.json)
+                st.json(r.json())
             error_code = r.status_code
             if (error_code==400):
                 st.error("Please provide a valid username and password")
