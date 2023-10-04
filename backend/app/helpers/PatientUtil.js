@@ -13,7 +13,7 @@ const {
  * @param {string} timezone
  * @returns {Object}
  */
-const formatPatientOutput = (patient, timezone) => {
+const formatPatientOutputTimezone = (patient, timezone) => {
   const formattedPatient = patient.toJSON();
   formattedPatient.visit_date = formatDateTime(
     moment(formattedPatient.visit_date),
@@ -105,6 +105,6 @@ const getBaseURLForS3 = async (key) => {
 };
 
 module.exports = {
-  formatPatientOutput,
+  formatPatientOutputTimezone,
   uploadPatientFiles,
 };

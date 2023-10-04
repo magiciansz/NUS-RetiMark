@@ -8,11 +8,13 @@ const moment = require("moment-timezone");
 const TokenService = require("../../app/services/TokenService");
 const { tokenTypes } = require("../../config/tokens");
 const path = require("path");
+const { formatDateTime } = require("../../app/helpers/DateUtil");
 
 setUpTestDB();
 
 describe("Patient History Routes", () => {
   let patient;
+  let createdPatient;
   let name = "Tan Jun Jie";
   let date_of_birth = "1999-05-08";
   let sex = "M";
@@ -55,7 +57,7 @@ describe("Patient History Routes", () => {
       expires,
       tokenTypes.ACCESS
     );
-    await request(app)
+    createdPatient = await request(app)
       .post("/api/v1/patient")
       .attach(
         "left_eye_image",
@@ -239,6 +241,138 @@ describe("Patient History Routes", () => {
         .query({ timezone: "Asia/Singapore" })
         .set("Authorization", `Bearer ${newAccessToken}`)
         .expect(httpStatus.UNAUTHORIZED);
+    });
+  });
+  describe("GET /api/v1/patient-history/:id/reports", () => {
+    test("should return 200 and a report, in specified timezone", async () => {
+      const res = await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      const visitDate = formatDateTime(
+        moment(createdPatient.body.patient.visit_date),
+        "Asia/Singapore"
+      );
+      expect(res.body.totalCount).toBe(1);
+      expect(res.body.reports).toHaveLength(1);
+      expect(res.body.reports[0]).toMatchObject({
+        version: createdPatient.body.patient.version,
+        doctor_notes: createdPatient.body.patient.doctor_notes,
+        report_link: createdPatient.body.patient.report_link,
+        visit_date: visitDate,
+      });
+      expect(res.body.reports[0].visit_date).toMatch("+08:00");
+    });
+    test("should return 200 and a report, in UTC if no timezone is given", async () => {
+      const res = await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(1);
+      expect(res.body.reports).toHaveLength(1);
+      expect(res.body.reports[0]).toMatchObject({
+        version: createdPatient.body.patient.version,
+        doctor_notes: createdPatient.body.patient.doctor_notes,
+        report_link: createdPatient.body.patient.report_link,
+        visit_date: createdPatient.body.patient.visit_date,
+      });
+      expect(res.body.reports[0].visit_date).toMatch("+00:00");
+    });
+    test("should return 200 and 2 reports after a PATCH action, sorted by descending time", async () => {
+      const updatedPatient = await request(app)
+        .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "testimage1.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "testimage2.jpeg")
+        )
+        .attach(
+          "report_pdf",
+          path.join(__dirname, "..", "files", "testpdf.pdf")
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      const visitDate = formatDateTime(
+        moment(createdPatient.body.patient.visit_date),
+        "Asia/Singapore"
+      );
+      const res = await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(2);
+      expect(res.body.reports).toHaveLength(2);
+      expect(res.body.reports[0].version).toBeGreaterThan(
+        res.body.reports[1].version
+      );
+      expect(res.body.reports[1]).toMatchObject({
+        version: createdPatient.body.patient.version,
+        doctor_notes: createdPatient.body.patient.doctor_notes,
+        report_link: createdPatient.body.patient.report_link,
+        visit_date: visitDate,
+      });
+      expect(res.body.reports[0]).toMatchObject({
+        version: updatedPatient.body.patient.version,
+        doctor_notes: updatedPatient.body.patient.doctor_notes,
+        report_link: updatedPatient.body.patient.report_link,
+        visit_date: updatedPatient.body.patient.visit_date,
+      });
+    });
+    test("should return 400 if timezone is not valid", async () => {
+      await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Wakanda" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("should return 401 if access token is not attached", async () => {
+      await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Singapore" })
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    test("should return 401 if access token is not valid", async () => {
+      const expiry = moment().subtract(
+        process.env.TOKEN_ACCESS_EXPIRATION_MINUTES,
+        "minutes"
+      );
+      const newAccessToken = TokenService.generateToken(
+        user.id,
+        expiry,
+        tokenTypes.ACCESS
+      );
+      await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${newAccessToken}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+    test("should return 404 if user isn't found", async () => {
+      await request(app)
+        .get(`/api/v1/patient-history/100/reports`)
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.NOT_FOUND);
     });
   });
 });

@@ -47,13 +47,6 @@ const validateGetImageParameters = [
   },
 ];
 
-const validatePatientID = [
-  param("id").not().isEmpty().withMessage("id cannot be empty."),
-  (req, res, next) => {
-    return BadRequestError(req, res, next);
-  },
-];
-
 // clear all stuff above after patient is done
 
 const validateLogin = [
@@ -224,7 +217,6 @@ const validateUserId = [
 module.exports = {
   validateUploadImageParameters,
   validateGetImageParameters,
-  validatePatientID,
   validateLogin,
   validateUserDetails,
   validateUserId,

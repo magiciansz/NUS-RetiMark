@@ -3,7 +3,7 @@ const ApiError = require("../middlewares/ApiError");
 const httpStatus = require("http-status");
 const {
   uploadPatientFiles,
-  formatPatientOutput,
+  formatPatientOutputTimezone,
 } = require("../helpers/PatientUtil");
 const sequelize = require("../../config/database");
 const { Sequelize } = require("sequelize");
@@ -48,7 +48,7 @@ const addPatient = async (body, files, timezone = "UTC") => {
     await patient.update(urls, { transaction: transaction });
   });
   await patient.reload();
-  return formatPatientOutput(patient, timezone);
+  return formatPatientOutputTimezone(patient, timezone);
 };
 
 const updatePatient = async (id, body, files, timezone = "UTC") => {
@@ -67,7 +67,7 @@ const updatePatient = async (id, body, files, timezone = "UTC") => {
     ...urls,
   });
   await patient.reload();
-  return formatPatientOutput(patient, timezone);
+  return formatPatientOutputTimezone(patient, timezone);
 };
 
 const deletePatient = async (id) => {
