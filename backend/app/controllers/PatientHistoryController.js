@@ -9,6 +9,15 @@ const index = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send(patientHistory);
 });
 
+const getPatientReports = catchAsync(async (req, res) => {
+  const patientReports = await PatientHistoryService.getPatientReports(
+    req.params.id,
+    req.query.timezone
+  );
+  res.status(httpStatus.OK).send(patientReports);
+});
+
 module.exports = {
   index,
+  getPatientReports,
 };

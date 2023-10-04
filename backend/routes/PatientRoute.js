@@ -5,17 +5,12 @@ const upload = multer(); // Remove storage configuration
 const auth = require("../app/middlewares/auth");
 
 const PatientController = require("../app/controllers/PatientController");
-const {
-  validatePatientID,
-} = require("../app/middlewares/validators/UserValidator");
 
 const {
   validateCreatePatient,
   validateUpdatePatient,
 } = require("../app/middlewares/validators/PatientValidator");
 router.get("/search", auth(), PatientController.search);
-
-router.get("/:id", validatePatientID, PatientController.index);
 
 router.patch(
   "/:id",
