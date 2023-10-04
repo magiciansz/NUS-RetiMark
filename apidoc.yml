@@ -257,7 +257,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PatientNotFound"
-  /search:
+  /patient/search:
     get:
       tags:
         - Patient
@@ -315,9 +315,80 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnauthorisedRequest"
+  /patient-history/{id}/reports:
+    get:
+      tags:
+        - Patient History
+      summary: Get All Reports for a Patient
+      description: Get reports for a patient, in descending version number
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: ID of patient to get reports
+        - name: timezone
+          in: query
+          description: timezone to return visit date of patients
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully Retrieved Reports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientHistoryReportResult"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPatientHistoryBadRequest"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotFound"
 
 components:
   schemas:
+    PatientHistoryReportResult:
+      type: object
+      properties:
+        reports:
+          type: array
+          items:
+            type: object
+            properties:
+              version:
+                type: integer
+              doctor_notes:
+                type: string
+              report_link:
+                type: string
+              visit_date:
+                type: string
+          example:
+            - version: 2
+              doctor_notes: "This patient is healthy."
+              report_link: "testreportlink.com"
+              visit_date: "2023-10-04T14:36:34+08:00"
+            - version: 1
+              doctor_notes: "This patient is unhealthy"
+              report_link: "testreportlink.com"
+              visit_date: "2023-10-03T14:36:34+08:00"
+        totalCount:
+          type: integer
+          example: 2
     SearchPatientResult:
       type: object
       properties:
@@ -422,7 +493,7 @@ components:
             doctor_notes:
               type: string
               example: "This patient is healthy."
-            report_pdf:
+            report_link:
               type: string
               example: "testreportlink.com"
             visit_date:
@@ -639,7 +710,7 @@ components:
             doctor_notes:
               type: string
               example: "This patient is healthy."
-            report_pdf:
+            report_link:
               type: string
               example: "testreportlink.com"
             visit_date:
