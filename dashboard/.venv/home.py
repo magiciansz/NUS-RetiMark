@@ -1,6 +1,8 @@
 import altair as alt
+from copy import deepcopy
 import datetime
 import extra_streamlit_components as stx
+import json
 import numpy as np
 import pandas as pd
 import random
@@ -30,7 +32,7 @@ cookies = cookie_manager.get_all()
 
 if (_DEBUG):
     st.subheader("All Cookies:")
-    cookies = cookie_manager.get_all()
+    # cookies = cookie_manager.get_all()
     st.write(cookies)
     c1, c2, c3 = st.columns(3)
 
@@ -94,7 +96,7 @@ def login():
         except requests.exceptions.HTTPError as err:
             if (_DEBUG):
                 st.write("Entered Except block")
-                st.json(r.json)
+                st.json(r.json())
             error_code = r.status_code
             if (error_code==400):
                 st.error("Please provide a valid username and password")
@@ -157,21 +159,33 @@ def home():
     
     st.session_state['submitted_login'] = False
 
-    patients_history = pd.read_csv("./test-data/patient_history_table.csv")
+    # patients_history = pd.read_csv("./test-data/patient_history_table.csv")
+    def get_patient_history():
+        ##BEGIN API CALL
+        # tz_string = datetime.datetime.now().astimezone().tzinfo
+        # tz_string = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
+        # cookie_manager.set(key='time_zone', cookie='time_zone', val=tz_string)
+        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history"
+        PARAMS = {'timezone':cookie_manager.get(cookie="time_zone")}
+        HEADERS = {
+            "Authorization": "Bearer " + cookie_manager.get(cookie="access_token")
+        }
+        try:
+            if (_DEBUG):   
+                st.write("Entered Try block")
+            r = requests.get(url=API_ENDPOINT, params=PARAMS, headers=HEADERS)
+            # r = requests.post(url=API_ENDPOINT, json=data)
+            r.raise_for_status()
 
-    #list like [{column -> value}, … , {column -> value}]
-    patient_raw_dict = patients_history.to_dict(orient="records")
-    #dict like {column -> [values]}
-    patient_series_dict = patients_history.to_dict(orient="list")
-
-    #group by id
-    patient_dict = {}
-    for d in patient_raw_dict:
-        if d['id'] not in patient_dict:
-            patient_dict[d['id']] = [d]
+        except requests.exceptions.HTTPError as err:
+            print("Oops, something went wrong, please contact your administrator: " + str(err))
         else:
-            patient_dict[d['id']].append(d)
-
+            if (_DEBUG):
+                st.write("Entered Else block")
+            res_json = r.json()
+            
+            return res_json
+            ##END API CALL
 
     #helper functions
     #def: this function converts name of dieseases into a string format using in the column names of the databse
@@ -280,22 +294,29 @@ def home():
                 st.write("Entered Else block")
             cookie_manager.set(key='login_status', cookie='login_status', val=False)
             st.session_state.submitted_logout = False
-
+            router.route('login')
             cookie_manager.delete(key='user_username', cookie='user_username')
             cookie_manager.delete(key='access_token', cookie='access_token')
             cookie_manager.delete(key='access_token_expiry_date', cookie='access_token_expiry_time')
             cookie_manager.delete(key='refresh_token', cookie='refresh_token')
             cookie_manager.delete(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time')
 
-            router.route('login')
+            
             # st.experimental_rerun()
             return True
-
+    
     ##END API CALL
-
+    
+    patients_history = get_patient_history()
+    patient_raw_dict = deepcopy(patients_history)
+    #group by id
+    patient_dict = patients_history
     #demo variables
-    patient_ids = patient_series_dict['id']
-    patient_names = patient_series_dict['name']
+    for key in patient_raw_dict.keys():
+        patient_raw_dict[key] = patient_raw_dict[key][0]["name"]
+    patient_w_id_options_raw = []
+    for key,value in patient_raw_dict.items():
+        patient_w_id_options_raw.append((key,value))
     #format id column as a string
     disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
     
@@ -319,7 +340,7 @@ def home():
         with st.expander(label="Search and Filter", expanded=True):
             filter1, filter2, filter3 = st.columns(3)
             with filter1:
-                patient_w_id_options = list(set(zip(patient_ids, patient_names)))
+                patient_w_id_options = patient_w_id_options_raw
                 patient_w_id_options.sort()
                 selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient')
                 selected_patient_id = selected_patient_id_selectbox[0]
@@ -362,7 +383,7 @@ def home():
             with stage:
                 st.metric("Most Probable Stage", left_stage)
             with risk:
-                st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%')
+                st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%', delta_color="inverse")
         with right:
             st.subheader("Right Fundus")
             right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
@@ -373,7 +394,7 @@ def home():
             with stage:
                 st.metric("Most Probable Stage", right_stage)
             with risk:
-                st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(random.randint(-5,5))+'%')
+                st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(random.randint(-5,5))+'%', delta_color="inverse")
 
         st.divider()
         st.subheader("Risk Trend")
@@ -472,3 +493,5 @@ if (_DEBUG):
         st.write(st.session_state)
 if (st.session_state['stx_router_route'] =="/"):
     router.route("login")
+if (st.session_state['stx_router_route'] =="/login" and cookie_manager.get(cookie='login_status')):
+    router.route("home")
