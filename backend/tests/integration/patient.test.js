@@ -18,10 +18,10 @@ describe("Patient Routes", () => {
   let name = "Tan Jun Jie";
   let date_of_birth = "1999-05-08";
   let sex = "M";
-  let left_diabetic_retinography_stage = 1;
-  let left_diabetic_retinography_prob = 0.56;
-  let right_diabetic_retinography_stage = 2;
-  let right_diabetic_retinography_prob = 0.11;
+  let left_diabetic_retinopathy_stage = 1;
+  let left_diabetic_retinopathy_prob = 0.56;
+  let right_diabetic_retinopathy_stage = 2;
+  let right_diabetic_retinopathy_prob = 0.11;
   let left_ocular_prob = 0.25;
   let right_ocular_prob = 0.05;
   let left_glaucoma_prob = 0.36;
@@ -34,10 +34,10 @@ describe("Patient Routes", () => {
       name: name,
       date_of_birth: date_of_birth,
       sex: sex,
-      left_diabetic_retinography_stage: left_diabetic_retinography_stage,
-      left_diabetic_retinography_prob: left_diabetic_retinography_prob,
-      right_diabetic_retinography_stage: right_diabetic_retinography_stage,
-      right_diabetic_retinography_prob: right_diabetic_retinography_prob,
+      left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
+      left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
+      right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
+      right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
       left_ocular_prob: left_ocular_prob,
       right_ocular_prob: right_ocular_prob,
       left_glaucoma_prob: left_glaucoma_prob,
@@ -90,10 +90,10 @@ describe("Patient Routes", () => {
         age: Math.abs(ageDate.getUTCFullYear() - 1970),
         left_eye_image: res.body.patient.left_eye_image,
         right_eye_image: res.body.patient.right_eye_image,
-        left_diabetic_retinography_stage: left_diabetic_retinography_stage,
-        left_diabetic_retinography_prob: left_diabetic_retinography_prob,
-        right_diabetic_retinography_stage: right_diabetic_retinography_stage,
-        right_diabetic_retinography_prob: right_diabetic_retinography_prob,
+        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
+        left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
+        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
+        right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
         left_glaucoma_prob: left_glaucoma_prob,
@@ -171,10 +171,10 @@ describe("Patient Routes", () => {
         age: Math.abs(ageDate.getUTCFullYear() - 1970),
         left_eye_image: res.body.patient.left_eye_image,
         right_eye_image: res.body.patient.right_eye_image,
-        left_diabetic_retinography_stage: left_diabetic_retinography_stage,
-        left_diabetic_retinography_prob: left_diabetic_retinography_prob,
-        right_diabetic_retinography_stage: right_diabetic_retinography_stage,
-        right_diabetic_retinography_prob: right_diabetic_retinography_prob,
+        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
+        left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
+        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
+        right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
         left_glaucoma_prob: left_glaucoma_prob,
@@ -592,8 +592,8 @@ describe("Patient Routes", () => {
       });
       expect(res).toBeNull();
     });
-    test("should return 400 if left_diabetic_retinography_stage is empty", async () => {
-      delete patient["left_diabetic_retinography_stage"];
+    test("should return 400 if left_diabetic_retinopathy_stage is empty", async () => {
+      delete patient["left_diabetic_retinopathy_stage"];
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -618,8 +618,8 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if left_diabetic_retinography_stage is not a valid value between 0 and 4", async () => {
-      patient.left_diabetic_retinography_stage = 5;
+    test("should return 400 if left_diabetic_retinopathy_stage is not a valid value between 0 and 4", async () => {
+      patient.left_diabetic_retinopathy_stage = 5;
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -644,8 +644,8 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if left_diabetic_retinography_prob is empty", async () => {
-      delete patient["left_diabetic_retinography_prob"];
+    test("should return 400 if left_diabetic_retinopathy_prob is empty", async () => {
+      delete patient["left_diabetic_retinopathy_prob"];
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -670,8 +670,8 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if left_diabetic_retinography_prob is not a valid value between 0 and 1", async () => {
-      patient.left_diabetic_retinography_prob = 1.5;
+    test("should return 400 if left_diabetic_retinopathy_prob is not a valid value between 0 and 1", async () => {
+      patient.left_diabetic_retinopathy_prob = 1.5;
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -696,8 +696,8 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if right_diabetic_retinography_stage is empty", async () => {
-      delete patient["right_diabetic_retinography_stage"];
+    test("should return 400 if right_diabetic_retinopathy_stage is empty", async () => {
+      delete patient["right_diabetic_retinopathy_stage"];
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -722,8 +722,8 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if right_diabetic_retinography_stage is not a valid value between 0 and 4", async () => {
-      patient.right_diabetic_retinography_stage = 5;
+    test("should return 400 if right_diabetic_retinopathy_stage is not a valid value between 0 and 4", async () => {
+      patient.right_diabetic_retinopathy_stage = 5;
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -748,8 +748,8 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if right_diabetic_retinography_prob is empty", async () => {
-      delete patient["right_diabetic_retinography_prob"];
+    test("should return 400 if right_diabetic_retinopathy_prob is empty", async () => {
+      delete patient["right_diabetic_retinopathy_prob"];
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -774,8 +774,8 @@ describe("Patient Routes", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
-    test("should return 400 if right_diabetic_retinography_prob is not a valid value between 0 and 1", async () => {
-      patient.right_diabetic_retinography_prob = 1.5;
+    test("should return 400 if right_diabetic_retinopathy_prob is not a valid value between 0 and 1", async () => {
+      patient.right_diabetic_retinopathy_prob = 1.5;
       await request(app)
         .post("/api/v1/patient")
         .query({ timezone: "Asia/Singapore" })
@@ -1147,10 +1147,10 @@ describe("Patient Routes", () => {
         age: Math.abs(ageDate.getUTCFullYear() - 1970),
         left_eye_image: res.body.patient.left_eye_image,
         right_eye_image: res.body.patient.right_eye_image,
-        left_diabetic_retinography_stage: left_diabetic_retinography_stage,
-        left_diabetic_retinography_prob: left_diabetic_retinography_prob,
-        right_diabetic_retinography_stage: right_diabetic_retinography_stage,
-        right_diabetic_retinography_prob: right_diabetic_retinography_prob,
+        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
+        left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
+        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
+        right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
         left_glaucoma_prob: left_glaucoma_prob,
@@ -1197,10 +1197,10 @@ describe("Patient Routes", () => {
         age: Math.abs(ageDate.getUTCFullYear() - 1970),
         left_eye_image: res.body.patient.left_eye_image,
         right_eye_image: res.body.patient.right_eye_image,
-        left_diabetic_retinography_stage: left_diabetic_retinography_stage,
-        left_diabetic_retinography_prob: left_diabetic_retinography_prob,
-        right_diabetic_retinography_stage: right_diabetic_retinography_stage,
-        right_diabetic_retinography_prob: right_diabetic_retinography_prob,
+        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
+        left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
+        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
+        right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
         left_glaucoma_prob: left_glaucoma_prob,
@@ -1329,8 +1329,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if left_diabetic_retinography_stage is empty", async () => {
-      delete patient["left_diabetic_retinography_stage"];
+    test("should return 400 if left_diabetic_retinopathy_stage is empty", async () => {
+      delete patient["left_diabetic_retinopathy_stage"];
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })
@@ -1360,8 +1360,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if left_diabetic_retinography_stage is not a valid value between 0 and 4", async () => {
-      patient.left_diabetic_retinography_stage = 5;
+    test("should return 400 if left_diabetic_retinopathy_stage is not a valid value between 0 and 4", async () => {
+      patient.left_diabetic_retinopathy_stage = 5;
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })
@@ -1391,8 +1391,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if left_diabetic_retinography_prob is empty", async () => {
-      delete patient["left_diabetic_retinography_prob"];
+    test("should return 400 if left_diabetic_retinopathy_prob is empty", async () => {
+      delete patient["left_diabetic_retinopathy_prob"];
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })
@@ -1422,8 +1422,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if left_diabetic_retinography_prob is not a valid value between 0 and 1", async () => {
-      patient.left_diabetic_retinography_prob = 1.5;
+    test("should return 400 if left_diabetic_retinopathy_prob is not a valid value between 0 and 1", async () => {
+      patient.left_diabetic_retinopathy_prob = 1.5;
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })
@@ -1453,8 +1453,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if right_diabetic_retinography_stage is empty", async () => {
-      delete patient["right_diabetic_retinography_stage"];
+    test("should return 400 if right_diabetic_retinopathy_stage is empty", async () => {
+      delete patient["right_diabetic_retinopathy_stage"];
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })
@@ -1484,8 +1484,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if right_diabetic_retinography_stage is not a valid value between 0 and 4", async () => {
-      patient.right_diabetic_retinography_stage = 5;
+    test("should return 400 if right_diabetic_retinopathy_stage is not a valid value between 0 and 4", async () => {
+      patient.right_diabetic_retinopathy_stage = 5;
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })
@@ -1515,8 +1515,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if right_diabetic_retinography_prob is empty", async () => {
-      delete patient["right_diabetic_retinography_prob"];
+    test("should return 400 if right_diabetic_retinopathy_prob is empty", async () => {
+      delete patient["right_diabetic_retinopathy_prob"];
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })
@@ -1546,8 +1546,8 @@ describe("Patient Routes", () => {
       });
       expect(historyRecords).toHaveLength(1);
     });
-    test("should return 400 if right_diabetic_retinography_prob is not a valid value between 0 and 1", async () => {
-      patient.right_diabetic_retinography_prob = 1.5;
+    test("should return 400 if right_diabetic_retinopathy_prob is not a valid value between 0 and 1", async () => {
+      patient.right_diabetic_retinopathy_prob = 1.5;
       await request(app)
         .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
         .query({ timezone: "Asia/Singapore" })

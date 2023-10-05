@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 async function createPatient({
   accessToken,
@@ -9,24 +9,24 @@ async function createPatient({
   report,
 }) {
   const formData = new FormData();
-  formData.append('name', patient.name);
-  formData.append('date_of_birth', patient.dateOfBirth);
-  formData.append('sex', patient.gender);
-  formData.append('left_diabetic_retinography_stage', 0);
-  formData.append('right_diabetic_retinography_stage', 0);
-  formData.append('left_diabetic_retinography_prob', 0);
-  formData.append('right_diabetic_retinography_prob', 0);
-  formData.append('left_ocular_prob', 0);
-  formData.append('right_ocular_prob', 0);
-  formData.append('left_glaucoma_prob', 0);
-  formData.append('right_glaucoma_prob', 0);
-  formData.append('doctor_notes', docNotes);
-  formData.append('right_eye_image', rightEye);
-  formData.append('left_eye_image', leftEye);
-  formData.append('report_pdf', report);
-  console.log('form data for create patient');
+  formData.append("name", patient.name);
+  formData.append("date_of_birth", patient.dateOfBirth);
+  formData.append("sex", patient.gender);
+  formData.append("left_diabetic_retinopathy_stage", 0);
+  formData.append("right_diabetic_retinopathy_stage", 0);
+  formData.append("left_diabetic_retinopathy_prob", 0);
+  formData.append("right_diabetic_retinopathy_prob", 0);
+  formData.append("left_ocular_prob", 0);
+  formData.append("right_ocular_prob", 0);
+  formData.append("left_glaucoma_prob", 0);
+  formData.append("right_glaucoma_prob", 0);
+  formData.append("doctor_notes", docNotes);
+  formData.append("right_eye_image", rightEye);
+  formData.append("left_eye_image", leftEye);
+  formData.append("report_pdf", report);
+  console.log("form data for create patient");
   formData.forEach((value, key) => {
-    console.log('Field:', key, 'Value:', value);
+    console.log("Field:", key, "Value:", value);
   });
 
   return axios.post(
@@ -34,28 +34,28 @@ async function createPatient({
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     }
   );
 }
 
 async function updatePatient({ accessToken, id, leftEye, rightEye, report }) {
   const formData = new FormData();
-  formData.append('left_diabetic_retinography_stage', 0);
-  formData.append('right_diabetic_retinography_stage', 0);
-  formData.append('left_diabetic_retinography_prob', 0);
-  formData.append('right_diabetic_retinography_prob', 0);
-  formData.append('left_ocular_prob', 0);
-  formData.append('right_ocular_prob', 0);
-  formData.append('left_glaucoma_prob', 0);
-  formData.append('right_glaucoma_prob', 0);
-  formData.append('doctor_notes', 'hi');
-  formData.append('right_eye_image', rightEye);
-  formData.append('left_eye_image', leftEye);
-  formData.append('report_pdf', report);
-  console.log('form data for update patient');
+  formData.append("left_diabetic_retinopathy_stage", 0);
+  formData.append("right_diabetic_retinopathy_stage", 0);
+  formData.append("left_diabetic_retinopathy_prob", 0);
+  formData.append("right_diabetic_retinopathy_prob", 0);
+  formData.append("left_ocular_prob", 0);
+  formData.append("right_ocular_prob", 0);
+  formData.append("left_glaucoma_prob", 0);
+  formData.append("right_glaucoma_prob", 0);
+  formData.append("doctor_notes", "hi");
+  formData.append("right_eye_image", rightEye);
+  formData.append("left_eye_image", leftEye);
+  formData.append("report_pdf", report);
+  console.log("form data for update patient");
   formData.forEach((value, key) => {
-    console.log('Field:', key, 'Value:', value);
+    console.log("Field:", key, "Value:", value);
   });
 
   return axios.patch(
@@ -63,7 +63,7 @@ async function updatePatient({ accessToken, id, leftEye, rightEye, report }) {
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     }
   );
 }

@@ -33,16 +33,16 @@ const PatientHistory = sequelize.define(
     right_eye_image: {
       type: DataTypes.STRING,
     },
-    left_diabetic_retinography_stage: {
+    left_diabetic_retinopathy_stage: {
       type: DataTypes.TINYINT,
     },
-    left_diabetic_retinography_prob: {
+    left_diabetic_retinopathy_prob: {
       type: DataTypes.FLOAT,
     },
-    right_diabetic_retinography_stage: {
+    right_diabetic_retinopathy_stage: {
       type: DataTypes.TINYINT,
     },
-    right_diabetic_retinography_prob: {
+    right_diabetic_retinopathy_prob: {
       type: DataTypes.FLOAT,
     },
     left_ocular_prob: {

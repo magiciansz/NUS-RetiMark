@@ -18,10 +18,10 @@ describe("Patient History Routes", () => {
   let name = "Tan Jun Jie";
   let date_of_birth = "1999-05-08";
   let sex = "M";
-  let left_diabetic_retinography_stage = 1;
-  let left_diabetic_retinography_prob = 0.56;
-  let right_diabetic_retinography_stage = 2;
-  let right_diabetic_retinography_prob = 0.11;
+  let left_diabetic_retinopathy_stage = 1;
+  let left_diabetic_retinopathy_prob = 0.56;
+  let right_diabetic_retinopathy_stage = 2;
+  let right_diabetic_retinopathy_prob = 0.11;
   let left_ocular_prob = 0.25;
   let right_ocular_prob = 0.05;
   let left_glaucoma_prob = 0.36;
@@ -34,10 +34,10 @@ describe("Patient History Routes", () => {
       name: name,
       date_of_birth: date_of_birth,
       sex: sex,
-      left_diabetic_retinography_stage: left_diabetic_retinography_stage,
-      left_diabetic_retinography_prob: left_diabetic_retinography_prob,
-      right_diabetic_retinography_stage: right_diabetic_retinography_stage,
-      right_diabetic_retinography_prob: right_diabetic_retinography_prob,
+      left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
+      left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
+      right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
+      right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
       left_ocular_prob: left_ocular_prob,
       right_ocular_prob: right_ocular_prob,
       left_glaucoma_prob: left_glaucoma_prob,
@@ -96,11 +96,10 @@ describe("Patient History Routes", () => {
             age: Math.abs(ageDate.getUTCFullYear() - 1970),
             left_eye_image: res.body[1][0].left_eye_image,
             right_eye_image: res.body[1][0].right_eye_image,
-            left_diabetic_retinography_stage: left_diabetic_retinography_stage,
-            left_diabetic_retinography_prob: left_diabetic_retinography_prob,
-            right_diabetic_retinography_stage:
-              right_diabetic_retinography_stage,
-            right_diabetic_retinography_prob: right_diabetic_retinography_prob,
+            left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
+            left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
+            right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
+            right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
             left_ocular_prob: left_ocular_prob,
             right_ocular_prob: right_ocular_prob,
             left_glaucoma_prob: left_glaucoma_prob,

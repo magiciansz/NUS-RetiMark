@@ -45,36 +45,34 @@ const validateCreatePatient = [
       return (value === "M") | (value === "F");
     })
     .withMessage("sex has to be either M or F."),
-  body("left_diabetic_retinography_stage")
+  body("left_diabetic_retinopathy_stage")
     .not()
     .isEmpty()
-    .withMessage("left_diabetic_retinography_stage cannot be empty")
+    .withMessage("left_diabetic_retinopathy_stage cannot be empty")
     .bail()
     .isInt({ min: 0, max: 4 })
-    .withMessage("left_diabetic_retinography_stage has to be betweeen 0 and 4"),
-  body("left_diabetic_retinography_prob")
+    .withMessage("left_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
+  body("left_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
-    .withMessage("left_diabetic_retinography_prob cannot be empty")
+    .withMessage("left_diabetic_retinopathy_prob cannot be empty")
     .bail()
     .isFloat({ min: 0.0, max: 1.0 })
-    .withMessage("left_diabetic_retinography_prob has to be betweeen 0 and 1"),
-  body("right_diabetic_retinography_stage")
+    .withMessage("left_diabetic_retinopathy_prob has to be betweeen 0 and 1"),
+  body("right_diabetic_retinopathy_stage")
     .not()
     .isEmpty()
-    .withMessage("right_diabetic_retinography_stage cannot be empty")
+    .withMessage("right_diabetic_retinopathy_stage cannot be empty")
     .bail()
     .isInt({ min: 0, max: 4 })
-    .withMessage(
-      "right_diabetic_retinography_stage has to be betweeen 0 and 4"
-    ),
-  body("right_diabetic_retinography_prob")
+    .withMessage("right_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
+  body("right_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
-    .withMessage("right_diabetic_retinography_prob cannot be empty")
+    .withMessage("right_diabetic_retinopathy_prob cannot be empty")
     .bail()
     .isFloat({ min: 0.0, max: 1.0 })
-    .withMessage("right_diabetic_retinography_prob has to be betweeen 0 and 1"),
+    .withMessage("right_diabetic_retinopathy_prob has to be betweeen 0 and 1"),
   body("left_ocular_prob")
     .not()
     .isEmpty()
@@ -123,36 +121,34 @@ const validateUpdatePatient = [
       return true;
     })
     .withMessage("timezone is not valid"),
-  body("left_diabetic_retinography_stage")
+  body("left_diabetic_retinopathy_stage")
     .not()
     .isEmpty()
-    .withMessage("left_diabetic_retinography_stage cannot be empty")
+    .withMessage("left_diabetic_retinopathy_stage cannot be empty")
     .bail()
     .isInt({ min: 0, max: 4 })
-    .withMessage("left_diabetic_retinography_stage has to be betweeen 0 and 4"),
-  body("left_diabetic_retinography_prob")
+    .withMessage("left_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
+  body("left_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
-    .withMessage("left_diabetic_retinography_prob cannot be empty")
+    .withMessage("left_diabetic_retinopathy_prob cannot be empty")
     .bail()
     .isFloat({ min: 0.0, max: 1.0 })
-    .withMessage("left_diabetic_retinography_prob has to be betweeen 0 and 1"),
-  body("right_diabetic_retinography_stage")
+    .withMessage("left_diabetic_retinopathy_prob has to be betweeen 0 and 1"),
+  body("right_diabetic_retinopathy_stage")
     .not()
     .isEmpty()
-    .withMessage("right_diabetic_retinography_stage cannot be empty")
+    .withMessage("right_diabetic_retinopathy_stage cannot be empty")
     .bail()
     .isInt({ min: 0, max: 4 })
-    .withMessage(
-      "right_diabetic_retinography_stage has to be betweeen 0 and 4"
-    ),
-  body("right_diabetic_retinography_prob")
+    .withMessage("right_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
+  body("right_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
-    .withMessage("right_diabetic_retinography_prob cannot be empty")
+    .withMessage("right_diabetic_retinopathy_prob cannot be empty")
     .bail()
     .isFloat({ min: 0.0, max: 1.0 })
-    .withMessage("right_diabetic_retinography_prob has to be betweeen 0 and 1"),
+    .withMessage("right_diabetic_retinopathy_prob has to be betweeen 0 and 1"),
   body("left_ocular_prob")
     .not()
     .isEmpty()
