@@ -18,6 +18,10 @@ servers:
 tags:
   - name: Authentication
     description: User Management
+  - name: Patient
+    description: Patient APIs
+  - name: Patient History
+    description: Patient History APIs
 
 paths:
   /auth/login:
@@ -161,9 +165,606 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExpiredOrInvalidRefreshToken"
+  /patient:
+    post:
+      tags:
+        - Patient
+      summary: Create a Patient
+      description: Create patient given all parameters
+      parameters:
+        - name: timezone
+          in: query
+          description: timezone to return visit date of patient
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreatePatientForm"
+        required: true
+      responses:
+        "201":
+          description: Successfully Created Patient
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePatientResponse"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePatientBadRequest"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
+        "409":
+          description: Duplicate Patient exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDuplicatePatient"
+  /patient/{id}:
+    patch:
+      tags:
+        - Patient
+      summary: Update a Patient
+      description: Update patient given new inputs
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: ID of patient to update
+        - name: timezone
+          in: query
+          description: timezone to return visit date of patient
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UpdatePatientForm"
+        required: true
+      responses:
+        "200":
+          description: Successfully Updated Patient
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePatientResponse"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePatientBadRequest"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotFound"
+  /patient/search:
+    get:
+      tags:
+        - Patient
+      summary: Search for a Patient
+      description: Search patient given query
+      parameters:
+        - name: query
+          in: query
+          description: search query for name of patient
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchPatientResult"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
+
+  /patient-history:
+    get:
+      tags:
+        - Patient History
+      summary: Get All Patient History
+      description: Get Patient History for all patients, in ascending ID and descending version order
+      parameters:
+        - name: timezone
+          in: query
+          description: timezone to return visit date of patients
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully Retrieved Patient History
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPatientHistoryResponse"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPatientHistoryBadRequest"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
+  /patient-history/{id}/reports:
+    get:
+      tags:
+        - Patient History
+      summary: Get All Reports for a Patient
+      description: Get reports for a patient, in descending version number
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: ID of patient to get reports
+        - name: timezone
+          in: query
+          description: timezone to return visit date of patients
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully Retrieved Reports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientHistoryReportResult"
+        "400":
+          description: Invalid data format or data that does not match the expected schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPatientHistoryBadRequest"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorisedRequest"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotFound"
 
 components:
   schemas:
+    PatientHistoryReportResult:
+      type: object
+      properties:
+        reports:
+          type: array
+          items:
+            type: object
+            properties:
+              version:
+                type: integer
+              doctor_notes:
+                type: string
+              report_link:
+                type: string
+              visit_date:
+                type: string
+          example:
+            - version: 2
+              doctor_notes: "This patient is healthy."
+              report_link: "testreportlink.com"
+              visit_date: "2023-10-04T14:36:34+08:00"
+            - version: 1
+              doctor_notes: "This patient is unhealthy"
+              report_link: "testreportlink.com"
+              visit_date: "2023-10-03T14:36:34+08:00"
+        totalCount:
+          type: integer
+          example: 2
+    SearchPatientResult:
+      type: object
+      properties:
+        patients:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "Tan Jun Jie"
+              date_of_birth:
+                type: string
+                example: "1999-09-21"
+              sex:
+                type: string
+                example: "M"
+        totalCount:
+          type: integer
+          example: 1
+    PatientNotFound:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "Patient Not Found"
+        stack:
+          type: string
+          example: "Error: Patient Not Found"
+    UpdatePatientBadRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Your right_eye_image has to be in either jpg / png format."
+        stack:
+          type: string
+          example: "Error: Your right_eye_image has to be in either jpg / png format."
+    UpdatePatientResponse:
+      type: object
+      properties:
+        patient:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            version:
+              type: integer
+              example: 2
+            name:
+              type: string
+              example: "Tan Jun Jie"
+            date_of_birth:
+              type: string
+              example: "1999-09-21"
+            age:
+              type: integer
+              example: 24
+            sex:
+              type: string
+              example: "M"
+            left_eye_image:
+              type: string
+              example: "tests3bucket.com"
+            right_eye_image:
+              type: string
+              example: "tests3bucket.com"
+            left_diabetic_retinopathy_stage:
+              type: integer
+              example: 1
+            left_diabetic_retinopathy_prob:
+              type: number
+              example: 0.56
+            right_diabetic_retinopathy_stage:
+              type: integer
+              example: 1
+            right_diabetic_retinopathy_prob:
+              type: number
+              example: 0.11
+            left_ocular_prob:
+              type: number
+              example: 0.11
+            right_ocular_prob:
+              type: number
+              example: 0.11
+            left_glaucoma_prob:
+              type: number
+              example: 0.11
+            right_glaucoma_prob:
+              type: number
+              example: 0.11
+            doctor_notes:
+              type: string
+              example: "This patient is healthy."
+            report_link:
+              type: string
+              example: "testreportlink.com"
+            visit_date:
+              type: string
+              example: "2023-09-23T18:14:45+08:00"
+    UpdatePatientForm:
+      type: object
+      properties:
+        left_eye_image:
+          type: string
+          format: binary
+        right_eye_image:
+          type: string
+          format: binary
+        left_diabetic_retinopathy_stage:
+          type: integer
+          example: 1
+        left_diabetic_retinopathy_prob:
+          type: number
+          example: 0.56
+        right_diabetic_retinopathy_stage:
+          type: integer
+          example: 1
+        right_diabetic_retinopathy_prob:
+          type: number
+          example: 0.11
+        left_ocular_prob:
+          type: number
+          example: 0.11
+        right_ocular_prob:
+          type: number
+          example: 0.11
+        left_glaucoma_prob:
+          type: number
+          example: 0.11
+        right_glaucoma_prob:
+          type: number
+          example: 0.11
+        doctor_notes:
+          type: string
+          example: "This patient is healthy."
+        report_pdf:
+          type: string
+          format: binary
+    GetPatientHistoryBadRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: '[{\"type\":\"field\",\"value\":\"Asia/Singapor\",\"msg\":\"timezone is not valid\",\"path\":\"timezone\",\"location\":\"query\"}]'
+        stack:
+          type: string
+          example: 'Error: [{\"type\":\"field\",\"value\":\"Asia/Singapor\",\"msg\":\"timezone is not valid\",\"path\":\"timezone\",\"location\":\"query\"}]'
+    GetPatientHistoryResponse:
+      type: object
+      properties:
+        1:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              version:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "Tan Jun Jie"
+              date_of_birth:
+                type: string
+                example: "1999-09-21"
+              age:
+                type: integer
+                example: 24
+              sex:
+                type: string
+                example: "M"
+              left_eye_image:
+                type: string
+                example: "tests3bucket.com"
+              right_eye_image:
+                type: string
+                example: "tests3bucket.com"
+              left_diabetic_retinopathy_stage:
+                type: integer
+                example: 1
+              left_diabetic_retinopathy_prob:
+                type: number
+                example: 0.56
+              right_diabetic_retinopathy_stage:
+                type: integer
+                example: 1
+              right_diabetic_retinopathy_prob:
+                type: number
+                example: 0.11
+              left_ocular_prob:
+                type: number
+                example: 0.11
+              right_ocular_prob:
+                type: number
+                example: 0.11
+              left_glaucoma_prob:
+                type: number
+                example: 0.11
+              right_glaucoma_prob:
+                type: number
+                example: 0.11
+              doctor_notes:
+                type: string
+                example: "This patient is healthy."
+              report_pdf:
+                type: string
+                example: "testreportlink.com"
+              visit_date:
+                type: string
+                example: "2023-09-23T18:14:45+08:00"
+    UnauthorisedRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: "Please Authenticate"
+        stack:
+          type: string
+          example: "Error: Please Authenticate"
+
+    CreateDuplicatePatient:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 409
+        message:
+          type: string
+          example: "This patient has already been created."
+        stack:
+          type: string
+          example: "Error: This patient has already been created."
+
+    CreatePatientBadRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: '[{"type":"field","value":"1999/09/21","msg":"date_of_birth has to be a valid date with format YYYY-MM-DD","path":"date_of_birth","location":"body"}]'
+        stack:
+          type: string
+          example: 'Error: [{"type":"field","value":"1999/09/21","msg":"date_of_birth has to be a valid date with format YYYY-MM-DD","path":"date_of_birth","location":"body"}]'
+    CreatePatientResponse:
+      type: object
+      properties:
+        patient:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            version:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: "Tan Jun Jie"
+            date_of_birth:
+              type: string
+              example: "1999-09-21"
+            age:
+              type: integer
+              example: 24
+            sex:
+              type: string
+              example: "M"
+            left_eye_image:
+              type: string
+              example: "tests3bucket.com"
+            right_eye_image:
+              type: string
+              example: "tests3bucket.com"
+            left_diabetic_retinopathy_stage:
+              type: integer
+              example: 1
+            left_diabetic_retinopathy_prob:
+              type: number
+              example: 0.56
+            right_diabetic_retinopathy_stage:
+              type: integer
+              example: 1
+            right_diabetic_retinopathy_prob:
+              type: number
+              example: 0.11
+            left_ocular_prob:
+              type: number
+              example: 0.11
+            right_ocular_prob:
+              type: number
+              example: 0.11
+            left_glaucoma_prob:
+              type: number
+              example: 0.11
+            right_glaucoma_prob:
+              type: number
+              example: 0.11
+            doctor_notes:
+              type: string
+              example: "This patient is healthy."
+            report_link:
+              type: string
+              example: "testreportlink.com"
+            visit_date:
+              type: string
+              example: "2023-09-23T18:14:45+08:00"
+    CreatePatientForm:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Tan Jun Jie"
+        date_of_birth:
+          type: string
+          example: "1999-09-21"
+        sex:
+          type: string
+          example: "M"
+        left_eye_image:
+          type: string
+          format: binary
+        right_eye_image:
+          type: string
+          format: binary
+        left_diabetic_retinopathy_stage:
+          type: integer
+          example: 1
+        left_diabetic_retinopathy_prob:
+          type: number
+          example: 0.56
+        right_diabetic_retinopathy_stage:
+          type: integer
+          example: 1
+        right_diabetic_retinopathy_prob:
+          type: number
+          example: 0.11
+        left_ocular_prob:
+          type: number
+          example: 0.11
+        right_ocular_prob:
+          type: number
+          example: 0.11
+        left_glaucoma_prob:
+          type: number
+          example: 0.11
+        right_glaucoma_prob:
+          type: number
+          example: 0.11
+        doctor_notes:
+          type: string
+          example: "This patient is healthy."
+        report_pdf:
+          type: string
+          format: binary
+
     CreateUserUsernameTaken:
       type: object
       properties:
@@ -262,7 +863,7 @@ components:
               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NDkwMTM1LCJ0eXBlIjoiYWNjZXNzIn0.RfkK1wzZnwx037E7P37gDBPJ49zCEGTFv27SQ-B_lzA"
             expires:
               type: string
-              example: "Tue Sep 12 2023 11:42:15 GMT+0800"
+              example: "2023-09-23T17:29:08+08:00"
         refreshToken:
           type: object
           properties:
@@ -271,7 +872,7 @@ components:
               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NTAwOTM1LCJ0eXBlIjoicmVmcmVzaCJ9.NSX9bPKOJagAqoBpDU2SoQMFE2ST0qhYpVyR20-Z5CQ"
             expires:
               type: string
-              example: "Tue Sep 12 2023 14:42:15 GMT+0800"
+              example: "2023-09-23T21:29:08+08:00"
     LoginResponse:
       type: object
       properties:
@@ -295,7 +896,7 @@ components:
                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NDkwMTM1LCJ0eXBlIjoiYWNjZXNzIn0.RfkK1wzZnwx037E7P37gDBPJ49zCEGTFv27SQ-B_lzA"
                 expires:
                   type: string
-                  example: "Tue Sep 12 2023 11:42:15 GMT+0800"
+                  example: "2023-09-23T17:29:08+08:00"
             refreshToken:
               type: object
               properties:
@@ -304,4 +905,4 @@ components:
                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTY5NDQ4NjUzNSwiZXhwIjoxNjk0NTAwOTM1LCJ0eXBlIjoicmVmcmVzaCJ9.NSX9bPKOJagAqoBpDU2SoQMFE2ST0qhYpVyR20-Z5CQ"
                 expires:
                   type: string
-                  example: "Tue Sep 12 2023 14:42:15 GMT+0800"
+                  example: "2023-09-23T21:29:08+08:00"

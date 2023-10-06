@@ -17,6 +17,7 @@ function Home() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [leftEye, setLeftEye] = useState(null);
 	const [rightEye, setRightEye] = useState(null);
+	const [isNewPatient, setIsNewPatient] = useState(false);
 
 	const openModal = () => {
 		setIsModalOpen(true);
@@ -40,6 +41,10 @@ function Home() {
 
 	const rightEyeImage = (value) => {
 		setRightEye(value);
+	};
+
+	const newPatient = (value) => {
+		setIsNewPatient(value);
 	};
 
 	const closeReport = () => {
@@ -87,9 +92,9 @@ function Home() {
 						Start
 					</div>
 				</div>
-				<Modal isOpen={isModalOpen} onClose={closeModal} showReport={handleShowReport} selectedPatient={selectedPatient} leftEyeImage={leftEyeImage} rightEyeImage={rightEyeImage}/>
+				<Modal isOpen={isModalOpen} onClose={closeModal} showReport={handleShowReport} selectedPatient={selectedPatient} leftEyeImage={leftEyeImage} rightEyeImage={rightEyeImage} newPatient={newPatient}/>
 			</div>}
-			{showReport && <Report patient={patient} leftEyeImage={leftEye} rightEyeImage={rightEye} onSave={closeReport}/>}
+			{showReport && <Report patient={patient} leftEyeImage={leftEye} rightEyeImage={rightEye} onSave={closeReport} newPatient={isNewPatient}/>}
 			{/* <div className='prediction-container'>
 				{showReport && <div className='new-prediction' onClick={handleNewPrediction}>
 					Save

@@ -1,17 +1,24 @@
 import React, {
     useState, useEffect, useCallback, useRef, useNavigate 
   } from 'react';
+
 import './modal.css';
 import {FaSearch} from "react-icons/fa"
+
+import PatientApi from '../../../apis/PatientApi';
+import Cookies from 'js-cookie';
+import { getAccessToken } from '../../auth/Auth';
+
 const patients = [
 	{name: 'jiahui', age: '22', gender: 'F'},
+    {name: 'tanjiahui', age: '22', gender: 'F'},
 	{name: 'xianghan', age: '24', gender: 'M'},
 	{name: 'jiajun', age: '24', gender: 'M'},
 	{name: 'glenn', age: '24', gender: 'M'},
 	{name: 'josiah', age: '24', gender: 'M'},
 ]
 
-function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage}) {
+function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage, newPatient}) {
     const [userEdit, setUserEdit] = useState({gender: ''});
     const [mode, setMode] = useState('');
     const [input, setInput] = useState("");
@@ -19,12 +26,30 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
     const [patient, setPatient] = useState()
     const [leftEye, setLeftEye] = useState(null);
     const [rightEye, setRightEye] = useState(null);
-    const [navigateBack, setNavigateBack] = useState(false);
-    // const navigate = useNavigate();
+    const [errorMessageLeftEye, setErrorMessageLeftEye] = useState('');
+    const [errorMessageRightEye, setErrorMessageRightEye] = useState('');
+    const [accessToken, setAccessToken] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
 
     if (!isOpen) return null;
     // Handle form submission
-    const handleSubmit = (e) => {
+
+    const addPatient = async (accessToken, rightEye) => {
+        console.log("running adding patient func")
+        const requestParams = {
+            accessToken,
+            rightEye: rightEye.blob,
+        };
+        try {
+            const res = await PatientApi.createPatient(requestParams);
+            console.log("res from create", res)
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         // call postapi to backend 
@@ -41,7 +66,6 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         leftEyeImage(leftEye)
         rightEyeImage(rightEye)
         clearInputs()
-        // navigate.push('/reports');
         onClose();
     };
 
@@ -66,6 +90,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
     const switchToCreateMode = () => {
         setMode('create');
         setUserEdit({ gender: '' }); // Clear the userEdit data when switching modes
+        newPatient(true)
     };
     
     const switchToSearchMode = () => {
@@ -73,6 +98,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         setInput(''); // Clear the search text when switching modes
         setPatient()
         setFilteredPatients([])
+        newPatient(false)
     };
 
     const switchToNextMode = () => {
@@ -84,15 +110,17 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
             const { name, gender, dateOfBirth } = userEdit;
             
             // Calculate age based on date of birth
-            const dob = new Date(dateOfBirth);
-            const today = new Date();
-            const age = today.getFullYear() - dob.getFullYear();
+            // const dob = new Date(dateOfBirth);
+            // const today = new Date();
+            // const age = today.getFullYear() - dob.getFullYear();
         
-            setPatient({
-              name,
-              gender,
-              age,
-            })
+            // setPatient({
+            //   name,
+            //   gender,
+            //   age,
+            // })
+
+            setPatient(userEdit)
         }
         setMode('next');
     };
@@ -128,13 +156,54 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 
     const handleFileChange = (event, eye) => {
 		const file = event.target.files[0];
-		if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-            if (eye === 'left') {
-                setLeftEye(URL.createObjectURL(file));
-            } else {
-                setRightEye(URL.createObjectURL(file));
-            }
-		}
+        console.log("uploading file")
+        if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+            const img = new Image();
+            img.onload = function () {
+                const width = this.width;
+                const height = this.height;
+                
+                // Define your image resolution and dimensions requirements
+                const minWidth = 100; // Minimum width in pixels
+                const minHeight = 100; // Minimum height in pixels
+                const maxWidth = 800; // Maximum width in pixels
+                const maxHeight = 800; // Maximum height in pixels
+                const minDpi = 95; // Minimum DPI
+            
+                // Calculate DPI based on image dimensions
+                const dpi = Math.round((width / (width * 0.0254)));
+                console.log("dpi", dpi)
+                console.log("width, height", width, height)
+
+                if (
+                    width >= minWidth &&
+                    height >= minHeight &&
+                    width <= maxWidth &&
+                    height <= maxHeight
+                ) {
+                    if (eye === 'left') {
+                        setLeftEye(URL.createObjectURL(file));
+                        setErrorMessageLeftEye("")
+                    } else {
+                        setRightEye(URL.createObjectURL(file));
+                        setErrorMessageRightEye("")
+                    }
+                } else {
+                    // Image does not meet the requirements
+                    console.log("image doesnt fit size")
+                    event.target.value = '';
+                    if (eye === 'left') {
+                        setLeftEye(null)
+                        setErrorMessageLeftEye("Image of left eye doesn't follow the requirements. Please upload another image.")
+                    } else {
+                        setRightEye(null)
+                        setErrorMessageRightEye("Image of right eye doesn't follow the requirements. Please upload another image.") 
+                    }
+                    
+                }
+            };
+            img.src = URL.createObjectURL(file);
+        } 
 	};
 
     const isFormValid = () => {
@@ -190,12 +259,12 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                             <select
                                 className="text-input"
                                 onChange={(e) => { setUserEdit({ ...userEdit, gender: e.target.value }); }}
-                                value={userEdit?.gender?.toLowerCase()}
+                                value={userEdit?.gender}
                                 required
                             >
                                 <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
                             </select>
                         </div>
                         <div>
@@ -261,6 +330,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 Image of left eye
                             </label>
                             <input type="file" accept=".jpg, .png" onChange={(e) => handleFileChange(e, 'left')} />
+                            {errorMessageLeftEye && <p className="error-message">{errorMessageLeftEye}</p>}
                             {leftEye && <img src={leftEye} className='preview' alt="Preview" />}
                     
                         </div>
@@ -270,6 +340,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 Image of right eye
                             </label>
                             <input type="file" accept=".jpg, .png" onChange={(e) => handleFileChange(e, 'right')} />
+                            {errorMessageRightEye && <p className="error-message">{errorMessageRightEye}</p>}
                             {rightEye && <img src={rightEye} className='preview' alt="Preview" />}
                         </div>
                     </div>

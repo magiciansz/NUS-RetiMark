@@ -4,30 +4,35 @@ import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Modal from './doc-notes';
+import SaveModal from './save-modal';
+import { getAccessToken } from '../../auth/Auth';
+import PatientApi from '../../../apis/PatientApi';
+
 
 import './report.css';
 
-function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
+function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
     const reportRef = useRef(null);
     const [docNotes, setDocNotes] = useState('')
     const [openModal, setOpenModal] = useState(false)
+    const [openSaveModal, setOpenSaveModal] = useState(false)
+    const [modalMessage, setModalMessage] = useState('Saving In Progress')
 
     const handleDownloadPDF = () => {
         if (reportRef.current) {
             html2canvas(reportRef.current).then((canvas) => {
                 const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]); // Use canvas dimensions for PDF
                 
                 // Add the captured image to the PDF
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
                 
                 // Save the PDF
                 pdf.save('report.pdf');
             });
         }
     };
+      
 
     const handleOpenModal = () => {
 		setOpenModal(true);
@@ -41,14 +46,85 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
 		setDocNotes(value);
 	};
 
-    const handleSave = () => {
-	    onSave();
+    const closeSaveModal = () => {
+		setOpenSaveModal(false);
+        onSave();
 	};
+
+    // const handleSave = () => {
+	//     onSave();
+	// };
+
+    const handleSave = async () => {
+        // First, capture the content of the report as a PDF
+        console.log("saving report")
+        setModalMessage('Saving In Progress')
+        setOpenSaveModal(true)
+        if (reportRef.current) {
+          html2canvas(reportRef.current).then(async (canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]); // Use canvas dimensions for PDF
+            
+            // Add the captured image to the PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      
+            // Convert the PDF to a blob
+            const pdfBlob = pdf.output('blob');
+      
+            // Now, send the PDF blob to the API
+            const accessTokenData = await getAccessToken();
+            if (accessTokenData) {
+                console.log("theres access token", accessTokenData)
+                const rightEyeBlob = await fetch(rightEyeImage).then((response) => response.blob());
+                const leftEyeBlob = await fetch(leftEyeImage).then((response) => response.blob());
+
+                const requestParams = {
+                    accessToken: accessTokenData,
+                    leftEye: leftEyeBlob,
+                    rightEye: rightEyeBlob,
+                    report: pdfBlob,
+                    patient, 
+                    docNotes,
+                };
+                try {
+                    if (!newPatient) {
+                        // Include the 'id' field conditionally
+                        requestParams.id = 42;
+                    }
+                    console.log("request params", requestParams)
+                    // const res = await PatientApi.createPatient(requestParams);
+                    const res = newPatient
+                        ? await PatientApi.createPatient(requestParams)
+                        : await PatientApi.updatePatient(requestParams);
+                    console.log("res from create in save report", res)
+                    setModalMessage("Successfully saved!")
+                } catch (err) {
+                    console.log("failed to call endpoint")
+                    // last error is 404 error from update patient 
+                    if (err.response.data.status === 401) {
+                        setModalMessage("Save failed. Authentication failed.");
+                    } else if (err.response.data.status === 409) {
+                        setModalMessage("Save failed. A patient with the same name and DOB has been created before.");
+                    } else {
+                        setModalMessage("Patient not found. Failed to update the patient's record.");
+                    }
+                    console.log(err.response.data.message)
+                    console.error(err);
+                }
+              
+            }
+          });
+        }
+        // onSave();
+    };
+
+    console.log("patient detials", patient)
+      
 
     return (
         <div>
-            <div className='report-container' id='report-container' ref={reportRef}>
-                <div className='report'>
+            <div className='report-container' id='report-container' >
+                <div className='report' ref={reportRef}> 
                     <div className='report-header'>
                         REPORT
                     </div>
@@ -100,16 +176,19 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave}) {
                 </div>
             </div>
             <Modal isOpen={openModal} onClose={closeModal} doctorNotes={doctorNotes}/>
-            <div className='download-button'>
-                <div className='button' onClick={handleOpenModal}>
-                    Add Doctor's Note
+            <div className='button-container'>
+                <div className='pdf-button'>
+                    <div className='button' onClick={handleOpenModal}>
+                        Add Doctor's Note
+                    </div>
+                </div>
+                <div className='pdf-button'>
+                    <div className='button' onClick={handleDownloadPDF}>
+                        Download PDF
+                    </div>
                 </div>
             </div>
-            <div className='download-button'>
-                <div className='button' onClick={handleDownloadPDF}>
-                    Download PDF
-                </div>
-            </div>
+            <SaveModal isOpen={openSaveModal} onClose={closeSaveModal} modalMessage={modalMessage}/>
             <div className='download-button'>
                 <div className='button' onClick={handleSave}>
                     Save

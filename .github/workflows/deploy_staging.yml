@@ -19,6 +19,18 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      localstack:
+        image: localstack/localstack
+        ports:
+          - "127.0.0.1:4566:4566" # LocalStack Gateway
+          - "127.0.0.1:4510-4559:4510-4559" # external services port range
+        env:
+          AWS_DEFAULT_REGION: ap-southeast-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          DEBUG: ${DEBUG:-1}
+          DOCKER_HOST: unix:///var/run/docker.sock
+          LS_LOG: WARN
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -26,6 +38,13 @@ jobs:
         working-directory: backend
         run: |
           npm install
+      - name: Configure LocalStack
+        working-directory: backend
+        run: |
+          aws configure set aws_access_key_id test
+          aws configure set aws_secret_access_key test
+          aws configure set default.region ap-southeast-1
+          aws s3 mb s3://vision-developer --endpoint-url=http://localhost:4566
       - name: Run Tests
         working-directory: backend
         env:
@@ -37,6 +56,10 @@ jobs:
           DB_DATABASE: retimark_db
           DB_USERNAME: root
           DB_PASSWORD: 123456
+          NODE_ENV: DEVELOP
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_BUCKET: vision-developer
         run: |
           npm test
       - name: Test Report
