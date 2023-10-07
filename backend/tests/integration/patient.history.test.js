@@ -248,7 +248,7 @@ describe("Patient History Routes", () => {
         .get(
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
         )
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", sort: "descending" })
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.OK);
       const visitDate = formatDateTime(
@@ -271,6 +271,7 @@ describe("Patient History Routes", () => {
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
         )
         .set("Authorization", `Bearer ${accessToken}`)
+        .query({ sort: "descending" })
         .expect(httpStatus.OK);
       expect(res.body.totalCount).toBe(1);
       expect(res.body.reports).toHaveLength(1);
@@ -309,7 +310,7 @@ describe("Patient History Routes", () => {
         .get(
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
         )
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", sort: "descending" })
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.OK);
       expect(res.body.totalCount).toBe(2);
@@ -330,12 +331,78 @@ describe("Patient History Routes", () => {
         visit_date: updatedPatient.body.patient.visit_date,
       });
     });
+    test("should return 200 and 2 reports after a PATCH action, sorted by ascending time", async () => {
+      const updatedPatient = await request(app)
+        .patch(`/api/v1/patient/${createdPatient.body.patient.id}`)
+        .query({ timezone: "Asia/Singapore" })
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "testimage1.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "testimage2.jpeg")
+        )
+        .attach(
+          "report_pdf",
+          path.join(__dirname, "..", "files", "testpdf.pdf")
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      const visitDate = formatDateTime(
+        moment(createdPatient.body.patient.visit_date),
+        "Asia/Singapore"
+      );
+      const res = await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Singapore", sort: "ascending" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(res.body.totalCount).toBe(2);
+      expect(res.body.reports).toHaveLength(2);
+      expect(res.body.reports[1].version).toBeGreaterThan(
+        res.body.reports[0].version
+      );
+      expect(res.body.reports[0]).toMatchObject({
+        version: createdPatient.body.patient.version,
+        doctor_notes: createdPatient.body.patient.doctor_notes,
+        report_link: createdPatient.body.patient.report_link,
+        visit_date: visitDate,
+      });
+      expect(res.body.reports[1]).toMatchObject({
+        version: updatedPatient.body.patient.version,
+        doctor_notes: updatedPatient.body.patient.doctor_notes,
+        report_link: updatedPatient.body.patient.report_link,
+        visit_date: updatedPatient.body.patient.visit_date,
+      });
+    });
+    test("should return 400 if sort order is not given", async () => {
+      await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Singapore" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("should return 400 if sort order is not valid", async () => {
+      await request(app)
+        .get(
+          `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
+        )
+        .query({ timezone: "Asia/Singapore", sort: "wakanda" })
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.BAD_REQUEST);
+    });
     test("should return 400 if timezone is not valid", async () => {
       await request(app)
         .get(
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
         )
-        .query({ timezone: "Asia/Wakanda" })
+        .query({ timezone: "Asia/Wakanda", sort: "ascending" })
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.BAD_REQUEST);
     });
@@ -344,7 +411,7 @@ describe("Patient History Routes", () => {
         .get(
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
         )
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", sort: "ascending" })
         .expect(httpStatus.UNAUTHORIZED);
     });
 
@@ -362,14 +429,14 @@ describe("Patient History Routes", () => {
         .get(
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
         )
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", sort: "ascending" })
         .set("Authorization", `Bearer ${newAccessToken}`)
         .expect(httpStatus.UNAUTHORIZED);
     });
     test("should return 404 if user isn't found", async () => {
       await request(app)
         .get(`/api/v1/patient-history/100/reports`)
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", sort: "ascending" })
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.NOT_FOUND);
     });

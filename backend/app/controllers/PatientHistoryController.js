@@ -12,6 +12,7 @@ const index = catchAsync(async (req, res) => {
 const getPatientReports = catchAsync(async (req, res) => {
   const patientReports = await PatientHistoryService.getPatientReports(
     req.params.id,
+    req.query.sort,
     req.query.timezone
   );
   res.status(httpStatus.OK).send(patientReports);

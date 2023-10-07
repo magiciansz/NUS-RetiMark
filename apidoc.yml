@@ -320,7 +320,7 @@ paths:
       tags:
         - Patient History
       summary: Get All Reports for a Patient
-      description: Get reports for a patient, in descending version number
+      description: Get reports for a patient, in specified sort order
       parameters:
         - name: id
           in: path
@@ -328,11 +328,21 @@ paths:
             type: integer
           required: true
           description: ID of patient to get reports
+        - name: sort
+          in: query
+          required: true
+          description: sort order for version numbers
+          schema:
+            type: string
+            enum:
+              - ascending
+              - descending
         - name: timezone
           in: query
           description: timezone to return visit date of patients
           schema:
             type: string
+
       responses:
         "200":
           description: Successfully Retrieved Reports
