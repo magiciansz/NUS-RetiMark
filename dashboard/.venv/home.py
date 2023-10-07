@@ -15,7 +15,7 @@ st.set_page_config(
     layout="wide"
 )
 
-_DEBUG = False
+_DEBUG = True
 
 @st.cache_resource(hash_funcs={"_thread.RLock": lambda _: None})
 def init_router(): 
@@ -210,8 +210,8 @@ def home():
     #output: single value int/str/float depending on the desired column
     def query_last_visit_date(curr_date, date_list):
         sorted_dates = sorted(date_list)
-        if curr_date not in date_list:
-            return sorted_dates[0]
+        # if curr_date not in date_list:
+        #     return sorted_dates[0]
         if (sorted_dates.index(curr_date)==0):
             return "NA"
         else:
@@ -247,7 +247,7 @@ def home():
         code = encode_disease(disease)
         risk_col = laterality + '_' + code + '_prob'
         return query_patient_value(dict, id, visit_date, risk_col)
-
+    
     def concat_tuples(x):
         return str(x[0]) + ' - ' + x[1]
     def strip_time_from_isodatetime(iso_datetime):
@@ -334,11 +334,14 @@ def home():
 
         # Filters
         with st.expander(label="Search and Filter", expanded=True):
+            # selected_date=None
+            def reset_date_options():
+                st.experimental_rerun()
             filter1, filter2, filter3 = st.columns(3)
             with filter1:
                 patient_w_id_options = patient_w_id_options_raw
                 patient_w_id_options.sort(key=lambda x: int(x[0]))
-                selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient')
+                selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient', on_change=reset_date_options)
                 selected_patient_id = selected_patient_id_selectbox[0]
             with filter2:
                 selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
