@@ -2,13 +2,11 @@ import altair as alt
 from copy import deepcopy
 import datetime
 import extra_streamlit_components as stx
-import json
 import numpy as np
 import pandas as pd
 import random
 import requests
 import streamlit as st
-import time
 
 # Streamlit app
 st.set_page_config(
@@ -55,17 +53,9 @@ if (_DEBUG):
         if st.button("Delete"):
             cookie_manager.delete(cookie)
 
-
-
-
-
 def get_region_from_UTC_offset(val):
     regions = {"+08": "Asia/Singapore", "+09": "Asia/Tokyo"}
     return regions[val]
-
-# timezone = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
-
-
 
 def submitted():
     st.session_state.submitted_login = True
@@ -220,10 +210,13 @@ def home():
     #output: single value int/str/float depending on the desired column
     def query_last_visit_date(curr_date, date_list):
         sorted_dates = sorted(date_list)
+        if curr_date not in date_list:
+            return sorted_dates[0]
         if (sorted_dates.index(curr_date)==0):
             return "NA"
         else:
             return sorted_dates[sorted_dates.index(curr_date)-1]
+
 
     def get_cutoff_date(list_of_dates):
         list_of_dates = sorted(list_of_dates, reverse=True)
@@ -257,6 +250,9 @@ def home():
 
     def concat_tuples(x):
         return str(x[0]) + ' - ' + x[1]
+    def strip_time_from_isodatetime(iso_datetime):
+        converted = datetime.datetime.fromisoformat(iso_datetime) 
+        return converted.date()
     def submitted_logout():
         st.session_state.submitted_logout = True
     def logout():
@@ -306,17 +302,17 @@ def home():
             return True
     
     ##END API CALL
-    
-    patients_history = get_patient_history()
-    patient_raw_dict = deepcopy(patients_history)
-    #group by id
-    patient_dict = patients_history
-    #demo variables
-    for key in patient_raw_dict.keys():
-        patient_raw_dict[key] = patient_raw_dict[key][0]["name"]
-    patient_w_id_options_raw = []
-    for key,value in patient_raw_dict.items():
-        patient_w_id_options_raw.append((key,value))
+    if (cookie_manager.get(cookie="access_token")):
+        patients_history = get_patient_history()
+        patient_raw_dict = deepcopy(patients_history)
+        #group by id
+        patient_dict = patients_history
+        #demo variables
+        for key in patient_raw_dict.keys():
+            patient_raw_dict[key] = patient_raw_dict[key][0]["name"]
+        patient_w_id_options_raw = []
+        for key,value in patient_raw_dict.items():
+            patient_w_id_options_raw.append((key,value))
     #format id column as a string
     disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
     
@@ -341,15 +337,26 @@ def home():
             filter1, filter2, filter3 = st.columns(3)
             with filter1:
                 patient_w_id_options = patient_w_id_options_raw
-                patient_w_id_options.sort()
+                patient_w_id_options.sort(key=lambda x: int(x[0]))
                 selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient')
                 selected_patient_id = selected_patient_id_selectbox[0]
             with filter2:
                 selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
             with filter3:
                 selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
-                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
-                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, help='Select visit date')
+                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list])
+                # date_list =[]
+                # time_list=[]
+                # for date in selected_patient_date_list_flatten:
+                #     converted = datetime.datetime.fromisoformat(date) 
+                #     date_list.append(converted.date())
+                #     time_list.append(converted.time())
+                # df = pd.DataFrame({'raw':selected_patient_date_list_flatten, 'date':date_list, 'time':time_list})
+                # df = df.sort_values('raw')
+                # dropped = df.drop_duplicates(subset='date', keep='last')
+                # dropped_options = list(dropped['raw'])
+                # dropped_options.sort(reverse=True)
+                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
 
         info, left, right = st.columns([0.35, 0.275, 0.275])
 
@@ -371,7 +378,11 @@ def home():
             #query diagnosed date
             #placeholder information for now
             temp_diagnosed_date = query_last_visit_date(selected_date, selected_patient_date_list_flatten)
-            st.write(f"**Last Visit Date:** {temp_diagnosed_date}")
+            if (temp_diagnosed_date!="NA"):
+                display_diagnosed_date = strip_time_from_isodatetime(temp_diagnosed_date)
+            else:
+                display_diagnosed_date = temp_diagnosed_date
+            st.write(f"**Last Visit Date:** {display_diagnosed_date}")
             
         with left:
             st.subheader("Left Fundus")
@@ -379,22 +390,31 @@ def home():
             st.image(left_img_url, use_column_width="auto")
             left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
             left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
+            if (temp_diagnosed_date == "NA"):
+                left_risk_prev = 0
+            else:
+                left_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'left')
             stage, risk = st.columns([0.5, 0.5])
             with stage:
                 st.metric("Most Probable Stage", left_stage)
             with risk:
-                st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(random.randint(-5,5))+'%', delta_color="inverse")
+                st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
         with right:
             st.subheader("Right Fundus")
             right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
             st.image(right_img_url, use_column_width="auto")
             right_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
             right_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
+            if (temp_diagnosed_date == "NA"):
+                right_risk_prev = 0
+            else:
+                right_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'right')
+            stage, risk = st.columns([0.5, 0.5])
             stage, risk = st.columns([0.5, 0.5])
             with stage:
                 st.metric("Most Probable Stage", right_stage)
             with risk:
-                st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(random.randint(-5,5))+'%', delta_color="inverse")
+                st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(round((right_risk-right_risk_prev)*100,2))+'%', delta_color="inverse")
 
         st.divider()
         st.subheader("Risk Trend")
@@ -405,6 +425,7 @@ def home():
         chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
 
         df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
+        # df = df[df['date'].isin(dropped_options)]
         melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
         melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
         melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
