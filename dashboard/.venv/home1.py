@@ -2,11 +2,13 @@ import altair as alt
 from copy import deepcopy
 import datetime
 import extra_streamlit_components as stx
+import json
 import numpy as np
 import pandas as pd
 import random
 import requests
 import streamlit as st
+import time
 
 # Streamlit app
 st.set_page_config(
@@ -53,9 +55,17 @@ if (_DEBUG):
         if st.button("Delete"):
             cookie_manager.delete(cookie)
 
+
+
+
+
 def get_region_from_UTC_offset(val):
     regions = {"+08": "Asia/Singapore", "+09": "Asia/Tokyo"}
     return regions[val]
+
+# timezone = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
+
+
 
 def submitted():
     st.session_state.submitted_login = True
@@ -215,7 +225,6 @@ def home():
         else:
             return sorted_dates[sorted_dates.index(curr_date)-1]
 
-
     def get_cutoff_date(list_of_dates):
         list_of_dates = sorted(list_of_dates, reverse=True)
         if (len(list_of_dates)>10):
@@ -245,7 +254,7 @@ def home():
         code = encode_disease(disease)
         risk_col = laterality + '_' + code + '_prob'
         return query_patient_value(dict, id, visit_date, risk_col)
-    
+
     def concat_tuples(x):
         return str(x[0]) + ' - ' + x[1]
     def strip_time_from_isodatetime(iso_datetime):
@@ -300,17 +309,17 @@ def home():
             return True
     
     ##END API CALL
-    if (cookie_manager.get(cookie="access_token")):
-        patients_history = get_patient_history()
-        patient_raw_dict = deepcopy(patients_history)
-        #group by id
-        patient_dict = patients_history
-        #demo variables
-        for key in patient_raw_dict.keys():
-            patient_raw_dict[key] = patient_raw_dict[key][0]["name"]
-        patient_w_id_options_raw = []
-        for key,value in patient_raw_dict.items():
-            patient_w_id_options_raw.append((key,value))
+    
+    patients_history = get_patient_history()
+    patient_raw_dict = deepcopy(patients_history)
+    #group by id
+    patient_dict = patients_history
+    #demo variables
+    for key in patient_raw_dict.keys():
+        patient_raw_dict[key] = patient_raw_dict[key][0]["name"]
+    patient_w_id_options_raw = []
+    for key,value in patient_raw_dict.items():
+        patient_w_id_options_raw.append((key,value))
     #format id column as a string
     disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
     
@@ -318,8 +327,6 @@ def home():
     with main:
         st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
         st.sidebar.write(f'Welcome, *{cookie_manager.get(cookie="user_username")}*')
-        d_range = st.sidebar.slider(label="Diabetic Retinopathy Risk Range:", min_value=0, max_value=100, value=(11, 100))
-
         st.sidebar.button(label='Logout', on_click=submitted_logout, key='logout_button')
         logo, title = st.columns([0.08,0.92])
         with title:
@@ -334,9 +341,6 @@ def home():
 
         # Filters
         with st.expander(label="Search and Filter", expanded=True):
-            # selected_date=None
-            # def reset_date_options():
-            #     st.experimental_rerun()
             filter1, filter2, filter3 = st.columns(3)
             with filter1:
                 patient_w_id_options = patient_w_id_options_raw
@@ -347,20 +351,8 @@ def home():
                 selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
             with filter3:
                 selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
-                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list])
-                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
-                # date_list =[]
-                # time_list=[]
-                # for date in selected_patient_date_list_flatten:
-                #     converted = datetime.datetime.fromisoformat(date) 
-                #     date_list.append(converted.date())
-                #     time_list.append(converted.time())
-                # df = pd.DataFrame({'raw':selected_patient_date_list_flatten, 'date':date_list, 'time':time_list})
-                # df = df.sort_values('raw')
-                # dropped = df.drop_duplicates(subset='date', keep='last')
-                # dropped_options = list(dropped['raw'])
-                # dropped_options.sort(reverse=True)
-                
+                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
+                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, help='Select visit date', format_func=strip_time_from_isodatetime)
 
         info, left, right = st.columns([0.35, 0.275, 0.275])
 
@@ -414,7 +406,6 @@ def home():
             else:
                 right_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'right')
             stage, risk = st.columns([0.5, 0.5])
-            stage, risk = st.columns([0.5, 0.5])
             with stage:
                 st.metric("Most Probable Stage", right_stage)
             with risk:
@@ -429,7 +420,6 @@ def home():
         chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
 
         df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
-        # df = df[df['date'].isin(dropped_options)]
         melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
         melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
         melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
