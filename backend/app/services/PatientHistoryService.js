@@ -15,13 +15,14 @@ const getPatientHistory = async (timezone = "UTC") => {
   return convertPatientHistoryFormat(patientHistory, timezone);
 };
 
-const getPatientReports = async (id, timezone = "UTC") => {
+const getPatientReports = async (id, sort, timezone = "UTC") => {
   const patient = await getPatientByID(id);
+  const order = sort == "ascending" ? "ASC" : "DESC";
   const patientReports = await PatientHistory.findAll({
     where: {
       id: patient.id,
     },
-    order: [["version", "DESC"]],
+    order: [["version", order]],
     attributes: ["version", "doctor_notes", "report_link", "visit_date"],
     timezone: timezone,
   });

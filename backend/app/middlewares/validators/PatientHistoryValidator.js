@@ -18,6 +18,24 @@ const validateGetPatientHistory = [
   },
 ];
 
+const validateGetSortedPatientHistory = [
+  query("sort")
+    .not()
+    .isEmpty()
+    .withMessage("sort cannot be empty.")
+    .bail()
+    .custom((value) => {
+      return ["ascending", "descending"].includes(value);
+    })
+    .withMessage(
+      "sort is not valid, please choose from ascending or descending"
+    ),
+  (req, res, next) => {
+    return BadRequestError(req, res, next);
+  },
+];
+
 module.exports = {
   validateGetPatientHistory,
+  validateGetSortedPatientHistory,
 };
