@@ -4,6 +4,8 @@ import Cookies from 'js-cookie';
 
 const Navi = () => {
     const clearCookies = () => {
+
+        console.log("logging out, removing cookies")
         Cookies.remove('accessToken'); // Clear the access token cookie
         Cookies.remove('refreshToken'); // Clear the refresh token cookie
         // You can remove any other cookies you have here

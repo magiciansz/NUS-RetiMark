@@ -9,7 +9,7 @@ import './pastreports.css';
 
 
 const patients = [
-	{name: 'jiahui', age: '22', gender: 'F'},
+	{name: 'jiahui', dateOfBirth: '02-02-2001', gender: 'F'},
 	{name: 'xianghan', age: '24', gender: 'M'},
 	{name: 'jiajun', age: '24', gender: 'M'},
 	{name: 'glenn', age: '24', gender: 'M'},
@@ -26,6 +26,7 @@ const PastReports = () => {
 	const [existingPatient, setExistingPatient] = useState(false)
 	const [filteredPatients, setFilteredPatients] = useState([])
 	const [input, setInput] = useState("");
+    const [pastReports, setPastReports] = useState([])
 
     const handleExistingPatient = () => {
         setExistingPatient(true)
@@ -76,9 +77,35 @@ const PastReports = () => {
 
     const handleSearch = async () => {
         const accessToken = await getAccessToken();
+        console.log("acess in past reports", accessToken)
         if (accessToken) {
-            console.log('Access token:', accessToken);
+            // const requestParams = {
+            //     accessToken, 
+            //     query: 'jia'
+            // };
+            // try {
+            //     const res = await PatientApi.searchPatient(requestParams);
+            //     console.log("res from search", res)
+            // } catch (err) {
+            //     console.error(err);
+            // }
+
+
+
+            const requestParams = {
+                accessToken,
+                id: 59,
+            };
+            
+            try {
+                const res = await PatientApi.getPastReports(requestParams);
+                console.log("res from past reports", res)
+                setPastReports(res.data?.reports)
+            } catch (err) {
+                console.error(err);
+            }
         } else {
+            // change to logout function !! 
             navigate("/login")
             console.log('No valid access token.');
         }
@@ -120,7 +147,41 @@ const PastReports = () => {
                 </div>
             </div>
             <div>
-                {patient && <div> Selected patient: {patient.name} </div>}
+                <div className='search-results-header'>
+                    Your Search Results: 
+                </div>
+                {patient && <div> 
+                    Name: {patient.name}
+                    Date of Birth: {patient.dateOfBirth}  
+                    Gender: {patient.gender}
+                </div>}
+                <div className='report-table'>
+                <table>
+                    <thead>
+                        <tr className="header">
+                        <th>Date</th>
+                        <th>Report Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {pastReports.map((v) => (
+                        <tr key={`report${v.id}`}>
+                            <td>{v.visit_date}</td>
+                            <td>
+                                <a href={v.report_link} target="_blank" rel="noopener noreferrer" class='custom-link'>
+                                    {v.report_link}
+                                </a>
+                            </td>
+                        </tr>
+                        ))}
+                    </tbody>
+                </table>
+                </div>
+                {/* {pastReports?.map((report, index) => (
+                    
+                ))} */}
+                <div>
+                </div>
             </div>
         </div>
     )

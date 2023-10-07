@@ -24,7 +24,9 @@ function Home() {
 	};
 
 	const closeModal = () => {
+		console.log("Before: isModalOpen", isModalOpen);
 		setIsModalOpen(false);
+		console.log("After: isModalOpen", isModalOpen);
 	};
 
 	const handleShowReport = (value) => {

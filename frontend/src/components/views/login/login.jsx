@@ -44,6 +44,7 @@ function Login() {
             password: formData.password,
         };
         try {
+            console.log("trying to login")
             const res = await AuthApi.login(requestParams);
             console.log("res from login", res.data.tokens)
             const {accessToken, refreshToken} = res.data.tokens;

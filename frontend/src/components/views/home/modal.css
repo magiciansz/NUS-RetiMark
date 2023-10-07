@@ -9,6 +9,15 @@
     justify-content: center;
     align-items: center;
     /* overflow-y: auto; */
+    &.hide-modal{
+        height: 0;
+        width: 0;
+    }
+    &.show-modal {
+        height: 100%;
+        width: 100%;
+    }
+   
 
     .modal-content {
         position: relative;
@@ -16,6 +25,20 @@
         width: 50%;
         background-color: #fff;
         border-radius: 20px;
+        &.hide-modal{
+            display: none;
+        }
+        /* &.show-modal {
+            height: 100%;
+            width: 100%;
+            .modal-gray-screen{
+                opacity: 1;
+            }
+        } */
+        
+    }
+    .modal-content hide-modal {
+        display: none;
     }
     .text-input{
         /* background-color:#fff; */
