@@ -1,3 +1,7 @@
+altair
+datetime
+extra_streamlit_components
 numpy
+requests
 pandas
 streamlit
