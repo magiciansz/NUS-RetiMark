@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 async function createPatient({
   accessToken,
@@ -26,7 +26,7 @@ async function createPatient({
   formData.append('report_pdf', report);
   console.log('form data for create patient');
   formData.forEach((value, key) => {
-    console.log('Field:', key, 'Value:', value);
+    console.log("Field:", key, "Value:", value);
   });
 
   return axios.post(
@@ -34,7 +34,7 @@ async function createPatient({
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     }
   );
 }
@@ -62,7 +62,7 @@ async function updatePatient({
   formData.append('report_pdf', report);
   console.log('form data for update patient');
   formData.forEach((value, key) => {
-    console.log('Field:', key, 'Value:', value);
+    console.log("Field:", key, "Value:", value);
   });
 
   return axios.patch(
@@ -70,7 +70,7 @@ async function updatePatient({
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     }
   );
 }

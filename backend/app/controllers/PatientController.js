@@ -1,5 +1,4 @@
 const catchAsync = require("../helpers/catchAsync");
-const PatientHistory = require("../models/PatientHistory");
 const httpStatus = require("http-status");
 
 const PatientService = require("../services/PatientService");
@@ -60,7 +59,12 @@ const add = catchAsync(async (req, res) => {
 });
 
 const update = catchAsync(async (req, res) => {
-  const patient = await PatientService.updatePatient(req.params.id, req.body);
+  const patient = await PatientService.updatePatient(
+    req.params.id,
+    req.body,
+    req.files,
+    req.query.timezone
+  );
   res.status(httpStatus.OK).send({ patient });
 });
 
@@ -69,9 +73,15 @@ const remove = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const search = catchAsync(async (req, res) => {
+  const results = await PatientService.searchPatient(req.query.query);
+  res.status(httpStatus.OK).send(results);
+});
+
 module.exports = {
   index,
   update,
   add,
   remove,
+  search,
 };
