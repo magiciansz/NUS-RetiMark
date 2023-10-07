@@ -18,6 +18,7 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
     const [openSaveModal, setOpenSaveModal] = useState(false)
     const [modalMessage, setModalMessage] = useState('Saving In Progress')
 
+    console.log("patient in report", newPatient)
     const handleDownloadPDF = () => {
         if (reportRef.current) {
             html2canvas(reportRef.current).then((canvas) => {
@@ -51,9 +52,12 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
         onSave();
 	};
 
-    // const handleSave = () => {
-	//     onSave();
-	// };
+    const calculateAge = () => {
+        const dob = new Date(patient.date_of_birth);
+        const today = new Date();
+        const age = today.getFullYear() - dob.getFullYear();
+        return age;
+    }
 
     const handleSave = async () => {
         // First, capture the content of the report as a PDF
@@ -89,7 +93,7 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
                 try {
                     if (!newPatient) {
                         // Include the 'id' field conditionally
-                        requestParams.id = 42;
+                        requestParams.id = patient.id;
                     }
                     console.log("request params", requestParams)
                     // const res = await PatientApi.createPatient(requestParams);
@@ -134,9 +138,9 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
                         </div>
                         Name: {patient.name}
                         <br/>
-                        Age: {patient.age}
+                        Age: {newPatient? patient.age : calculateAge()}
                         <br/>
-                        Sex: {patient.gender}
+                        Sex: {newPatient? patient.gender : patient.sex}
                     </div>
                     <div className='eye-image'>
                         <div className='sub-header'>

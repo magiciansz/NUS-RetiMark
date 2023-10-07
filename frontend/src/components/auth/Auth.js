@@ -4,8 +4,9 @@ import AuthApi from '../../apis/AuthApi';
 // Function to check if the access token has expired
 const isAccessTokenExpired = (accessTokenExpiry) => {
   console.log('access token expiry checking', accessTokenExpiry);
-  if (typeof accessTokenExpiry !== 'undefined' && accessTokenExpiry != null) {
-    return false;
+  if (typeof accessTokenExpiry == 'undefined' && accessTokenExpiry == null) {
+    console.log('returning false');
+    return true;
   }
   const expiryDate = new Date(accessTokenExpiry);
   const currentTime = new Date();
@@ -69,7 +70,9 @@ const getAccessToken = async () => {
     const accessToken = parsedAccessTokenData.token;
     const accessTokenExpiry = parsedAccessTokenData.expires;
     if (!isAccessTokenExpired(accessTokenExpiry)) {
+      console.log('why is this ehre', isAccessTokenExpired(accessTokenExpiry));
       // Access token is still valid
+      console.log('havent expired??', accessToken);
       return accessToken;
     } else {
       const refreshedAccessToken = await handleTokenRefresh();
@@ -79,11 +82,16 @@ const getAccessToken = async () => {
         // Token refresh failed or no refresh token available, log the user out
         // Implement your logout logic here
         console.log('User logged out due to token expiration.');
+        Cookies.remove('accessToken'); // Clear the access token cookie
+        Cookies.remove('refreshToken');
 
         return null;
       }
     }
+  } else {
+    console.log('failed??');
   }
+
   return null; // No access token available
 };
 
