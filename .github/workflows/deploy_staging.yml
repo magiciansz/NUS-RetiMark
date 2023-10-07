@@ -1,76 +1,14 @@
-name: CI/CD (Staging)
+name: CD (Staging)
 
 on:
   pull_request:
     branches:
       - develop
+    types: [closed]
 
 jobs:
-  tests:
-    name: Unit & Integration Testing
-    permissions: write-all
-    runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_DATABASE: retimark_db
-          MYSQL_ROOT_PASSWORD: 123456
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-      localstack:
-        image: localstack/localstack
-        ports:
-          - "127.0.0.1:4566:4566" # LocalStack Gateway
-          - "127.0.0.1:4510-4559:4510-4559" # external services port range
-        env:
-          AWS_DEFAULT_REGION: ap-southeast-1
-          AWS_ACCESS_KEY_ID: test
-          AWS_SECRET_ACCESS_KEY: test
-          DEBUG: ${DEBUG:-1}
-          DOCKER_HOST: unix:///var/run/docker.sock
-          LS_LOG: WARN
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Install dependencies
-        working-directory: backend
-        run: |
-          npm install
-      - name: Configure LocalStack
-        working-directory: backend
-        run: |
-          aws configure set aws_access_key_id test
-          aws configure set aws_secret_access_key test
-          aws configure set default.region ap-southeast-1
-          aws s3 mb s3://vision-developer --endpoint-url=http://localhost:4566
-      - name: Run Tests
-        working-directory: backend
-        env:
-          TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
-          TOKEN_ACCESS_EXPIRATION_MINUTES: 60
-          TOKEN_REFRESH_EXPIRATION_HOURS: 4
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: retimark_db
-          DB_USERNAME: root
-          DB_PASSWORD: 123456
-          NODE_ENV: DEVELOP
-          AWS_ACCESS_KEY_ID: test
-          AWS_SECRET_ACCESS_KEY: test
-          AWS_BUCKET: vision-developer
-        run: |
-          npm test
-      - name: Test Report
-        uses: dorny/test-reporter@v1.6.0
-        if: success() || failure() # run this step even if previous step failed
-        with:
-          name: Test Report # Name of the check run which will be created
-          path: backend/report.xml # Path to test results
-          reporter: jest-junit # Format of test results
   build:
-    needs: tests
+    if: ${{ github.event.pull_request.merged }}
     name: Build Image to ECR & deploy on ECS
     runs-on: ubuntu-latest
     steps:
