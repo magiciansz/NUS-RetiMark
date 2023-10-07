@@ -210,6 +210,8 @@ def home():
     #output: single value int/str/float depending on the desired column
     def query_last_visit_date(curr_date, date_list):
         sorted_dates = sorted(date_list)
+        if curr_date not in date_list:
+            return sorted_dates[0]
         if (sorted_dates.index(curr_date)==0):
             return "NA"
         else:
@@ -245,7 +247,7 @@ def home():
         code = encode_disease(disease)
         risk_col = laterality + '_' + code + '_prob'
         return query_patient_value(dict, id, visit_date, risk_col)
-    
+
     def concat_tuples(x):
         return str(x[0]) + ' - ' + x[1]
     def strip_time_from_isodatetime(iso_datetime):
@@ -318,8 +320,6 @@ def home():
     with main:
         st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
         st.sidebar.write(f'Welcome, *{cookie_manager.get(cookie="user_username")}*')
-        d_range = st.sidebar.slider(label="Diabetic Retinopathy Risk Range:", min_value=0, max_value=100, value=(11, 100))
-
         st.sidebar.button(label='Logout', on_click=submitted_logout, key='logout_button')
         logo, title = st.columns([0.08,0.92])
         with title:
@@ -334,9 +334,6 @@ def home():
 
         # Filters
         with st.expander(label="Search and Filter", expanded=True):
-            # selected_date=None
-            # def reset_date_options():
-            #     st.experimental_rerun()
             filter1, filter2, filter3 = st.columns(3)
             with filter1:
                 patient_w_id_options = patient_w_id_options_raw
@@ -348,7 +345,6 @@ def home():
             with filter3:
                 selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
                 selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list])
-                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
                 # date_list =[]
                 # time_list=[]
                 # for date in selected_patient_date_list_flatten:
@@ -360,7 +356,7 @@ def home():
                 # dropped = df.drop_duplicates(subset='date', keep='last')
                 # dropped_options = list(dropped['raw'])
                 # dropped_options.sort(reverse=True)
-                
+                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
 
         info, left, right = st.columns([0.35, 0.275, 0.275])
 
