@@ -318,6 +318,8 @@ def home():
     with main:
         st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
         st.sidebar.write(f'Welcome, *{cookie_manager.get(cookie="user_username")}*')
+        d_range = st.sidebar.slider(label="Diabetic Retinopathy Risk Range:", min_value=0, max_value=100, value=(11, 100))
+
         st.sidebar.button(label='Logout', on_click=submitted_logout, key='logout_button')
         logo, title = st.columns([0.08,0.92])
         with title:
