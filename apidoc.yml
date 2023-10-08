@@ -289,8 +289,44 @@ paths:
       tags:
         - Patient History
       summary: Get All Patient History
-      description: Get Patient History for all patients, in ascending ID and descending version order
+      description: Get Patient History for patients within any threshold, in ascending ID and descending version order
       parameters:
+        - name: ocular_lower_threshold
+          in: query
+          description: lower threshold for ocular disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: ocular_upper_threshold
+          in: query
+          description: upper threshold for ocular disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: glaucoma_lower_threshold
+          in: query
+          description: lower threshold for glaucoma disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: glaucoma_upper_threshold
+          in: query
+          description: upper threshold for glaucoma disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: diabetic_retinopathy_lower_threshold
+          in: query
+          description: lower threshold for diabetic retinopathy (0-1)
+          required: true
+          schema:
+            type: number
+        - name: diabetic_retinopathy_upper_threshold
+          in: query
+          description: upper threshold for diabetic retinopathy (0-1)
+          required: true
+          schema:
+            type: number
         - name: timezone
           in: query
           description: timezone to return visit date of patients
