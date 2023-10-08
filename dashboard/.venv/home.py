@@ -19,7 +19,7 @@ _DEBUG = False
 
 @st.cache_resource(hash_funcs={"_thread.RLock": lambda _: None})
 def init_router(): 
-    return stx.Router({"/login": login, "/select_risk": select_risk, "/home": home, })
+    return stx.Router({"/login": login, "/home": home, })
 
 @st.cache_resource(experimental_allow_widgets=True)
 def get_manager():
@@ -132,7 +132,7 @@ def login():
     if (st.session_state.submitted_login):
         attempt_login(username, password)
         if (cookie_manager.get(cookie="login_status")):
-            router.route("select_risk")
+            router.route("home")
             # If the form is submitted and the email and password are correct,
             # clear the form/container and display a success message
             landing.empty()
@@ -142,49 +142,6 @@ def login():
     else:
         st.error("Username/password is incorrect")
     return landing
-
-def select_risk():
-    def confirm_selection(d_r, o_r, g_r):
-        cookie_manager.set(key='diabetic_retinopathy_risk', cookie='diabetic_retinopathy_risk', val=d_r)
-        cookie_manager.set(key='ocular', cookie='ocular', val=o_r)
-        cookie_manager.set(key='glaucoma', cookie='glaucoma', val=g_r)
-        cookie_manager.set(key='risk_selection_status', cookie='risk_selection_status', val=True)
-        st.session_state.confirmed_selection = True
-
-    if 'confirmed_selection' not in st.session_state:
-        st.session_state['confirmed_selection'] = False
-                                                               
-    # Create an empty container
-    risk_selection = st.container()
-    # Insert a form in the container
-    with risk_selection:
-        with st.form("risk"):
-            st.markdown("## Select risk ranges:")
-            st.markdown("###### Default risk levels are dereived from empirical data and represent the subset of patient data with non-normal fundus images")
-            diabetic_retinopathy = st.slider("Risk level for Diabetic Retinopathy (%)", 0, 100, (10,100))
-            ocular = st.slider("Risk level for Age-related Macular Degeneration (%)", 0, 100, (20,100))
-            glaucoma = st.slider("Risk level for Glaucoma (%)", 0, 100, (30,100))
-            confirm_selection = st.form_submit_button("Proceed", on_click=confirm_selection, args=(diabetic_retinopathy, ocular, glaucoma))
-            # success = st.form_submit_button("Login", on_click=attempt_login, args=[username, password])
-    
-    #check for login status in case user tries to access link directly
-    if (cookie_manager.get(cookie='login_status')):   
-        return risk_selection
-    else:
-        router.route("login")
-        st.warning("You must log in first")
-
-
-    if (st.session_state.confirmed_selection):
-        if (cookie_manager.get(cookie="login_status")):
-            router.route("home")
-            # risk_selection.empty()
-            # st.success("Login successful")
-    # elif (not st.session_state.submitted_login):
-    #       return st.warning("Please enter your credentials")
-    # else:
-    #     st.error("Username/password is incorrect")
-    return risk_selection
 
 def home():
     if 'submitted_logout' not in st.session_state:
@@ -376,8 +333,54 @@ def home():
         # st.sidebar.button("Sign out", type="secondary")
 
         # Filters
+        with st.expander(label="Filter Risk Thresholds", expanded=False):
+            options1, options2, options3, options4 = st.columns(4)
+            with options1:
+                pre_filter_on = st.toggle('Filter by risk values')
+            with options2:
+                if pre_filter_on:
+                    use_default = st.toggle('Use default thresholds')
+                else:
+                    use_default = st.toggle('Use default thresholds', disabled = True)
+            with options3:
+                if pre_filter_on:
+                    view_type = st.multiselect('I want to view', ['Low-Risk', 'High-Risk'], default=None)
+                else:
+                    view_type = st.multiselect('I want to view', ['Low-Risk', 'High-Risk'], default=None, disabled=True)
+            with options4:
+                if pre_filter_on:
+                    advanced_mode = st.toggle('Advanced mode')
+                else:
+                    advanced_mode = st.toggle('Advanced Mode', disabled = True)
+            pre_filter1, pre_filter2, pre_filter3 = st.columns(3)
+            with pre_filter1:
+                if pre_filter_on:
+                    if use_default:
+                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (20,100))
+                    else:
+                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
+                else:
+                    st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), disabled=True)
+            with pre_filter2:
+                if pre_filter_on:
+                    if use_default:
+                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (20,100))
+                    else:
+                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100))
+                else:
+                    st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), disabled=True)
+            with pre_filter3:
+                if pre_filter_on:
+                    if use_default:
+                        st.slider("Risk of Glaucoma:", 0, 100, (20,100))
+                    else:
+                        st.slider("Risk of Glaucoma:", 0, 100, (0,100))
+                else:
+                    st.slider("Risk of Glaucoma:", 0, 100, (0,100), disabled=True)
         with st.expander(label="Search and Filter", expanded=True):
+            
             filter1, filter2, filter3 = st.columns(3)
+            
             with filter1:
                 patient_w_id_options = patient_w_id_options_raw
                 patient_w_id_options.sort(key=lambda x: int(x[0]))
@@ -557,7 +560,5 @@ if (_DEBUG):
         st.write(st.session_state)
 if (st.session_state['stx_router_route'] =="/"):
     router.route("login")
-if (st.session_state['stx_router_route'] =="/login" and cookie_manager.get(cookie='login_status') and not cookie_manager.get(cookie='risk_selection_status')):
-    router.route("select_risk")
-if (st.session_state['stx_router_route'] =="/login" and cookie_manager.get(cookie='login_status') and cookie_manager.get(cookie='risk_selection_status')):
+if (st.session_state['stx_router_route'] =="/login" and cookie_manager.get(cookie='login_status')):
     router.route("home")
