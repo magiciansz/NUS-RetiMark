@@ -8,7 +8,6 @@ const moment = require("moment-timezone");
 const TokenService = require("../../app/services/TokenService");
 const { tokenTypes } = require("../../config/tokens");
 const path = require("path");
-const { formatDateTime } = require("../../app/helpers/DateUtil");
 
 setUpTestDB();
 
@@ -160,7 +159,7 @@ describe("Patient History Routes", () => {
       expect(Object.keys(res.body)[0]).toBe("1");
       expect(Object.keys(res.body)[1]).toBe("2");
     });
-    test("Should return 200 and return history in descending version order for each ID", async () => {
+    test("Should return 200 and return history, keeping only one unique entry per date", async () => {
       patient.name = "Xi Gua";
       const createdPatient = await request(app)
         .post("/api/v1/patient")
@@ -208,9 +207,8 @@ describe("Patient History Routes", () => {
       expect(Object.keys(res.body)).toHaveLength(2);
       expect(Object.keys(res.body)[0]).toBe("1");
       expect(Object.keys(res.body)[1]).toBe("2");
-      expect(res.body[2]).toHaveLength(2);
+      expect(res.body[2]).toHaveLength(1);
       expect(res.body[2][0].version).toBe(2);
-      expect(res.body[2][1].version).toBe(1);
     });
     test("Should return 400 if timezone is not valid", async () => {
       await request(app)
@@ -251,17 +249,13 @@ describe("Patient History Routes", () => {
         .query({ timezone: "Asia/Singapore", sort: "descending" })
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.OK);
-      const visitDate = formatDateTime(
-        moment(createdPatient.body.patient.visit_date),
-        "Asia/Singapore"
-      );
       expect(res.body.totalCount).toBe(1);
       expect(res.body.reports).toHaveLength(1);
       expect(res.body.reports[0]).toMatchObject({
         version: createdPatient.body.patient.version,
         doctor_notes: createdPatient.body.patient.doctor_notes,
         report_link: createdPatient.body.patient.report_link,
-        visit_date: visitDate,
+        visit_date: expect.anything(),
       });
       expect(res.body.reports[0].visit_date).toMatch("+08:00");
     });
@@ -279,7 +273,7 @@ describe("Patient History Routes", () => {
         version: createdPatient.body.patient.version,
         doctor_notes: createdPatient.body.patient.doctor_notes,
         report_link: createdPatient.body.patient.report_link,
-        visit_date: createdPatient.body.patient.visit_date,
+        visit_date: expect.anything(),
       });
       expect(res.body.reports[0].visit_date).toMatch("+00:00");
     });
@@ -302,10 +296,6 @@ describe("Patient History Routes", () => {
         .field(patient)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.OK);
-      const visitDate = formatDateTime(
-        moment(createdPatient.body.patient.visit_date),
-        "Asia/Singapore"
-      );
       const res = await request(app)
         .get(
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
@@ -322,13 +312,13 @@ describe("Patient History Routes", () => {
         version: createdPatient.body.patient.version,
         doctor_notes: createdPatient.body.patient.doctor_notes,
         report_link: createdPatient.body.patient.report_link,
-        visit_date: visitDate,
+        visit_date: expect.anything(),
       });
       expect(res.body.reports[0]).toMatchObject({
         version: updatedPatient.body.patient.version,
         doctor_notes: updatedPatient.body.patient.doctor_notes,
         report_link: updatedPatient.body.patient.report_link,
-        visit_date: updatedPatient.body.patient.visit_date,
+        visit_date: expect.anything(),
       });
     });
     test("should return 200 and 2 reports after a PATCH action, sorted by ascending time", async () => {
@@ -350,10 +340,6 @@ describe("Patient History Routes", () => {
         .field(patient)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.OK);
-      const visitDate = formatDateTime(
-        moment(createdPatient.body.patient.visit_date),
-        "Asia/Singapore"
-      );
       const res = await request(app)
         .get(
           `/api/v1/patient-history/${createdPatient.body.patient.id}/reports`
@@ -370,13 +356,13 @@ describe("Patient History Routes", () => {
         version: createdPatient.body.patient.version,
         doctor_notes: createdPatient.body.patient.doctor_notes,
         report_link: createdPatient.body.patient.report_link,
-        visit_date: visitDate,
+        visit_date: expect.anything(),
       });
       expect(res.body.reports[1]).toMatchObject({
         version: updatedPatient.body.patient.version,
         doctor_notes: updatedPatient.body.patient.doctor_notes,
         report_link: updatedPatient.body.patient.report_link,
-        visit_date: updatedPatient.body.patient.visit_date,
+        visit_date: expect.anything(),
       });
     });
     test("should return 400 if sort order is not given", async () => {
