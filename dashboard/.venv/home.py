@@ -146,7 +146,8 @@ def login():
 def home():
     if 'submitted_logout' not in st.session_state:
         st.session_state['submitted_logout'] = False
-    
+    if 'reset_thresholds' not in st.session_state:
+        st.session_state['reset_thresholds'] = False
     st.session_state['submitted_login'] = False
 
     # patients_history = pd.read_csv("./test-data/patient_history_table.csv")
@@ -156,7 +157,15 @@ def home():
         # tz_string = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
         # cookie_manager.set(key='time_zone', cookie='time_zone', val=tz_string)
         API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history"
-        PARAMS = {'timezone':cookie_manager.get(cookie="time_zone")}
+        PARAMS = {
+            'timezone':cookie_manager.get(cookie="time_zone"),
+            'diabetic_retinopathy_lower_threshold':0.0,
+            'diabetic_retinopathy_upper_threshold':1.0,
+            'ocular_lower_threshold':0.0,
+            'ocular_upper_threshold':1.0,
+            'glaucoma_lower_threshold':0.0,
+            'glaucoma_upper_threshold':1.0
+            }
         HEADERS = {
             "Authorization": "Bearer " + cookie_manager.get(cookie="access_token")
         }
@@ -255,6 +264,12 @@ def home():
         return converted.date()
     def submitted_logout():
         st.session_state.submitted_logout = True
+    def toggle_reset_thresholds():
+        if st.session_state.reset_thresholds:
+            st.session_state.reset_thresholds=False
+        else:
+            st.session_state.reset_thresholds=True
+    
     def logout():
         ##BEGIN API CALL
         # tz_string = datetime.datetime.now().astimezone().tzinfo
@@ -334,45 +349,62 @@ def home():
 
         # Filters
         with st.expander(label="Filter Risk Thresholds", expanded=False):
-            options1, options2, options3, options4 = st.columns(4)
+            options1, options2, options3 = st.columns(3)
             with options1:
-                pre_filter_on = st.toggle('Filter by risk values')
+                pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds)
             with options2:
                 if pre_filter_on:
-                    use_default = st.toggle('Use default thresholds')
+                    use_default_disease = st.button('Use default disease thresholds')
                 else:
-                    use_default = st.toggle('Use default thresholds', disabled = True)
+                    use_default_disease = st.button('Use default disease thresholds', disabled=True)
             with options3:
                 if pre_filter_on:
-                    view_type = st.multiselect('I want to view', ['Low-Risk', 'High-Risk'], default=None)
+                    use_default_normal = st.button('Use default normal thresholds')
                 else:
-                    view_type = st.multiselect('I want to view', ['Low-Risk', 'High-Risk'], default=None, disabled=True)
-            with options4:
-                if pre_filter_on:
-                    advanced_mode = st.toggle('Advanced mode')
-                else:
-                    advanced_mode = st.toggle('Advanced Mode', disabled = True)
+                    use_default_normal = st.button('Use default normal thresholds', disabled=True)
+            # with options3:
+            #     if pre_filter_on:
+            #         use_default_2 = st.toggle('Use default thresholds')
+            #     else:
+            #         use_default_2 = st.toggle('Use default thresholds', disabled = True)
+            # with options4:
+            #     if pre_filter_on:
+            #         advanced_mode = st.toggle('Advanced mode')
+            #     else:
+            #         advanced_mode = st.toggle('Advanced Mode', disabled = True)
             pre_filter1, pre_filter2, pre_filter3 = st.columns(3)
             with pre_filter1:
                 if pre_filter_on:
-                    if use_default:
-                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (20,100))
+                    if use_default_disease:
+                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (21,100), on_change=toggle_reset_thresholds)
+                    elif use_default_normal:
+                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20), on_change=toggle_reset_thresholds)
+                    elif st.session_state.reset_thresholds:
+                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
                     else:
                         st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
                 else:
                     st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), disabled=True)
             with pre_filter2:
                 if pre_filter_on:
-                    if use_default:
-                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (20,100))
+                    if use_default_disease:
+                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (21,100), on_change=toggle_reset_thresholds)
+                    elif use_default_normal:
+                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20), on_change=toggle_reset_thresholds)
+                    elif st.session_state.reset_thresholds:
+                        st.slider("Risk of Age-related Macular Degenerationa:", 0, 100, (0,100))
                     else:
                         st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100))
                 else:
                     st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), disabled=True)
             with pre_filter3:
                 if pre_filter_on:
-                    if use_default:
-                        st.slider("Risk of Glaucoma:", 0, 100, (20,100))
+                    if use_default_disease:
+                        st.slider("Risk of Glaucoma:", 0, 100, (21,100), on_change=toggle_reset_thresholds)
+                    elif use_default_normal:
+                        st.slider("Risk of Glaucoma:", 0, 100, (0,20), on_change=toggle_reset_thresholds)
+                    elif st.session_state.reset_thresholds:
+                        st.slider("Risk of Glaucoma:", 0, 100, (0,100))
                     else:
                         st.slider("Risk of Glaucoma:", 0, 100, (0,100))
                 else:
@@ -390,7 +422,7 @@ def home():
                 selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
             with filter3:
                 selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
-                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list])
+                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
                 # date_list =[]
                 # time_list=[]
                 # for date in selected_patient_date_list_flatten:
@@ -402,7 +434,8 @@ def home():
                 # dropped = df.drop_duplicates(subset='date', keep='last')
                 # dropped_options = list(dropped['raw'])
                 # dropped_options.sort(reverse=True)
-                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
+                # selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
+                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, help='Select visit date')
 
         info, left, right = st.columns([0.35, 0.275, 0.275])
 
