@@ -18,16 +18,17 @@ describe("Patient History Routes", () => {
   let date_of_birth = "1999-05-08";
   let sex = "M";
   let left_diabetic_retinopathy_stage = 1;
-  let left_diabetic_retinopathy_prob = 0.56;
+  let left_diabetic_retinopathy_prob = 0.5;
   let right_diabetic_retinopathy_stage = 2;
-  let right_diabetic_retinopathy_prob = 0.11;
-  let left_ocular_prob = 0.25;
-  let right_ocular_prob = 0.05;
-  let left_glaucoma_prob = 0.36;
-  let right_glaucoma_prob = 0.55;
+  let right_diabetic_retinopathy_prob = 0.5;
+  let left_ocular_prob = 0.5;
+  let right_ocular_prob = 0.5;
+  let left_glaucoma_prob = 0.5;
+  let right_glaucoma_prob = 0.5;
   let doctor_notes = "This patient is healthy.";
   let user;
   let accessToken;
+  let thresholds;
   beforeEach(async () => {
     patient = {
       name: name,
@@ -56,6 +57,14 @@ describe("Patient History Routes", () => {
       expires,
       tokenTypes.ACCESS
     );
+    thresholds = {
+      ocular_lower_threshold: 0,
+      ocular_upper_threshold: 1,
+      glaucoma_lower_threshold: 0,
+      glaucoma_upper_threshold: 1,
+      diabetic_retinopathy_lower_threshold: 0,
+      diabetic_retinopathy_upper_threshold: 1,
+    };
     createdPatient = await request(app)
       .post("/api/v1/patient")
       .attach(
@@ -79,11 +88,11 @@ describe("Patient History Routes", () => {
       .set("Authorization", `Bearer ${accessToken}`);
   });
   describe("GET /api/v1/patient-history", () => {
-    test("Should return 200 and return history if authorization provided", async () => {
+    test("Should return 200 and return all history if thresholds are 0-1", async () => {
       const res = await request(app)
         .get("/api/v1/patient-history")
         .set("Authorization", `Bearer ${accessToken}`)
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", ...thresholds })
         .expect(httpStatus.OK);
       const ageDate = new Date(Date.now() - new Date(date_of_birth));
       const expectedHistory = {
@@ -120,14 +129,15 @@ describe("Patient History Routes", () => {
       expect(patientHistory).toMatchObject(expectedHistory[1]);
       expect(res.body[1][0].visit_date).toMatch("+08:00");
     });
-    test("Should return 200 and return history in UTC if no timezone specified", async () => {
+    test("Should return 200 and return all history in UTC if no timezone specified, if thresholds are 0-1", async () => {
       const res = await request(app)
         .get("/api/v1/patient-history")
         .set("Authorization", `Bearer ${accessToken}`)
+        .query(thresholds)
         .expect(httpStatus.OK);
       expect(res.body[1][0].visit_date).toMatch("+00:00");
     });
-    test("Should return 200 and return history in ascending ID order", async () => {
+    test("Should return 200 and return all history in ascending ID order, if thresholds are 0-1", async () => {
       patient.name = "Xi Gua";
       await request(app)
         .post("/api/v1/patient")
@@ -153,13 +163,14 @@ describe("Patient History Routes", () => {
         .expect(httpStatus.CREATED);
       const res = await request(app)
         .get("/api/v1/patient-history")
+        .query(thresholds)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.OK);
       expect(Object.keys(res.body)).toHaveLength(2);
       expect(Object.keys(res.body)[0]).toBe("1");
       expect(Object.keys(res.body)[1]).toBe("2");
     });
-    test("Should return 200 and return history, keeping only one unique entry per date", async () => {
+    test("Should return 200 and return all history, keeping only one unique entry per date,if thresholds are 0-1", async () => {
       patient.name = "Xi Gua";
       const createdPatient = await request(app)
         .post("/api/v1/patient")
@@ -202,6 +213,7 @@ describe("Patient History Routes", () => {
         .expect(httpStatus.OK);
       const res = await request(app)
         .get("/api/v1/patient-history")
+        .query(thresholds)
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(httpStatus.OK);
       expect(Object.keys(res.body)).toHaveLength(2);
@@ -210,17 +222,250 @@ describe("Patient History Routes", () => {
       expect(res.body[2]).toHaveLength(1);
       expect(res.body[2][0].version).toBe(2);
     });
+    test("Should return 200 and only patients with a threshold within any given thresholds", async () => {
+      patient.name = "Xi Gua";
+      patient.left_diabetic_retinopathy_prob = 0.1;
+      patient.right_diabetic_retinopathy_prob = 0.1;
+      patient.left_glaucoma_prob = 0.1;
+      patient.right_glaucoma_prob = 0.1;
+      patient.left_ocular_prob = 0.1;
+      patient.right_ocular_prob = 0.1;
+      await request(app)
+        .post("/api/v1/patient")
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.CREATED);
+      thresholds = {
+        ocular_lower_threshold: 0.05,
+        ocular_upper_threshold: 0.2,
+        glaucoma_lower_threshold: 0.05,
+        glaucoma_upper_threshold: 0.2,
+        diabetic_retinopathy_lower_threshold: 0.05,
+        diabetic_retinopathy_upper_threshold: 0.2,
+      };
+      const res = await request(app)
+        .get("/api/v1/patient-history")
+        .query(thresholds)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(Object.keys(res.body)).toHaveLength(1);
+      expect(Object.keys(res.body)[0]).toBe("2");
+    });
+    test("Should return 200 and patients, even if these patients only have 1 matching threshold", async () => {
+      patient.name = "Xi Gua";
+      patient.left_diabetic_retinopathy_prob = 0.1;
+      patient.right_diabetic_retinopathy_prob = 1;
+      patient.left_glaucoma_prob = 1;
+      patient.right_glaucoma_prob = 1;
+      patient.left_ocular_prob = 1;
+      patient.right_ocular_prob = 1;
+      await request(app)
+        .post("/api/v1/patient")
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.CREATED);
+      thresholds = {
+        ocular_lower_threshold: 0.05,
+        ocular_upper_threshold: 0.2,
+        glaucoma_lower_threshold: 0.05,
+        glaucoma_upper_threshold: 0.2,
+        diabetic_retinopathy_lower_threshold: 0.05,
+        diabetic_retinopathy_upper_threshold: 0.2,
+      };
+      const res = await request(app)
+        .get("/api/v1/patient-history")
+        .query(thresholds)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(Object.keys(res.body)).toHaveLength(1);
+      expect(Object.keys(res.body)[0]).toBe("2");
+    });
+    test("Should return 200 and an empty result, if patients dont meet any of the thresholds", async () => {
+      patient.name = "Xi Gua";
+      patient.left_diabetic_retinopathy_prob = 1;
+      patient.right_diabetic_retinopathy_prob = 1;
+      patient.left_glaucoma_prob = 1;
+      patient.right_glaucoma_prob = 1;
+      patient.left_ocular_prob = 1;
+      patient.right_ocular_prob = 1;
+      await request(app)
+        .post("/api/v1/patient")
+        .attach(
+          "left_eye_image",
+          path.join(__dirname, "..", "files", "docker.jpeg")
+        )
+        .attach(
+          "right_eye_image",
+          path.join(__dirname, "..", "files", "react.png")
+        )
+        .attach(
+          "report_pdf",
+          path.join(
+            __dirname,
+            "..",
+            "files",
+            "BT4103 project proposal presentation guidelines.pdf"
+          )
+        )
+        .field(patient)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.CREATED);
+      thresholds = {
+        ocular_lower_threshold: 0.05,
+        ocular_upper_threshold: 0.2,
+        glaucoma_lower_threshold: 0.05,
+        glaucoma_upper_threshold: 0.2,
+        diabetic_retinopathy_lower_threshold: 0.05,
+        diabetic_retinopathy_upper_threshold: 0.2,
+      };
+      const res = await request(app)
+        .get("/api/v1/patient-history")
+        .query(thresholds)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(httpStatus.OK);
+      expect(Object.keys(res.body)).toHaveLength(0);
+    });
     test("Should return 400 if timezone is not valid", async () => {
       await request(app)
         .get("/api/v1/patient-history")
         .set("Authorization", `Bearer ${accessToken}`)
-        .query({ timezone: "Asia/Wakanda" })
+        .query({ timezone: "Asia/Wakanda", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if ocular_lower_threshold is not included", async () => {
+      delete thresholds["ocular_lower_threshold"];
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if ocular_lower_threshold is not valid", async () => {
+      thresholds.ocular_lower_threshold = 1.5;
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if ocular_upper_threshold is not included", async () => {
+      delete thresholds["ocular_upper_threshold"];
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if ocular_upper_threshold is not valid", async () => {
+      thresholds.ocular_upper_threshold = 1.5;
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if glaucoma_lower_threshold is not included", async () => {
+      delete thresholds["glaucoma_lower_threshold"];
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if glaucoma_lower_threshold is not valid", async () => {
+      thresholds.glaucoma_lower_threshold = 1.5;
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if glaucoma_upper_threshold is not included", async () => {
+      delete thresholds["glaucoma_upper_threshold"];
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if glaucoma_upper_threshold is not valid", async () => {
+      thresholds.glaucoma_upper_threshold = 1.5;
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if diabetic_retinopathy_lower_threshold is not included", async () => {
+      delete thresholds["diabetic_retinopathy_lower_threshold"];
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if diabetic_retinopathy_lower_threshold is not valid", async () => {
+      thresholds.diabetic_retinopathy_lower_threshold = 1.5;
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if diabetic_retinopathy_upper_threshold is not included", async () => {
+      delete thresholds["diabetic_retinopathy_upper_threshold"];
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
+        .expect(httpStatus.BAD_REQUEST);
+    });
+    test("Should return 400 if diabetic_retinopathy_upper_threshold is not valid", async () => {
+      thresholds.diabetic_retinopathy_upper_threshold = 1.5;
+      await request(app)
+        .get("/api/v1/patient-history")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .query({ timezone: "Asia/Singapore", ...thresholds })
         .expect(httpStatus.BAD_REQUEST);
     });
     test("Should return 401 if no access token provided", async () => {
       await request(app)
         .get("/api/v1/patient-history")
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", ...thresholds })
         .expect(httpStatus.UNAUTHORIZED);
     });
     test("should return 401 if access token is not valid", async () => {
@@ -235,7 +480,7 @@ describe("Patient History Routes", () => {
       );
       await request(app)
         .get("/api/v1/patient-history")
-        .query({ timezone: "Asia/Singapore" })
+        .query({ timezone: "Asia/Singapore", ...thresholds })
         .set("Authorization", `Bearer ${newAccessToken}`)
         .expect(httpStatus.UNAUTHORIZED);
     });

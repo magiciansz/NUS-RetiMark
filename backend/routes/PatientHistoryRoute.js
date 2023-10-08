@@ -4,7 +4,7 @@ const express = require("express");
 const PatientHistoryController = require("../app/controllers/PatientHistoryController");
 const {
   validateGetPatientHistory,
-  validateGetSortedPatientHistory,
+  validateGetPatientReports,
 } = require("../app/middlewares/validators/PatientHistoryValidator");
 const {
   validatePatientID,
@@ -23,8 +23,7 @@ router.get(
   "/:id/reports",
   auth(),
   validatePatientID,
-  validateGetPatientHistory,
-  validateGetSortedPatientHistory,
+  validateGetPatientReports,
   PatientHistoryController.getPatientReports
 );
 
