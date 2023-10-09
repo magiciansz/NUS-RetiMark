@@ -95,7 +95,7 @@ class ModelController(Resource):
             #     diabeticOutput = diabeticModel(image)
             # diabeticOutput_np = diabeticOutput.numpy()
             # output.update({'diabetic': diabeticOutput_np.tolist()[0][0]})
-            output.update({'diabetic': 0.042349932}) # REMOVE WHEN DIABETIC MODEL IS AVAILABLE
+            output.update({'diabetic': [0, 0.942349932]}) # REMOVE WHEN DIABETIC MODEL IS AVAILABLE
 
             # output_json = json.dumps(output)
             # return jsonify(output_json)
