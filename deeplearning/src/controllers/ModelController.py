@@ -24,6 +24,8 @@ import types
 
 amdWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/amd_state_dict.pth'
 amdModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/AmdClassifier.py'
+glaucomaWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/glaucoma_state_dict.pth'
+glaucomaModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/GlaucomaClassifier.py'
 
 def importModel(weightsUrl, modelUrl, moduleName="imported_module", className="EyeClassifier"):
     response = requests.get(modelUrl)
@@ -38,6 +40,7 @@ def importModel(weightsUrl, modelUrl, moduleName="imported_module", className="E
     return model
 
 amdModel = importModel(amdWeightsUrl, amdModelUrl)
+glaucomaModel = importModel(glaucomaWeightsUrl, glaucomaModelUrl)
 
 def crop_img(image):
     image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -46,8 +49,8 @@ def crop_img(image):
     cropped_image = cv.cvtColor(image[y:y+h, x:x+w], cv.COLOR_GRAY2RGB)
     return Image.fromarray(cropped_image)
 
-def preprocess_img(image):
-    content = image.read()
+def preprocess_img(input):
+    content = input.read()
     nparr = np.frombuffer(content, np.uint8)
     image = cv.imdecode(nparr, cv.IMREAD_COLOR)
 
@@ -73,17 +76,20 @@ class ModelController(Resource):
             abort(400, description = 'The image has to be of jpeg or png.')
         
         try:
+            output = {}
+            image = preprocess_img(image)
             with torch.no_grad():
-                output = amdModel(preprocess_img(image))
-            output_np = output.numpy()
-            output_json = json.dumps(output_np.tolist())
+                amdOutput = amdModel(image)
+            amdOutput_np = amdOutput.numpy()
+            output.update({'amd': amdOutput_np.tolist()[0][0]})
+
+            with torch.no_grad():
+                glaucomaOutput = glaucomaModel(image)
+            glaucomaOutput_np = glaucomaOutput.numpy()
+            output.update({'glaucoma': glaucomaOutput_np.tolist()[0][0]})
+
+            output_json = json.dumps(output)
             return jsonify(output_json)
         except Exception as e:
             print(e)
-
-
-        # process left_eye_image and right_eye_image here; variables below are the binaries of the images
-        # left_eye_image_binary = left_eye_image.read()
-        # right_eye_image_binary = right_eye_image.read()
-        # return jsonify({"left_glaucoma_prob": left_eye_image.mimetype})
 
