@@ -9,7 +9,7 @@ import PatientApi from '../../../apis/PatientApi';
 import Cookies from 'js-cookie';
 import { getAccessToken } from '../../auth/Auth';
 
-function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage, newPatient}) {
+function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage, newPatient, leftEyeResults, rightEyeResults}) {
     const [userEdit, setUserEdit] = useState({gender: ''});
     const [mode, setMode] = useState('');
     const [input, setInput] = useState("");
@@ -22,6 +22,8 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
     const [accessToken, setAccessToken] = useState(null);
     const [loading, setLoading] = useState(true);
     const [keywords, setKeywords] = useState('')
+    const [leftEyeRes, setLeftEyeRes] = useState(null)
+    const [rightEyeRes, setRightEyeRes] = useState(null)
 
     // if (!isOpen) return null;
     // Handle form submission
@@ -44,6 +46,8 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         selectedPatient(patient)
         leftEyeImage(leftEye)
         rightEyeImage(rightEye)
+        leftEyeResults(leftEyeRes)
+        rightEyeResults(rightEyeRes)
         clearInputs()
         onClose();
     };
@@ -159,7 +163,23 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 		setInput(selectedPatient.name); // Update the search input with the selected patient's name
 		setFilteredPatients([])   
         console.log("selected patient", selectedPatient)
-	};
+    };
+    
+    const runModels = async (image, eye) => {
+        const formData = new FormData();
+        formData.append('image', image)
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/model', {
+                method: 'POST',
+                body: formData
+            })
+            const result = await response.json()
+            console.log(result)
+            eye == "left" ? setLeftEyeRes(result) : setRightEyeRes(result)
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const handleFileChange = (event, eye) => {
 		const file = event.target.files[0];
@@ -195,6 +215,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                         setRightEye(URL.createObjectURL(file));
                         setErrorMessageRightEye("")
                     }
+                    runModels(file, eye)
                 } else {
                     // Image does not meet the requirements
                     console.log("image doesnt fit size")

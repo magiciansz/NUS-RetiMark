@@ -1,206 +1,221 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from "react";
 // import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import Modal from './doc-notes';
-import SaveModal from './save-modal';
-import { getAccessToken } from '../../auth/Auth';
-import PatientApi from '../../../apis/PatientApi';
+import { Link } from "react-router-dom";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import Modal from "./doc-notes";
+import SaveModal from "./save-modal";
+import { getAccessToken } from "../../auth/Auth";
+import PatientApi from "../../../apis/PatientApi";
 
+import "./report.css";
 
-import './report.css';
+function Report({
+  patient,
+  leftEyeImage,
+  rightEyeImage,
+  onSave,
+  newPatient,
+  leftEyeResults,
+  rightEyeResults,
+}) {
+  const reportRef = useRef(null);
+  const [docNotes, setDocNotes] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const [openSaveModal, setOpenSaveModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("Saving In Progress");
 
-function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
-    const reportRef = useRef(null);
-    const [docNotes, setDocNotes] = useState('')
-    const [openModal, setOpenModal] = useState(false)
-    const [openSaveModal, setOpenSaveModal] = useState(false)
-    const [modalMessage, setModalMessage] = useState('Saving In Progress')
+  console.log("patient in report", newPatient);
+  const handleDownloadPDF = () => {
+    if (reportRef.current) {
+      html2canvas(reportRef.current).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]); // Use canvas dimensions for PDF
 
-    console.log("patient in report", newPatient)
-    const handleDownloadPDF = () => {
-        if (reportRef.current) {
-            html2canvas(reportRef.current).then((canvas) => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]); // Use canvas dimensions for PDF
-                
-                // Add the captured image to the PDF
-                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                
-                // Save the PDF
-                pdf.save('report.pdf');
-            });
-        }
-    };
-      
+        // Add the captured image to the PDF
+        pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
 
-    const handleOpenModal = () => {
-		setOpenModal(true);
-	};
-
-    const closeModal = () => {
-		setOpenModal(false);
-	};
-
-    const doctorNotes = (value) => {
-		setDocNotes(value);
-	};
-
-    const closeSaveModal = () => {
-		setOpenSaveModal(false);
-        onSave();
-	};
-
-    const calculateAge = () => {
-        const dob = new Date(patient.date_of_birth);
-        const today = new Date();
-        const age = today.getFullYear() - dob.getFullYear();
-        return age;
+        // Save the PDF
+        pdf.save("report.pdf");
+      });
     }
+  };
 
-    const handleSave = async () => {
-        // First, capture the content of the report as a PDF
-        console.log("saving report")
-        setModalMessage('Saving In Progress')
-        setOpenSaveModal(true)
-        if (reportRef.current) {
-          html2canvas(reportRef.current).then(async (canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]); // Use canvas dimensions for PDF
-            
-            // Add the captured image to the PDF
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      
-            // Convert the PDF to a blob
-            const pdfBlob = pdf.output('blob');
-      
-            // Now, send the PDF blob to the API
-            const accessTokenData = await getAccessToken();
-            if (accessTokenData) {
-                console.log("theres access token", accessTokenData)
-                const rightEyeBlob = await fetch(rightEyeImage).then((response) => response.blob());
-                const leftEyeBlob = await fetch(leftEyeImage).then((response) => response.blob());
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
 
-                const requestParams = {
-                    accessToken: accessTokenData,
-                    leftEye: leftEyeBlob,
-                    rightEye: rightEyeBlob,
-                    report: pdfBlob,
-                    patient, 
-                    docNotes,
-                };
-                try {
-                    if (!newPatient) {
-                        // Include the 'id' field conditionally
-                        requestParams.id = patient.id;
-                    }
-                    console.log("request params", requestParams)
-                    // const res = await PatientApi.createPatient(requestParams);
-                    const res = newPatient
-                        ? await PatientApi.createPatient(requestParams)
-                        : await PatientApi.updatePatient(requestParams);
-                    console.log("res from create in save report", res)
-                    setModalMessage("Successfully saved!")
-                } catch (err) {
-                    console.log("failed to call endpoint")
-                    // last error is 404 error from update patient 
-                    if (err.response.data.status === 401) {
-                        setModalMessage("Save failed. Authentication failed.");
-                    } else if (err.response.data.status === 409) {
-                        setModalMessage("Save failed. A patient with the same name and DOB has been created before.");
-                    } else {
-                        setModalMessage("Patient not found. Failed to update the patient's record.");
-                    }
-                    console.log(err.response.data.message)
-                    console.error(err);
-                }
-              
+  const closeModal = () => {
+    setOpenModal(false);
+  };
+
+  const doctorNotes = (value) => {
+    setDocNotes(value);
+  };
+
+  const closeSaveModal = () => {
+    setOpenSaveModal(false);
+    onSave();
+  };
+
+  const calculateAge = () => {
+    const dob = new Date(patient.date_of_birth);
+    const today = new Date();
+    const age = today.getFullYear() - dob.getFullYear();
+    return age;
+  };
+
+  const handleSave = async () => {
+    // First, capture the content of the report as a PDF
+    console.log("saving report");
+    setModalMessage("Saving In Progress");
+    setOpenSaveModal(true);
+    if (reportRef.current) {
+      html2canvas(reportRef.current).then(async (canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]); // Use canvas dimensions for PDF
+
+        // Add the captured image to the PDF
+        pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+
+        // Convert the PDF to a blob
+        const pdfBlob = pdf.output("blob");
+
+        // Now, send the PDF blob to the API
+        const accessTokenData = await getAccessToken();
+        if (accessTokenData) {
+          console.log("theres access token", accessTokenData);
+          const rightEyeBlob = await fetch(rightEyeImage).then((response) =>
+            response.blob()
+          );
+          const leftEyeBlob = await fetch(leftEyeImage).then((response) =>
+            response.blob()
+          );
+
+          const requestParams = {
+            accessToken: accessTokenData,
+            leftEye: leftEyeBlob,
+            rightEye: rightEyeBlob,
+            report: pdfBlob,
+            patient,
+            docNotes,
+            leftEyeResults,
+            rightEyeResults,
+          };
+          try {
+            if (!newPatient) {
+              // Include the 'id' field conditionally
+              requestParams.id = patient.id;
             }
-          });
+            console.log("request params", requestParams);
+            // const res = await PatientApi.createPatient(requestParams);
+            const res = newPatient
+              ? await PatientApi.createPatient(requestParams)
+              : await PatientApi.updatePatient(requestParams);
+            console.log("res from create in save report", res);
+            setModalMessage("Successfully saved!");
+          } catch (err) {
+            console.log("failed to call endpoint");
+            // last error is 404 error from update patient
+            if (err.response.data.status === 401) {
+              setModalMessage("Save failed. Authentication failed.");
+            } else if (err.response.data.status === 409) {
+              setModalMessage(
+                "Save failed. A patient with the same name and DOB has been created before."
+              );
+            } else {
+              setModalMessage(
+                "Patient not found. Failed to update the patient's record."
+              );
+            }
+            console.log(err.response.data.message);
+            console.error(err);
+          }
         }
-        // onSave();
-    };
+      });
+    }
+    // onSave();
+  };
 
-    console.log("patient detials", patient)
-      
+  console.log("patient detials", patient);
 
-    return (
-        <div>
-            <div className='report-container' id='report-container' >
-                <div className='report' ref={reportRef}> 
-                    <div className='report-header'>
-                        REPORT
-                    </div>
-                    <div className='patient-details'>
-                        <div className='sub-header'>
-                            Patient details
-                        </div>
-                        Name: {patient.name}
-                        <br/>
-                        Age: {newPatient? patient.age : calculateAge()}
-                        <br/>
-                        Sex: {newPatient? patient.gender : patient.sex}
-                    </div>
-                    <div className='eye-image'>
-                        <div className='sub-header'>
-                            Eye Images
-                        </div>
-                        <div className='eye-images'>
-                            <div className='indiv-eye'>
-                                <img src={leftEyeImage}/>
-                                <div className='img-caption'>
-                                    Left Eye
-                                </div>
-                            </div>
-                            <div className='indiv-eye'>
-                                <img src={rightEyeImage}/>
-                                <div className='img-caption'>
-                                    Right Eye
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='results'>
-                        <div className='sub-header'>
-                            Results
-                        </div>
-                        Probability of Diabetic Retinopathy: 70%
-                        <br/>
-                        Probability of Age-related Macular Degeneration: 50%
-                        <br/>
-                        Probability of Glaucoma: 20%
-                    </div>
-                    {docNotes && <div className='doc-notes'>
-                        <div className='sub-header'>
-                            Doctor's Notes
-                        </div>
-                        {docNotes}
-                    </div>}
-                </div>
+  return (
+    <div>
+      <div className="report-container" id="report-container">
+        <div className="report" ref={reportRef}>
+          <div className="report-header">REPORT</div>
+          <div className="patient-details">
+            <div className="sub-header">Patient details</div>
+            Name: {patient.name}
+            <br />
+            Age: {newPatient ? patient.age : calculateAge()}
+            <br />
+            Sex: {newPatient ? patient.gender : patient.sex}
+          </div>
+          <div className="eye-image">
+            <div className="sub-header">Eye Images</div>
+            <div className="eye-images">
+              <div className="indiv-eye">
+                <img src={leftEyeImage} />
+                <div className="img-caption">Left Eye</div>
+              </div>
+              <div className="indiv-eye">
+                <img src={rightEyeImage} />
+                <div className="img-caption">Right Eye</div>
+              </div>
             </div>
-            <Modal isOpen={openModal} onClose={closeModal} doctorNotes={doctorNotes}/>
-            <div className='button-container'>
-                <div className='pdf-button'>
-                    <div className='button' onClick={handleOpenModal}>
-                        Add Doctor's Note
-                    </div>
-                </div>
-                <div className='pdf-button'>
-                    <div className='button' onClick={handleDownloadPDF}>
-                        Download PDF
-                    </div>
-                </div>
+          </div>
+          <div className="results">
+            <div className="sub-header">Results</div>
+            <br />
+            Probability of Diabetic Retinopathy: <br />
+            Left: {(leftEyeResults.diabetic[1] * 100).toFixed(1)}% Stage {leftEyeResults.diabetic[0]} | Right: {(rightEyeResults.diabetic[1] * 100).toFixed(1)}% Stage {rightEyeResults.diabetic[0]}
+            <br />
+            <br />
+            Probability of Age-related Macular Degeneration: <br />
+            Left: {(leftEyeResults.amd * 100).toFixed(1)}% | Right: {(rightEyeResults.amd * 100).toFixed(1)}%
+            <br />
+            <br />
+            Probability of Glaucoma: <br />
+            Left: {(leftEyeResults.glaucoma * 100).toFixed(1)}% | Right: {(rightEyeResults.glaucoma * 100).toFixed(1)}%
+          </div>
+          {docNotes && (
+            <div className="doc-notes">
+              <div className="sub-header">Doctor's Notes</div>
+              {docNotes}
             </div>
-            <SaveModal isOpen={openSaveModal} onClose={closeSaveModal} modalMessage={modalMessage}/>
-            <div className='download-button'>
-                <div className='button' onClick={handleSave}>
-                    Save
-                </div>
-            </div>
-            
+          )}
         </div>
-    );
+      </div>
+      <Modal
+        isOpen={openModal}
+        onClose={closeModal}
+        doctorNotes={doctorNotes}
+      />
+      <div className="button-container">
+        <div className="pdf-button">
+          <div className="button" onClick={handleOpenModal}>
+            Add Doctor's Note
+          </div>
+        </div>
+        <div className="pdf-button">
+          <div className="button" onClick={handleDownloadPDF}>
+            Download PDF
+          </div>
+        </div>
+      </div>
+      <SaveModal
+        isOpen={openSaveModal}
+        onClose={closeSaveModal}
+        modalMessage={modalMessage}
+      />
+      <div className="download-button">
+        <div className="button" onClick={handleSave}>
+          Save
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Report;
