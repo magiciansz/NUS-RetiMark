@@ -516,28 +516,48 @@ def home():
         st.subheader("Risk Trend")
 
         try:
-            #extract date, risk value L, risk value R, image L, image R
+            #extract date, stage, risk value L, risk value R, image L, image R
             risk_l_col = "left_" + encode_disease(selected_disease_type) + "_prob"
             risk_r_col = "right_" + encode_disease(selected_disease_type) + "_prob"
-            chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
+            if selected_disease_type=="Diabetic Retinopathy":
+                stage_l_col = "left_" + encode_disease(selected_disease_type) + "_stage"
+                stage_r_col = "right_" + encode_disease(selected_disease_type) + "_stage"
+            else:
+                stage_l_col = "Unknown"
+                stage_r_col = "Unknown"
 
-            df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
+            chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', stage_l_col, stage_r_col, risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
+
+            df = pd.DataFrame(chart_data, columns = ['date', 'stage_l', 'stage_r', 'risk_l', 'risk_r', 'image_l', 'image_r'])
             melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
             melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
+            melted_df3 = df.melt(id_vars=['date'], value_vars=['stage_l', 'stage_r'], var_name='laterality', value_name='stage')
             melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
             melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
-            melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
+            melted_df3['laterality'] = melted_df3['laterality'].map(lambda x: x[-1])
+            melted_res = melted_df.merge(melted_df2, on=['date', 'laterality']).merge(melted_df3, on=['date', 'laterality'])
             melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
 
             # Create a selection that chooses the nearest point & selects based on x-value
             nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
 
-            base = alt.Chart(melted_res).mark_line(point=True).encode(
-                alt.X('date:T', axis=alt.Axis(format="%b %Y")),
-                alt.Y('risk:Q').axis(format='.2%'),
-                alt.Color('laterality').scale(scheme="category10"),
-                tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
-            )
+            if selected_disease_type=="Diabetic Retinopathy":
+                melted_res['amplified_risk'] = melted_res['stage'] * 100 + melted_res['risk']
+                base = alt.Chart(melted_res).mark_line(point=True).encode(
+                    alt.X('date:T', axis=alt.Axis(format="%b %Y")),
+                    alt.Y('amplified_risk:Q').axis(format='.2%'),
+                    alt.Color('laterality').scale(scheme="category10"),
+                    # tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
+                    tooltip=['date:T', 'stage', alt.Tooltip("risk:Q", format=".2%")]
+                )
+            else:
+                base = alt.Chart(melted_res).mark_line(point=True).encode(
+                    alt.X('date:T', axis=alt.Axis(format="%b %Y")),
+                    alt.Y('risk:Q').axis(format='.2%'),
+                    alt.Color('laterality').scale(scheme="category10"),
+                    # tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
+                    tooltip=['date:T', 'stage', alt.Tooltip("risk:Q", format=".2%")]
+                )
 
             selectors = alt.Chart(melted_res).mark_point().encode(
                 x='date:T',
@@ -562,6 +582,21 @@ def home():
             ).transform_filter(
                 nearest
             )
+            if selected_disease_type=="Diabetic Retinopathy":
+                avg_left = alt.Chart(melted_res).mark_rule(color='#1f77b4', strokeOpacity=0.4, strokeWidth=2).encode(
+                    alt.Y('mean(amplified_risk):Q').axis(format='.2%')
+                ).transform_filter(alt.FieldEqualPredicate(field='laterality', equal='left'))
+                avg_right = alt.Chart(melted_res).mark_rule(color='#ff7f0e', strokeOpacity=0.4, strokeWidth=2).encode(
+                alt.Y('mean(amplified_risk):Q').axis(format='.2%')
+                ).transform_filter(alt.FieldEqualPredicate(field='laterality', equal='right'))
+            else:
+                avg_left = alt.Chart(melted_res).mark_rule(color='#1f77b4', strokeOpacity=0.4, strokeWidth=2).encode(
+                    alt.Y('mean(risk):Q').axis(format='.2%')
+                ).transform_filter(alt.FieldEqualPredicate(field='laterality', equal='left'))
+                avg_right = alt.Chart(melted_res).mark_rule(color='#ff7f0e', strokeOpacity=0.4, strokeWidth=2).encode(
+                alt.Y('mean(risk):Q').axis(format='.2%')
+                ).transform_filter(alt.FieldEqualPredicate(field='laterality', equal='right'))
+
             curr_date = alt.Chart(pd.DataFrame({
             'date': [selected_date],
             'laterality': ['red']
@@ -570,7 +605,7 @@ def home():
             color=alt.Color('laterality:N', scale=None)
             )
 
-            st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
+            st.altair_chart((base+selectors+points+text+rules+avg_left+avg_right+curr_date.interactive()), theme="streamlit", use_container_width=True)
         except TypeError as e:
                 st.text("No data to display")
         except UnboundLocalError as e:
