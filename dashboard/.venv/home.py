@@ -30,7 +30,6 @@ cookies = cookie_manager.get_all()
 
 if (_DEBUG):
     st.subheader("All Cookies:")
-    # cookies = cookie_manager.get_all()
     st.write(cookies)
     c1, c2, c3 = st.columns(3)
 
@@ -53,14 +52,20 @@ if (_DEBUG):
         if st.button("Delete"):
             cookie_manager.delete(cookie)
 
+#def this function returns the region in string format based on UTC offset value
+#input: string with +/- and hours difference
+#output: string, indicating region as Asia/Singapore or Asia/Tokyo (same as Korea) for now
 def get_region_from_UTC_offset(val):
     regions = {"+08": "Asia/Singapore", "+09": "Asia/Tokyo"}
     return regions[val]
 
+#functions to tack login status using sessions states
 def submitted():
     st.session_state.submitted_login = True
 def reset():
     st.session_state.submitted_login = False
+
+#login function
 def login():
     if 'submitted_login' not in st.session_state:
         st.session_state['submitted_login'] = False
@@ -144,6 +149,7 @@ def login():
     return landing
 
 def home():
+    #initialize session state variables
     if 'submitted_logout' not in st.session_state:
         st.session_state['submitted_logout'] = False
     if 'reset_thresholds' not in st.session_state:
@@ -166,12 +172,8 @@ def home():
     
     st.session_state['submitted_login'] = False
 
-    # patients_history = pd.read_csv("./test-data/patient_history_table.csv")
     def get_patient_history(d_lower, d_upper, o_lower, o_upper, g_lower, g_upper):
         ##BEGIN API CALL
-        # tz_string = datetime.datetime.now().astimezone().tzinfo
-        # tz_string = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
-        # cookie_manager.set(key='time_zone', cookie='time_zone', val=tz_string)
         API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history"
         PARAMS = {
             'timezone':cookie_manager.get(cookie="time_zone"),
@@ -242,14 +244,6 @@ def home():
         else:
             return sorted_dates[sorted_dates.index(curr_date)-1]
 
-
-    def get_cutoff_date(list_of_dates):
-        list_of_dates = sorted(list_of_dates, reverse=True)
-        if (len(list_of_dates)>10):
-            return list_of_dates[9]
-        else:
-            return list_of_dates[-1]
-    
     #def: this function returns a list of linked values under a patient
     #input: dictionary holding the data in record format, id of patient, [desired columns]
     #output: array of array of values
@@ -272,14 +266,20 @@ def home():
         code = encode_disease(disease)
         risk_col = laterality + '_' + code + '_prob'
         return query_patient_value(dict, id, visit_date, risk_col)
-
+    
+    ##Formatting related functions
+    ##This function takes in a tuple and concatenates the first element with scond element separated by a dash '-'
     def concat_tuples(x):
         return str(x[0]) + ' - ' + x[1]
+
+    #this function parses ISO8601 datetimes into a more readable format
     def strip_time_from_isodatetime(iso_datetime):
         converted = datetime.datetime.fromisoformat(iso_datetime)
         date = converted.date()
         time = converted.time()
         return (str(date)+' '+str(time))
+
+    #functions to track session states
     def submitted_logout():
         st.session_state.submitted_logout = True
     def toggle_reset_thresholds():
@@ -300,13 +300,10 @@ def home():
         set_diabetic_retinopathy_threshold()
         set_ocular_threshold()
         set_glaucoma_threshold()
+    
     def logout():
         ##BEGIN API CALL
-        # tz_string = datetime.datetime.now().astimezone().tzinfo
-        # tz_string = 'Asia/Singapore'
         API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/auth/logout"
-        # PARAMS = {'timezone':tz_string}
-        # HEADERS={"Content-Type": "application/json"}
         HEADERS = {
             "Authorization": "Bearer " + cookie_manager.get(cookie='access_token')
         }
@@ -323,12 +320,6 @@ def home():
         except requests.exceptions.HTTPError as err:
             if (_DEBUG):
                 st.write("Entered Except block")
-            # st.json(r.json)
-            # error_code = r.status_code
-            # if (error_code=="400"):
-            #     st.error("Please provide a valid username and password.")
-            # elif (error_code=="401"):
-            #     st.error("Wrong username or password.")
             st.error("Oops, something went wrong, please contact your administrator: " + str(err))
         else:
             if (_DEBUG):
@@ -342,11 +333,10 @@ def home():
             cookie_manager.delete(key='refresh_token', cookie='refresh_token')
             cookie_manager.delete(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time')
 
-            
-            # st.experimental_rerun()
             return True
-    
-    ##END API CALL
+        ##END API CALL
+
+    #retrieving data from database
     if (cookie_manager.get(cookie="access_token")):
         patients_history = get_patient_history(st.session_state.d_lower, st.session_state.d_upper,
                                                st.session_state.o_lower, st.session_state.d_upper,
@@ -362,6 +352,7 @@ def home():
         patient_w_id_options_raw = []
         for key,value in patient_raw_dict.items():
             patient_w_id_options_raw.append((key,value))
+
     #format id column as a string
     disease_types = ['Diabetic Retinopathy', 'Age-related Macular Degeneration', 'Glaucoma']
     
@@ -375,11 +366,6 @@ def home():
             st.title('RetiMark Fundus Dashboard')
         with logo:
             st.image("http://retimark.com/layout/images/common/logo_on.png")
-        # selected_category = st.sidebar.selectbox('Select Category', data['Category'].unique())
-
-        # if st.sidebar.button('Log in', type="primary"):
-        #     st.sidebar.write('Welcome, Dr. Swift')
-        # st.sidebar.button("Sign out", type="secondary")
 
         # Filters
         with st.expander(label="Filter Risk Thresholds", expanded=False):
@@ -401,16 +387,7 @@ def home():
                     confirm_sel = st.button('Filter results', on_click=set_all_thresholds, type="primary")
                 else:
                     confirm_sel = st.button('Filter results', type="primary", disabled=True)
-            # with options3:
-            #     if pre_filter_on:
-            #         use_default_2 = st.toggle('Use default thresholds')
-            #     else:
-            #         use_default_2 = st.toggle('Use default thresholds', disabled = True)
-            # with options4:
-            #     if pre_filter_on:
-            #         advanced_mode = st.toggle('Advanced mode')
-            #     else:
-            #         advanced_mode = st.toggle('Advanced Mode', disabled = True)
+
             pre_filter1, pre_filter2, pre_filter3 = st.columns(3)
             with pre_filter1:
                 if pre_filter_on:
@@ -418,8 +395,6 @@ def home():
                         d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (21,100), on_change=set_all_thresholds)
                     elif use_default_normal:
                         d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20), on_change=set_all_thresholds)
-                    # elif st.session_state.reset_thresholds:
-                    #     d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), on_change=set_diabetic_retinopathy_threshold)
                     else:
                         d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), on_change=set_all_thresholds)
                 else:
@@ -430,8 +405,6 @@ def home():
                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (21,100), on_change=set_all_thresholds)
                     elif use_default_normal:
                          o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20), on_change=set_all_thresholds)
-                    # elif st.session_state.reset_thresholds:
-                    #      o_threshold = st.slider("Risk of Age-related Macular Degenerationa:", 0, 100, (0,100), on_change=set_ocular_threshold)
                     else:
                          o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), on_change=set_all_thresholds)
                 else:
@@ -442,8 +415,6 @@ def home():
                         g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (21,100), on_change=set_all_thresholds)
                     elif use_default_normal:
                         g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20), on_change=set_all_thresholds)
-                    # elif st.session_state.reset_thresholds:
-                    #     g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), on_change=set_glaucoma_threshold)
                     else:
                         g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), on_change=set_all_thresholds)
                 else:
@@ -486,11 +457,7 @@ def home():
                         #query notes
                         temp_notes = query_patient_value(patient_dict, selected_patient_id, selected_date, 'doctor_notes')
                         st.markdown(f"**Notes:** {temp_notes}")
-                        # #query date
-                        # temp_upload_date = query_patient_value(patient_dict, patient_id, selected_date, 'visit_date')
-                        # st.write(f"**Last Upload Date:** {temp_upload_date}")
-                        #query diagnosed date
-                        #placeholder information for now
+                        #query last visit date
                         temp_diagnosed_date = query_last_visit_date(selected_date, selected_patient_date_list_flatten)
                         if (temp_diagnosed_date!="NA"):
                             display_diagnosed_date = strip_time_from_isodatetime(temp_diagnosed_date)
@@ -545,16 +512,12 @@ def home():
             chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
 
             df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
-            # df = df[df['date'].isin(dropped_options)]
             melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
             melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
             melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
             melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
             melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
             melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
-
-            #get 10th or latest date from this patient's record, whichever is smaller
-            date_cutoff = get_cutoff_date(selected_patient_date_list_flatten)
 
             # Create a selection that chooses the nearest point & selects based on x-value
             nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
@@ -563,7 +526,6 @@ def home():
                 alt.X('date:T', axis=alt.Axis(format="%b %Y")),
                 alt.Y('risk:Q').axis(format='.2%'),
                 alt.Color('laterality').scale(scheme="category10"),
-                # alt.Tooltip('risk:Q', format="%", title="Valor"),
                 tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
             )
 
@@ -608,9 +570,6 @@ def home():
             logout()
             if (_DEBUG):
                 st.write("Routing to login")
-            # if (cookie_manager.get(cookie="login_status") == False):
-                
-            #     router.route('login')
     if (cookie_manager.get(cookie='login_status')):   
         return main
     else:
