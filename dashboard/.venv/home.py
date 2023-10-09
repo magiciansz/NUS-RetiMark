@@ -195,7 +195,17 @@ def home():
             r.raise_for_status()
 
         except requests.exceptions.HTTPError as err:
-            print("Oops, something went wrong, please contact your administrator: " + str(err))
+            if (_DEBUG):
+                st.write("Entered Except block")
+                st.json(r.json())
+            error_code = r.status_code
+            # if (error_code==400):
+            #     st.error("Please provide a valid username and password")
+            if (error_code==401):
+                st.error("Session expired")
+                logout()
+            # else:
+            #     st.error("Oops, something went wrong, please contact your administrator: " + str(err))
         else:
             if (_DEBUG):
                 st.write("Entered Else block")
