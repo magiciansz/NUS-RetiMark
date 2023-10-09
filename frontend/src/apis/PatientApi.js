@@ -75,11 +75,12 @@ async function updatePatient({
   );
 }
 
-async function getPastReports({ accessToken, id }) {
+async function getPastReports({ accessToken, id, sort }) {
   return axios.get(
     `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history/${id}/reports`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
+      params: { sort },
     }
   );
 }
