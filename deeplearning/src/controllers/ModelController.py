@@ -17,17 +17,29 @@ from torch import nn
 from torchvision import transforms as T, models
 import cv2 as cv
 from PIL import Image
+import numpy as np
+import json
+import sys
+import types
 
-from AmdClassifier import EyeClassifier
+amdWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/amd_state_dict.pth'
+amdModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/AmdClassifier.py'
 
-amdUrl = 'https://amd-retimark.s3.ap-southeast-1.amazonaws.com/amd_state_dict.pth'
-amdResponse = requests.get(amdUrl)
+def importModel(weightsUrl, modelUrl, moduleName="imported_module", className="EyeClassifier"):
+    response = requests.get(modelUrl)
+    module = sys.modules.setdefault(moduleName, types.ModuleType(moduleName))
+    exec(response.text, module.__dict__)
+    model = getattr(module, className)
+    model = model()
 
-amdModel = EyeClassifier()
-amdModel.load_state_dict(torch.load(BytesIO(amdResponse.content), map_location=torch.device('cpu')))
+    response = requests.get(weightsUrl)
+    model.load_state_dict(torch.load(BytesIO(response.content), map_location=torch.device('cpu')))
+    model.eval()
+    return model
+
+amdModel = importModel(amdWeightsUrl, amdModelUrl)
 
 def crop_img(image):
-    # image = cv.imread(image)
     image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     _, thresholded = cv.threshold(image, 0, 255, cv.THRESH_OTSU)
     x, y, w, h = cv.boundingRect(thresholded)
@@ -35,6 +47,10 @@ def crop_img(image):
     return Image.fromarray(cropped_image)
 
 def preprocess_img(image):
+    content = image.read()
+    nparr = np.frombuffer(content, np.uint8)
+    image = cv.imdecode(nparr, cv.IMREAD_COLOR)
+
     transform = T.Compose([
             T.Resize([224, 224]),
             T.ToTensor(),
@@ -54,11 +70,14 @@ class ModelController(Resource):
             abort(400, description = 'Please enter an image')
 
         if not image.mimetype.startswith('image/'):
-            abort(400, description = 'The right_eye_image has to be an image of jpeg or png.')
+            abort(400, description = 'The image has to be of jpeg or png.')
         
         try:
             with torch.no_grad():
                 output = amdModel(preprocess_img(image))
+            output_np = output.numpy()
+            output_json = json.dumps(output_np.tolist())
+            return jsonify(output_json)
         except Exception as e:
             print(e)
 

@@ -6,8 +6,10 @@ from flask import Flask, json
 from flask.blueprints import Blueprint
 from werkzeug.exceptions import HTTPException
 
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
