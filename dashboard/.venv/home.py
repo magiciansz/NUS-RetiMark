@@ -148,10 +148,26 @@ def home():
         st.session_state['submitted_logout'] = False
     if 'reset_thresholds' not in st.session_state:
         st.session_state['reset_thresholds'] = False
+    if 'no_data_flag' not in st.session_state:
+        st.session_state['no_data_flag'] = False
+    #set lower and upper bouinds ion session state
+    if 'd_lower' not in st.session_state:
+        st.session_state['d_lower'] = 0.0
+    if 'd_upper' not in st.session_state:
+        st.session_state['d_upper'] = 1.0
+    if 'o_lower' not in st.session_state:
+        st.session_state['o_lower'] = 0.0
+    if 'o_upper' not in st.session_state:
+        st.session_state['o_upper'] = 1.0
+    if 'g_lower' not in st.session_state:
+        st.session_state['g_lower'] = 0.0
+    if 'g_upper' not in st.session_state:
+        st.session_state['g_upper'] = 1.0
+    
     st.session_state['submitted_login'] = False
 
     # patients_history = pd.read_csv("./test-data/patient_history_table.csv")
-    def get_patient_history():
+    def get_patient_history(d_lower, d_upper, o_lower, o_upper, g_lower, g_upper):
         ##BEGIN API CALL
         # tz_string = datetime.datetime.now().astimezone().tzinfo
         # tz_string = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
@@ -159,12 +175,12 @@ def home():
         API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history"
         PARAMS = {
             'timezone':cookie_manager.get(cookie="time_zone"),
-            'diabetic_retinopathy_lower_threshold':0.0,
-            'diabetic_retinopathy_upper_threshold':1.0,
-            'ocular_lower_threshold':0.0,
-            'ocular_upper_threshold':1.0,
-            'glaucoma_lower_threshold':0.0,
-            'glaucoma_upper_threshold':1.0
+            'diabetic_retinopathy_lower_threshold':d_lower,
+            'diabetic_retinopathy_upper_threshold':d_upper,
+            'ocular_lower_threshold':o_lower,
+            'ocular_upper_threshold':o_upper,
+            'glaucoma_lower_threshold':g_lower,
+            'glaucoma_upper_threshold':g_upper
             }
         HEADERS = {
             "Authorization": "Bearer " + cookie_manager.get(cookie="access_token")
@@ -260,8 +276,10 @@ def home():
     def concat_tuples(x):
         return str(x[0]) + ' - ' + x[1]
     def strip_time_from_isodatetime(iso_datetime):
-        converted = datetime.datetime.fromisoformat(iso_datetime) 
-        return converted.date()
+        converted = datetime.datetime.fromisoformat(iso_datetime)
+        date = converted.date()
+        time = converted.time()
+        return (str(date)+' '+str(time))
     def submitted_logout():
         st.session_state.submitted_logout = True
     def toggle_reset_thresholds():
@@ -269,7 +287,19 @@ def home():
             st.session_state.reset_thresholds=False
         else:
             st.session_state.reset_thresholds=True
-    
+    def set_diabetic_retinopathy_threshold():
+        st.session_state.d_lower = d_threshold[0]/100
+        st.session_state.d_upper = d_threshold[1]/100
+    def set_ocular_threshold():
+        st.session_state.o_lower = o_threshold[0]/100
+        st.session_state.o_upper = o_threshold[1]/100
+    def set_glaucoma_threshold():
+        st.session_state.g_lower = g_threshold[0]/100
+        st.session_state.g_upper = g_threshold[1]/100
+    def set_all_thresholds():
+        set_diabetic_retinopathy_threshold()
+        set_ocular_threshold()
+        set_glaucoma_threshold()
     def logout():
         ##BEGIN API CALL
         # tz_string = datetime.datetime.now().astimezone().tzinfo
@@ -318,7 +348,11 @@ def home():
     
     ##END API CALL
     if (cookie_manager.get(cookie="access_token")):
-        patients_history = get_patient_history()
+        patients_history = get_patient_history(st.session_state.d_lower, st.session_state.d_upper,
+                                               st.session_state.o_lower, st.session_state.d_upper,
+                                               st.session_state.g_lower, st.session_state.g_upper)
+        if (patients_history==None):
+            st.session_state.no_data_flag = True
         patient_raw_dict = deepcopy(patients_history)
         #group by id
         patient_dict = patients_history
@@ -349,19 +383,24 @@ def home():
 
         # Filters
         with st.expander(label="Filter Risk Thresholds", expanded=False):
-            options1, options2, options3 = st.columns(3)
+            options1, options2, options3, confirm = st.columns([0.25, 0.3, 0.3, 0.15])
             with options1:
                 pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds)
             with options2:
                 if pre_filter_on:
-                    use_default_disease = st.button('Use default disease thresholds')
+                    use_default_disease = st.button('Show default disease thresholds', on_click=set_all_thresholds)
                 else:
-                    use_default_disease = st.button('Use default disease thresholds', disabled=True)
+                    use_default_disease = st.button('Show default disease thresholds', disabled=True)
             with options3:
                 if pre_filter_on:
-                    use_default_normal = st.button('Use default normal thresholds')
+                    use_default_normal = st.button('Show default normal thresholds', on_click=set_all_thresholds)
                 else:
-                    use_default_normal = st.button('Use default normal thresholds', disabled=True)
+                    use_default_normal = st.button('Show default normal thresholds', disabled=True)
+            with confirm:
+                if pre_filter_on:
+                    confirm_sel = st.button('Filter results', on_click=set_all_thresholds, type="primary")
+                else:
+                    confirm_sel = st.button('Filter results', type="primary", disabled=True)
             # with options3:
             #     if pre_filter_on:
             #         use_default_2 = st.toggle('Use default thresholds')
@@ -376,188 +415,194 @@ def home():
             with pre_filter1:
                 if pre_filter_on:
                     if use_default_disease:
-                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (21,100), on_change=toggle_reset_thresholds)
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (21,100), on_change=set_all_thresholds)
                     elif use_default_normal:
-                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20), on_change=toggle_reset_thresholds)
-                    elif st.session_state.reset_thresholds:
-                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20), on_change=set_all_thresholds)
+                    # elif st.session_state.reset_thresholds:
+                    #     d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), on_change=set_diabetic_retinopathy_threshold)
                     else:
-                        st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), on_change=set_all_thresholds)
                 else:
-                    st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), disabled=True)
+                    d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), disabled=True)
             with pre_filter2:
                 if pre_filter_on:
                     if use_default_disease:
-                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (21,100), on_change=toggle_reset_thresholds)
+                        o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (21,100), on_change=set_all_thresholds)
                     elif use_default_normal:
-                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20), on_change=toggle_reset_thresholds)
-                    elif st.session_state.reset_thresholds:
-                        st.slider("Risk of Age-related Macular Degenerationa:", 0, 100, (0,100))
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20), on_change=set_all_thresholds)
+                    # elif st.session_state.reset_thresholds:
+                    #      o_threshold = st.slider("Risk of Age-related Macular Degenerationa:", 0, 100, (0,100), on_change=set_ocular_threshold)
                     else:
-                        st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100))
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), on_change=set_all_thresholds)
                 else:
-                    st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), disabled=True)
+                     o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), disabled=True)
             with pre_filter3:
                 if pre_filter_on:
                     if use_default_disease:
-                        st.slider("Risk of Glaucoma:", 0, 100, (21,100), on_change=toggle_reset_thresholds)
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (21,100), on_change=set_all_thresholds)
                     elif use_default_normal:
-                        st.slider("Risk of Glaucoma:", 0, 100, (0,20), on_change=toggle_reset_thresholds)
-                    elif st.session_state.reset_thresholds:
-                        st.slider("Risk of Glaucoma:", 0, 100, (0,100))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20), on_change=set_all_thresholds)
+                    # elif st.session_state.reset_thresholds:
+                    #     g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), on_change=set_glaucoma_threshold)
                     else:
-                        st.slider("Risk of Glaucoma:", 0, 100, (0,100))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), on_change=set_all_thresholds)
                 else:
-                    st.slider("Risk of Glaucoma:", 0, 100, (0,100), disabled=True)
+                    g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), disabled=True)
         with st.expander(label="Search and Filter", expanded=True):
             
-            filter1, filter2, filter3 = st.columns(3)
+            try:
+                filter1, filter2, filter3 = st.columns(3)
             
-            with filter1:
-                patient_w_id_options = patient_w_id_options_raw
-                patient_w_id_options.sort(key=lambda x: int(x[0]))
-                selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient')
-                selected_patient_id = selected_patient_id_selectbox[0]
-            with filter2:
-                selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
-            with filter3:
-                selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
-                selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
-                # date_list =[]
-                # time_list=[]
-                # for date in selected_patient_date_list_flatten:
-                #     converted = datetime.datetime.fromisoformat(date) 
-                #     date_list.append(converted.date())
-                #     time_list.append(converted.time())
-                # df = pd.DataFrame({'raw':selected_patient_date_list_flatten, 'date':date_list, 'time':time_list})
-                # df = df.sort_values('raw')
-                # dropped = df.drop_duplicates(subset='date', keep='last')
-                # dropped_options = list(dropped['raw'])
-                # dropped_options.sort(reverse=True)
-                # selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
-                selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, help='Select visit date')
+                with filter1:
+                    patient_w_id_options = patient_w_id_options_raw
+                    patient_w_id_options.sort(key=lambda x: int(x[0]))
+                    selected_patient_id_selectbox = st.selectbox(label='Patient', options=patient_w_id_options, format_func = concat_tuples, help='Search patient by name or id', placeholder='Select a patient')
+                    selected_patient_id = selected_patient_id_selectbox[0]
+                with filter2:
+                    selected_disease_type = st.selectbox(label='Disease', options=disease_types, help='Select disease type')
+                with filter3:
+                    selected_patient_date_list = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date'])
+                    selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
+                    selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
+            except TypeError as e:
+                st.text("No data to display")
+            except UnboundLocalError as e:
+                st.text=("No data to display")
+        st.session_state['reset_thresholds'] = False
 
-        info, left, right = st.columns([0.35, 0.275, 0.275])
+        try:
 
-        with info:
-            st.subheader("Patient Details")
-            st.write(f"**Patient ID:** {selected_patient_id}")
-            #query patient's age
-            temp_age =  query_patient_value(patient_dict, selected_patient_id, selected_date, 'age')
-            st.write(f"**Age:** {temp_age}")
-            #query patient's sex
-            temp_sex = query_patient_value(patient_dict, selected_patient_id, selected_date, 'sex')
-            st.write(f"**Sex:** {temp_sex}")
-            #query notes
-            temp_notes = query_patient_value(patient_dict, selected_patient_id, selected_date, 'doctor_notes')
-            st.markdown(f"**Notes:** {temp_notes}")
-            # #query date
-            # temp_upload_date = query_patient_value(patient_dict, patient_id, selected_date, 'visit_date')
-            # st.write(f"**Last Upload Date:** {temp_upload_date}")
-            #query diagnosed date
-            #placeholder information for now
-            temp_diagnosed_date = query_last_visit_date(selected_date, selected_patient_date_list_flatten)
-            if (temp_diagnosed_date!="NA"):
-                display_diagnosed_date = strip_time_from_isodatetime(temp_diagnosed_date)
-            else:
-                display_diagnosed_date = temp_diagnosed_date
-            st.write(f"**Last Visit Date:** {display_diagnosed_date}")
-            
-        with left:
-            st.subheader("Left Fundus")
-            left_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'left_eye_image')
-            st.image(left_img_url, use_column_width="auto")
-            left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
-            left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
-            if (temp_diagnosed_date == "NA"):
-                left_risk_prev = 0
-            else:
-                left_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'left')
-            stage, risk = st.columns([0.5, 0.5])
-            with stage:
-                st.metric("Most Probable Stage", left_stage)
-            with risk:
-                st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
-        with right:
-            st.subheader("Right Fundus")
-            right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
-            st.image(right_img_url, use_column_width="auto")
-            right_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
-            right_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
-            if (temp_diagnosed_date == "NA"):
-                right_risk_prev = 0
-            else:
-                right_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'right')
-            stage, risk = st.columns([0.5, 0.5])
-            stage, risk = st.columns([0.5, 0.5])
-            with stage:
-                st.metric("Most Probable Stage", right_stage)
-            with risk:
-                st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(round((right_risk-right_risk_prev)*100,2))+'%', delta_color="inverse")
+            info, left, right = st.columns([0.35, 0.275, 0.275])
 
+            with info:
+                        st.subheader("Patient Details")
+                        st.write(f"**Patient ID:** {selected_patient_id}")
+                        #query patient's age
+                        temp_age =  query_patient_value(patient_dict, selected_patient_id, selected_date, 'age')
+                        st.write(f"**Age:** {temp_age}")
+                        #query patient's sex
+                        temp_sex = query_patient_value(patient_dict, selected_patient_id, selected_date, 'sex')
+                        st.write(f"**Sex:** {temp_sex}")
+                        #query notes
+                        temp_notes = query_patient_value(patient_dict, selected_patient_id, selected_date, 'doctor_notes')
+                        st.markdown(f"**Notes:** {temp_notes}")
+                        # #query date
+                        # temp_upload_date = query_patient_value(patient_dict, patient_id, selected_date, 'visit_date')
+                        # st.write(f"**Last Upload Date:** {temp_upload_date}")
+                        #query diagnosed date
+                        #placeholder information for now
+                        temp_diagnosed_date = query_last_visit_date(selected_date, selected_patient_date_list_flatten)
+                        if (temp_diagnosed_date!="NA"):
+                            display_diagnosed_date = strip_time_from_isodatetime(temp_diagnosed_date)
+                        else:
+                            display_diagnosed_date = temp_diagnosed_date
+                        st.write(f"**Last Visit Date:** {display_diagnosed_date}")
+                        
+            with left:
+                        st.subheader("Left Fundus")
+                        left_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'left_eye_image')
+                        st.image(left_img_url, use_column_width="auto")
+                        left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
+                        left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
+                        if (temp_diagnosed_date == "NA"):
+                            left_risk_prev = 0
+                        else:
+                            left_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'left')
+                        stage, risk = st.columns([0.5, 0.5])
+                        with stage:
+                            st.metric("Most Probable Stage", left_stage)
+                        with risk:
+                            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
+            with right:
+                    st.subheader("Right Fundus")
+                    right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
+                    st.image(right_img_url, use_column_width="auto")
+                    right_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
+                    right_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
+                    if (temp_diagnosed_date == "NA"):
+                        right_risk_prev = 0
+                    else:
+                        right_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'right')
+                    stage, risk = st.columns([0.5, 0.5])
+                    stage, risk = st.columns([0.5, 0.5])
+                    with stage:
+                        st.metric("Most Probable Stage", right_stage)
+                    with risk:
+                        st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(round((right_risk-right_risk_prev)*100,2))+'%', delta_color="inverse")
+        except TypeError as e:
+                st.text("No data to display")
+        except UnboundLocalError as e:
+                st.text=("No data to display")
+        
         st.divider()
+        
         st.subheader("Risk Trend")
 
-        #extract date, risk value L, risk value R, image L, image R
-        risk_l_col = "left_" + encode_disease(selected_disease_type) + "_prob"
-        risk_r_col = "right_" + encode_disease(selected_disease_type) + "_prob"
-        chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
+        try:
+            #extract date, risk value L, risk value R, image L, image R
+            risk_l_col = "left_" + encode_disease(selected_disease_type) + "_prob"
+            risk_r_col = "right_" + encode_disease(selected_disease_type) + "_prob"
+            chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
 
-        df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
-        # df = df[df['date'].isin(dropped_options)]
-        melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
-        melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
-        melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
-        melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
-        melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
-        melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
+            df = pd.DataFrame(chart_data, columns = ['date', 'risk_l', 'risk_r', 'image_l', 'image_r'])
+            # df = df[df['date'].isin(dropped_options)]
+            melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
+            melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
+            melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
+            melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
+            melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
+            melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
 
-        #get 10th or latest date from this patient's record, whichever is smaller
-        date_cutoff = get_cutoff_date(selected_patient_date_list_flatten)
+            #get 10th or latest date from this patient's record, whichever is smaller
+            date_cutoff = get_cutoff_date(selected_patient_date_list_flatten)
 
-        # Create a selection that chooses the nearest point & selects based on x-value
-        nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
+            # Create a selection that chooses the nearest point & selects based on x-value
+            nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
 
-        base = alt.Chart(melted_res).mark_line(point=True).encode(
-            alt.X('date:T', axis=alt.Axis(format="%b %Y")),
-            alt.Y('risk:Q').axis(format='.2%'),
-            alt.Color('laterality').scale(scheme="category10"),
-            # alt.Tooltip('risk:Q', format="%", title="Valor"),
-            tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
-        )
+            base = alt.Chart(melted_res).mark_line(point=True).encode(
+                alt.X('date:T', axis=alt.Axis(format="%b %Y")),
+                alt.Y('risk:Q').axis(format='.2%'),
+                alt.Color('laterality').scale(scheme="category10"),
+                # alt.Tooltip('risk:Q', format="%", title="Valor"),
+                tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
+            )
 
-        selectors = alt.Chart(melted_res).mark_point().encode(
+            selectors = alt.Chart(melted_res).mark_point().encode(
+                x='date:T',
+                opacity=alt.value(0),
+            ).add_params(
+                nearest
+            )
+
+            # Draw points on the line, and highlight based on selection
+            points = base.mark_point().encode(
+                opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+            )
+
+            # Draw text labels near the points, and highlight based on selection
+            text = base.mark_text(align='left', dx=5, dy=-5).encode(
+                text=alt.condition(nearest, 'risk:Q', alt.value(' '))
+            )
+
+            # Draw a rule at the location of the selection
+            rules = alt.Chart(melted_res).mark_rule(color='gray').encode(
+                x='date:T',
+            ).transform_filter(
+                nearest
+            )
+            curr_date = alt.Chart(pd.DataFrame({
+            'date': [selected_date],
+            'laterality': ['red']
+            })).mark_rule(strokeDash=[6,6]).encode(
             x='date:T',
-            opacity=alt.value(0),
-        ).add_params(
-            nearest
-        )
+            color=alt.Color('laterality:N', scale=None)
+            )
 
-        # Draw points on the line, and highlight based on selection
-        points = base.mark_point().encode(
-            opacity=alt.condition(nearest, alt.value(1), alt.value(0))
-        )
-
-        # Draw text labels near the points, and highlight based on selection
-        text = base.mark_text(align='left', dx=5, dy=-5).encode(
-            text=alt.condition(nearest, 'risk:Q', alt.value(' '))
-        )
-
-        # Draw a rule at the location of the selection
-        rules = alt.Chart(melted_res).mark_rule(color='gray').encode(
-            x='date:T',
-        ).transform_filter(
-            nearest
-        )
-        curr_date = alt.Chart(pd.DataFrame({
-        'date': [selected_date],
-        'laterality': ['red']
-        })).mark_rule(strokeDash=[6,6]).encode(
-        x='date:T',
-        color=alt.Color('laterality:N', scale=None)
-        )
-
-        st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
+            st.altair_chart((base+selectors+points+text+rules+curr_date.interactive()), theme="streamlit", use_container_width=True)
+        except TypeError as e:
+                st.text("No data to display")
+        except UnboundLocalError as e:
+                st.text=("No data to display")
 
         if (st.session_state.submitted_logout):
             logout()
