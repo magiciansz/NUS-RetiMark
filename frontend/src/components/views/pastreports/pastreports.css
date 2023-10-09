@@ -45,7 +45,7 @@
         display: flex;
         justify-content: center;
         position: relative;
-        left: -70px;
+        left: -120px;
     }
     .input-wrapper {
         /* width: 100%;
@@ -84,7 +84,7 @@
         border: 1px #e76d27 solid;
         background-color: #e76d27;
         color: white;
-        width: 100px;
+        width: 200px;
         padding: 10px;
         border-radius: 8px; 
         cursor: pointer;
@@ -96,6 +96,12 @@
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+    .search-btn.disabled {
+        background-color: #ccc; /* Change the background color to gray */
+        cursor: not-allowed; /* Change the cursor to indicate it's not clickable */
+        pointer-events: none; /* Prevent click events on the button */
+        border: none;
     }
     .custom-link {
         text-decoration: none; /* Remove underlines */

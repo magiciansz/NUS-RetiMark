@@ -9,15 +9,6 @@ import PatientApi from '../../../apis/PatientApi';
 import Cookies from 'js-cookie';
 import { getAccessToken } from '../../auth/Auth';
 
-const patients = [
-	{name: 'jiahui', age: '22', gender: 'F'},
-    {name: 'tanjiahui', age: '22', gender: 'F'},
-	{name: 'xianghan', age: '24', gender: 'M'},
-	{name: 'jiajun', age: '24', gender: 'M'},
-	{name: 'glenn', age: '24', gender: 'M'},
-	{name: 'josiah', age: '24', gender: 'M'},
-]
-
 function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage, newPatient}) {
     const [userEdit, setUserEdit] = useState({gender: ''});
     const [mode, setMode] = useState('');

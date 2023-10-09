@@ -27,6 +27,7 @@ const PastReports = () => {
 	const [filteredPatients, setFilteredPatients] = useState([])
 	const [input, setInput] = useState("");
     const [pastReports, setPastReports] = useState([])
+    const [keywords, setKeywords] = useState('')
 
     const handleExistingPatient = () => {
         setExistingPatient(true)
@@ -47,7 +48,7 @@ const PastReports = () => {
 
     const handleChange = (value) => {
         setInput(value);
-        fetchData(value);
+        setKeywords(value)
     };
 
 	const clearInput = () => {
@@ -75,6 +76,28 @@ const PastReports = () => {
         }
     }, []);
 
+    const fetchPatients = useCallback(async () => {
+        console.log("running fetch patients")
+        // setFilteredPatients([]);
+        const accessTokenData = await getAccessToken();
+        if (!accessTokenData) return;
+        console.log("access token in fetch", accessTokenData)
+        const requestParams = {
+            accessToken: accessTokenData,
+        };
+        console.log("keywords", keywords)
+        if (keywords) requestParams.query = keywords;
+        try {
+            const res = await PatientApi.searchPatient(requestParams);
+            console.log("getting results frm search", res.data)
+            setFilteredPatients(res.data?.patients);
+        } catch (err) {
+        console.error(err);
+        }
+        
+
+    }, [keywords]);
+
     const handleSearch = async () => {
         const accessToken = await getAccessToken();
         console.log("acess in past reports", accessToken)
@@ -90,11 +113,12 @@ const PastReports = () => {
             //     console.error(err);
             // }
 
-
+            console.log("came in,", patient)
 
             const requestParams = {
                 accessToken,
-                id: 59,
+                id: patient.id,
+                sort: 'descending',
             };
             
             try {
@@ -110,8 +134,27 @@ const PastReports = () => {
             console.log('No valid access token.');
         }
 
-        setPatient(input);
+        // setPatient(input);
     };
+
+    // const isFormValid = () => {
+    //     console.log("in form value", userEdit)
+    //     const { name, gender, dateOfBirth } = userEdit;
+    
+    //     // Check if all required fields are filled
+    //     if (name && gender && dateOfBirth) {
+    //         return true;
+    //     }
+    
+    //     return false;
+    // };
+
+
+    useEffect(() => {   
+        fetchPatients();
+    }, [fetchPatients]); 
+
+    console.log("past reports, patient", patient)
     return (
         <div className='past-reports'>
             <div className='info'>
@@ -135,11 +178,11 @@ const PastReports = () => {
                         {input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
                     </div>
                 </div>
-                <div className='search-btn' onClick={() => handleSearch()}>
-                    Search
+                <div className={`search-btn ${!patient ? 'disabled' : ''}`} onClick={() => handleSearch()}>
+                    Get Past Reports
                 </div>
             </div>
-            <div className='results-container'>
+            <div className='results-container' style={{ height: filteredPatients.length === 0 ? 'auto' : '200px' }}>
                 <div className='results-list'>
                     {filteredPatients && filteredPatients.map((p, id) => (
                         <div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
@@ -147,39 +190,36 @@ const PastReports = () => {
                 </div>
             </div>
             <div>
-                <div className='search-results-header'>
+                {/* <div className='search-results-header'>
                     Your Search Results: 
-                </div>
+                </div> */}
                 {patient && <div> 
                     Name: {patient.name}
-                    Date of Birth: {patient.dateOfBirth}  
-                    Gender: {patient.gender}
+                    DOB: {patient.date_of_birth}  
+                    Sex: {patient.sex}
                 </div>}
-                <div className='report-table'>
-                <table>
-                    <thead>
-                        <tr className="header">
-                        <th>Date</th>
-                        <th>Report Link</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pastReports.map((v) => (
-                        <tr key={`report${v.id}`}>
-                            <td>{v.visit_date}</td>
-                            <td>
-                                <a href={v.report_link} target="_blank" rel="noopener noreferrer" class='custom-link'>
-                                    {v.report_link}
-                                </a>
-                            </td>
-                        </tr>
-                        ))}
-                    </tbody>
-                </table>
-                </div>
-                {/* {pastReports?.map((report, index) => (
-                    
-                ))} */}
+                {pastReports.length > 0 && <div className='report-table'>
+                    <table>
+                        <thead>
+                            <tr className="header">
+                            <th>Date</th>
+                            <th>Report Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pastReports.map((v) => (
+                            <tr key={`report${v.version}`}>
+                                <td>{v.visit_date}</td>
+                                <td>
+                                    <a href={v.report_link} target="_blank" rel="noopener noreferrer" className='custom-link'>
+                                        {v.report_link}
+                                    </a>
+                                </td>
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>}
                 <div>
                 </div>
             </div>
