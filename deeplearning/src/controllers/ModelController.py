@@ -26,6 +26,8 @@ amdWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/a
 amdModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/AmdClassifier.py'
 glaucomaWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/glaucoma_state_dict.pth'
 glaucomaModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/GlaucomaClassifier.py'
+diabeticWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/diabetic_state_dict.pth'
+diabeticModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/DiabeticClassifier.py'
 
 def importModel(weightsUrl, modelUrl, moduleName="imported_module", className="EyeClassifier"):
     response = requests.get(modelUrl)
@@ -41,6 +43,7 @@ def importModel(weightsUrl, modelUrl, moduleName="imported_module", className="E
 
 amdModel = importModel(amdWeightsUrl, amdModelUrl)
 glaucomaModel = importModel(glaucomaWeightsUrl, glaucomaModelUrl)
+# diabeticModel = importModel(diabeticWeightsUrl, diabeticModelUrl)
 
 def crop_img(image):
     image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -88,8 +91,16 @@ class ModelController(Resource):
             glaucomaOutput_np = glaucomaOutput.numpy()
             output.update({'glaucoma': glaucomaOutput_np.tolist()[0][0]})
 
-            output_json = json.dumps(output)
-            return jsonify(output_json)
+            # with torch.no_grad():
+            #     diabeticOutput = diabeticModel(image)
+            # diabeticOutput_np = diabeticOutput.numpy()
+            # output.update({'diabetic': diabeticOutput_np.tolist()[0][0]})
+            output.update({'diabetic': 0.042349932}) # REMOVE WHEN DIABETIC MODEL IS AVAILABLE
+
+            # output_json = json.dumps(output)
+            # return jsonify(output_json)
+
+            return jsonify(output)
         except Exception as e:
             print(e)
 
