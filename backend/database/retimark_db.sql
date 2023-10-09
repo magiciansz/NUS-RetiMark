@@ -5,10 +5,10 @@ CREATE TABLE IF NOT EXISTS `PatientTbl` (
 	`sex` VARCHAR(1),
 	`left_eye_image` VARCHAR(255),
 	`right_eye_image` VARCHAR(255),
-	`left_diabetic_retinography_stage` TINYINT,
-    `left_diabetic_retinography_prob` FLOAT,
-    `right_diabetic_retinography_stage` TINYINT,
-    `right_diabetic_retinography_prob` FLOAT,
+	`left_diabetic_retinopathy_stage` TINYINT,
+    `left_diabetic_retinopathy_prob` FLOAT,
+    `right_diabetic_retinopathy_stage` TINYINT,
+    `right_diabetic_retinopathy_prob` FLOAT,
     `left_ocular_prob` FLOAT,
     `right_ocular_prob` FLOAT,
     `left_glaucoma_prob` FLOAT,
@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS `PatientHistoryTbl` (
 	`sex` VARCHAR(1),
 	`left_eye_image` VARCHAR(255),
 	`right_eye_image` VARCHAR(255),
-	`left_diabetic_retinography_stage` TINYINT,
-    `left_diabetic_retinography_prob` FLOAT,
-    `right_diabetic_retinography_stage` TINYINT,
-    `right_diabetic_retinography_prob` FLOAT,
+	`left_diabetic_retinopathy_stage` TINYINT,
+    `left_diabetic_retinopathy_prob` FLOAT,
+    `right_diabetic_retinopathy_stage` TINYINT,
+    `right_diabetic_retinopathy_prob` FLOAT,
     `left_ocular_prob` FLOAT,
     `right_ocular_prob` FLOAT,
     `left_glaucoma_prob` FLOAT,
@@ -79,8 +79,8 @@ ON PatientTbl FOR EACH ROW
 BEGIN
 	INSERT INTO PatientHistoryTbl
 	VALUES(NEW.id, NEW.`version`, NEW.date_of_birth, NEW.sex, NEW.left_eye_image,
-    NEW.right_eye_image, NEW.left_diabetic_retinography_stage, NEW.left_diabetic_retinography_prob,
-    NEW.right_diabetic_retinography_stage, NEW.right_diabetic_retinography_prob,
+    NEW.right_eye_image, NEW.left_diabetic_retinopathy_stage, NEW.left_diabetic_retinopathy_prob,
+    NEW.right_diabetic_retinopathy_stage, NEW.right_diabetic_retinopathy_prob,
     NEW.left_ocular_prob, NEW.right_ocular_prob, NEW.left_glaucoma_prob, NEW.right_glaucoma_prob,
     NEW.visit_date);
 END$$
@@ -95,8 +95,8 @@ ON PatientTbl FOR EACH ROW
 BEGIN
 	INSERT INTO PatientHistoryTbl
 	VALUES(NEW.id, NEW.`version`, NEW.date_of_birth, NEW.sex, NEW.left_eye_image,
-    NEW.right_eye_image, NEW.left_diabetic_retinography_stage, NEW.left_diabetic_retinography_prob,
-    NEW.right_diabetic_retinography_stage, NEW.right_diabetic_retinography_prob,
+    NEW.right_eye_image, NEW.left_diabetic_retinopathy_stage, NEW.left_diabetic_retinopathy_prob,
+    NEW.right_diabetic_retinopathy_stage, NEW.right_diabetic_retinopathy_prob,
     NEW.left_ocular_prob, NEW.right_ocular_prob, NEW.left_glaucoma_prob, NEW.right_glaucoma_prob,
     NEW.visit_date);
 END$$
@@ -106,8 +106,8 @@ DELIMITER ;
 -- INSERT PATIENT
 
 INSERT INTO PatientTbl (date_of_birth, sex, left_eye_image,
-    right_eye_image, left_diabetic_retinography_stage, left_diabetic_retinography_prob,
-    right_diabetic_retinography_stage, right_diabetic_retinography_prob,
+    right_eye_image, left_diabetic_retinopathy_stage, left_diabetic_retinopathy_prob,
+    right_diabetic_retinopathy_stage, right_diabetic_retinopathy_prob,
     left_ocular_prob, right_ocular_prob, left_glaucoma_prob, right_glaucoma_prob)
 VALUES ('2000-01-01', 'M', 'left_image.jpg', 'right_image.jpg',
     0, 0.85, 0, 0.92, 0.75, 0.88, 0.6, 0.7)
@@ -119,10 +119,10 @@ UPDATE PatientTbl
 SET
     left_eye_image = 'new_left_image.jpg',
     right_eye_image = 'new_right_image.jpg',
-    left_diabetic_retinography_stage = 0,
-    left_diabetic_retinography_prob = 0.95,
-    right_diabetic_retinography_stage = 0,
-    right_diabetic_retinography_prob = 0.98,
+    left_diabetic_retinopathy_stage = 0,
+    left_diabetic_retinopathy_prob = 0.95,
+    right_diabetic_retinopathy_stage = 0,
+    right_diabetic_retinopathy_prob = 0.98,
     left_ocular_prob = 0.88,
     right_ocular_prob = 0.92,
     left_glaucoma_prob = 0.75,
