@@ -7,9 +7,9 @@ import Report from './report'
 import Modal from './modal';
 
 
-import Placeholder from '../../../css/imgs/ai.png';
-import Placeholder2 from '../../../css/imgs/img2.jpg';
-import Placeholder3 from '../../../css/imgs/img3.png';
+import BlurEye from '../../../css/imgs/blur_eye.JPG';
+import CroppedEye from '../../../css/imgs/cropped_eye.JPG';
+import GoodEye from '../../../css/imgs/eye_right.jpeg';
 
 function Home() {
 	const [showReport, setShowReport] = useState(false);
@@ -70,21 +70,21 @@ function Home() {
 					</div>
 					<div className='images'>
 						<div className='image'>
-							<img src={Placeholder} alt="Example" /> 
+							<img src={GoodEye} alt="Example" /> 
 							<div className='req'>
-								The image is clear
+								Good example. Image is clear and the entire iris is visible.
 							</div>
 						</div>
 						<div className='image'>
-							<img src={Placeholder2} alt="Example" /> 
+							<img src={CroppedEye} alt="Example" /> 
 							<div className='req'>
-								The eye is in the center of the image
+							Bad example. The  entire iris is not visible in the image.
 							</div>
 						</div>
 						<div className='image'>
-							<img src={Placeholder3} alt="Example" /> 
+							<img src={BlurEye} alt="Example" /> 
 							<div className='req'>
-								The background is plain
+								Bad example. The image is blur. 
 							</div>
 						</div>
 					</div>
@@ -97,11 +97,6 @@ function Home() {
 				<Modal isOpen={isModalOpen} onClose={closeModal} showReport={handleShowReport} selectedPatient={selectedPatient} leftEyeImage={leftEyeImage} rightEyeImage={rightEyeImage} newPatient={newPatient}/>
 			</div>}
 			{showReport && <Report patient={patient} leftEyeImage={leftEye} rightEyeImage={rightEye} onSave={closeReport} newPatient={isNewPatient}/>}
-			{/* <div className='prediction-container'>
-				{showReport && <div className='new-prediction' onClick={handleNewPrediction}>
-					Save
-				</div>}
-			</div> */}
 		</div>
 	);
 }

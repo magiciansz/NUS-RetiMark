@@ -68,6 +68,7 @@ const PastReports = () => {
                 const res = await PatientApi.getPastReports(requestParams);
                 console.log("res from past reports", res)
                 setPastReports(res.data?.reports)
+                setSortOption('latest')
             } catch (err) {
                 console.error(err);
             }
@@ -157,13 +158,13 @@ const PastReports = () => {
 
                 </div>
 
-                <div className='sort-dropdown'>
+                {pastReports.length > 0 && <div className='sort-dropdown'>
                     Sort by:
                     <select value={sortOption} onChange={handleSortOptionChange}>
                         <option value='oldest'>Oldest to Latest</option>
                         <option value='latest'>Latest to Oldest</option>
                     </select>
-                </div>
+                </div>}
                 
                 {pastReports.length > 0 && <div className='report-table'>
                     <table className='table'>

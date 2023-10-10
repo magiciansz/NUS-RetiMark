@@ -165,11 +165,11 @@ function Report({patient, leftEyeImage, rightEyeImage, onSave, newPatient}) {
                         <div className='sub-header'>
                             Results
                         </div>
-                        Probability of Diabetic Retinopathy: 70%
+                        Probability of Diabetic Retinopathy: 85.3%
                         <br/>
-                        Probability of Age-related Macular Degeneration: 50%
+                        Probability of Age-related Macular Degeneration: 9.6%
                         <br/>
-                        Probability of Glaucoma: 20%
+                        Probability of Glaucoma: 15.2%
                     </div>
                     {docNotes && <div className='doc-notes'>
                         <div className='sub-header'>
