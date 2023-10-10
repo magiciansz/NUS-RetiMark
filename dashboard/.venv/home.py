@@ -77,7 +77,7 @@ def login():
         # tz_string = datetime.datetime.now().astimezone().tzinfo
         tz_string = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
         cookie_manager.set(key='time_zone', cookie='time_zone', val=tz_string)
-        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/auth/login"
+        API_ENDPOINT = config['ENDPOINT_URL']+"/auth/login"
         PARAMS = {'timezone':tz_string}
         data = {
             "username":username,
@@ -176,7 +176,7 @@ def home():
 
     def get_patient_history(d_lower, d_upper, o_lower, o_upper, g_lower, g_upper):
         ##BEGIN API CALL
-        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history"
+        API_ENDPOINT = config['ENDPOINT_URL']+"/patient-history"
         PARAMS = {
             'timezone':cookie_manager.get(cookie="time_zone"),
             'diabetic_retinopathy_lower_threshold':d_lower,
@@ -315,7 +315,7 @@ def home():
     
     def logout():
         ##BEGIN API CALL
-        API_ENDPOINT = "http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/auth/logout"
+        API_ENDPOINT = config['ENDPOINT_URL']+"/auth/logout"
         HEADERS = {
             "Authorization": "Bearer " + cookie_manager.get(cookie='access_token')
         }
@@ -544,7 +544,7 @@ def home():
             nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
 
             if selected_disease_type=="Diabetic Retinopathy":
-                melted_res['amplified_risk'] = melted_res['stage'] * 100 + melted_res['risk']
+                melted_res['amplified_risk'] = melted_res['stage'] + melted_res['risk']
                 base = alt.Chart(melted_res).mark_line(point=True).encode(
                     alt.X('date:T', axis=alt.Axis(format="%b %Y")),
                     alt.Y('amplified_risk:Q').axis(format='.2%'),
