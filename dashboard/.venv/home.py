@@ -7,6 +7,7 @@ import pandas as pd
 import random
 import requests
 import streamlit as st
+from dotenv import dotenv_values
 
 # Streamlit app
 st.set_page_config(
@@ -24,6 +25,7 @@ def init_router():
 @st.cache_resource(experimental_allow_widgets=True)
 def get_manager():
     return stx.CookieManager()
+config = dotenv_values(".env")
 
 cookie_manager = get_manager()
 cookies = cookie_manager.get_all()
