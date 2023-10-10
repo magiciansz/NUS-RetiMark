@@ -190,27 +190,38 @@ const PastReports = () => {
                 </div>
             </div>
             <div>
-                {/* <div className='search-results-header'>
-                    Your Search Results: 
-                </div> */}
-                {patient && <div> 
-                    Name: {patient.name}
-                    DOB: {patient.date_of_birth}  
-                    Sex: {patient.sex}
-                </div>}
+                <div className='patient-container'>
+                    {patient && <div className='patient-details'> 
+                        <div>
+                            Selected Patient Details:
+                        </div>
+                        <div>
+                            Name: {patient.name}
+                        </div>
+                        <div>
+                            DOB: {patient.date_of_birth}  
+                        </div>
+                        <div>
+                            Sex: {patient.sex}
+                        </div>
+                    
+                    </div>}
+
+                </div>
+                
                 {pastReports.length > 0 && <div className='report-table'>
-                    <table>
-                        <thead>
+                    <table className='table'>
+                        <thead className='thead'>
                             <tr className="header">
-                            <th>Date</th>
-                            <th>Report Link</th>
+                                <th>Date</th>
+                                <th>Report Link</th>
                             </tr>
                         </thead>
                         <tbody>
                             {pastReports.map((v) => (
                             <tr key={`report${v.version}`}>
-                                <td>{v.visit_date}</td>
-                                <td>
+                                <td className='td'>{v.visit_date.slice(0, 10)}</td>
+                                <td className='td'>
                                     <a href={v.report_link} target="_blank" rel="noopener noreferrer" className='custom-link'>
                                         {v.report_link}
                                     </a>
@@ -220,8 +231,6 @@ const PastReports = () => {
                         </tbody>
                     </table>
                 </div>}
-                <div>
-                </div>
             </div>
         </div>
     )
