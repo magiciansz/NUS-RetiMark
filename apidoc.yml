@@ -22,6 +22,8 @@ tags:
     description: Patient APIs
   - name: Patient History
     description: Patient History APIs
+  - name: Model
+    description: Model APIs (follow the pure URL)
 
 paths:
   /auth/login:
@@ -404,9 +406,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PatientNotFound"
+  /model-staging/api/v1/model:
+    post:
+      tags:
+        - Model
+      summary: Get Disease Probabilities
+      description: Run model using image and retrieve probabilities
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ModelForm"
+        required: true
+      responses:
+        "200":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelResult"
+        "400":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlaskBadRequest"
 
 components:
   schemas:
+    FlaskBadRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The browser (or proxy) sent a request that this server could not understand."
+    ModelResult:
+      type: object
+      properties:
+        amd:
+          type: string
+          format: number
+          example: 0.5
+        diabetic:
+          type: string
+          format: number
+          example: 0.5
+        glaucoma:
+          type: string
+          format: number
+          example: 0.5
+    ModelForm:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
     PatientHistoryReportResult:
       type: object
       properties:
