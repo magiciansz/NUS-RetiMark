@@ -7,44 +7,14 @@ import { BrowserRouter as Router, Route, Link, Switch, useNavigate } from 'react
 
 import './pastreports.css';
 
-
-const patients = [
-	{name: 'jiahui', dateOfBirth: '02-02-2001', gender: 'F'},
-	{name: 'xianghan', age: '24', gender: 'M'},
-	{name: 'jiajun', age: '24', gender: 'M'},
-	{name: 'glenn', age: '24', gender: 'M'},
-	{name: 'josiah', age: '24', gender: 'M'},
-]
-
 const PastReports = () => {
     const navigate = useNavigate();
-    const [selectedFile, setSelectedFile] = useState(null);
-	const [previewImage, setPreviewImage] = useState(null);
-	const [showReport, setShowReport] = useState(false);
 	const [patient, setPatient] = useState()
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [existingPatient, setExistingPatient] = useState(false)
 	const [filteredPatients, setFilteredPatients] = useState([])
 	const [input, setInput] = useState("");
     const [pastReports, setPastReports] = useState([])
     const [keywords, setKeywords] = useState('')
-
-    const handleExistingPatient = () => {
-        setExistingPatient(true)
-    };
-
-	const fetchData = (value) => {
-        const results = patients.filter((user) => {
-            return (
-              value &&
-              user &&
-              user.name &&
-              user.name.toLowerCase().includes(value)
-            );
-        });
-        setFilteredPatients(results)
-        console.log("results", results);
-    }
+    const [sortOption, setSortOption] = useState('latest')
 
     const handleChange = (value) => {
         setInput(value);
@@ -61,20 +31,6 @@ const PastReports = () => {
 		setInput(selectedPatient.name); // Update the search input with the selected patient's name
         setFilteredPatients([])     
 	};
-
-    const addPatient = useCallback(async (accessToken, rightEye) => {
-        console.log("running adding patient func")
-        const requestParams = {
-            accessToken,
-            rightEye
-        };
-        try {
-            const res = await PatientApi.createPatient(requestParams);
-            console.log("res from create", res)
-        } catch (err) {
-            console.error(err);
-        }
-    }, []);
 
     const fetchPatients = useCallback(async () => {
         console.log("running fetch patients")
@@ -102,19 +58,6 @@ const PastReports = () => {
         const accessToken = await getAccessToken();
         console.log("acess in past reports", accessToken)
         if (accessToken) {
-            // const requestParams = {
-            //     accessToken, 
-            //     query: 'jia'
-            // };
-            // try {
-            //     const res = await PatientApi.searchPatient(requestParams);
-            //     console.log("res from search", res)
-            // } catch (err) {
-            //     console.error(err);
-            // }
-
-            console.log("came in,", patient)
-
             const requestParams = {
                 accessToken,
                 id: patient.id,
@@ -137,24 +80,29 @@ const PastReports = () => {
         // setPatient(input);
     };
 
-    // const isFormValid = () => {
-    //     console.log("in form value", userEdit)
-    //     const { name, gender, dateOfBirth } = userEdit;
-    
-    //     // Check if all required fields are filled
-    //     if (name && gender && dateOfBirth) {
-    //         return true;
-    //     }
-    
-    //     return false;
-    // };
+    const handleSortOptionChange = (event) => {
+        console.log("sorting")
+        const selectedOption = event.target.value;
+        setSortOption(selectedOption);
+      
+        // Sort the data based on the selected option
+        const sortedReports = [...pastReports]; // Create a copy of the current reports array
+        if (selectedOption === 'oldest') {
+          sortedReports.sort((a, b) => new Date(a.visit_date) - new Date(b.visit_date));
+        } else if (selectedOption === 'latest') {
+          sortedReports.sort((a, b) => new Date(b.visit_date) - new Date(a.visit_date));
+        }
 
+        console.log("new sorted", sortedReports)
+      
+        setPastReports(sortedReports);
+      };
 
     useEffect(() => {   
         fetchPatients();
     }, [fetchPatients]); 
 
-    console.log("past reports, patient", patient)
+    console.log("past reports, past reports", pastReports)
     return (
         <div className='past-reports'>
             <div className='info'>
@@ -190,27 +138,46 @@ const PastReports = () => {
                 </div>
             </div>
             <div>
-                {/* <div className='search-results-header'>
-                    Your Search Results: 
-                </div> */}
-                {patient && <div> 
-                    Name: {patient.name}
-                    DOB: {patient.date_of_birth}  
-                    Sex: {patient.sex}
-                </div>}
+                <div className='patient-container'>
+                    {patient && <div className='patient-details'> 
+                        <div className='text'>
+                            Selected Patient Details:
+                        </div>
+                        <div>
+                            Name: {patient.name}
+                        </div>
+                        <div>
+                            DOB: {patient.date_of_birth}  
+                        </div>
+                        <div>
+                            Sex: {patient.sex}
+                        </div>
+                    
+                    </div>}
+
+                </div>
+
+                <div className='sort-dropdown'>
+                    Sort by:
+                    <select value={sortOption} onChange={handleSortOptionChange}>
+                        <option value='oldest'>Oldest to Latest</option>
+                        <option value='latest'>Latest to Oldest</option>
+                    </select>
+                </div>
+                
                 {pastReports.length > 0 && <div className='report-table'>
-                    <table>
-                        <thead>
+                    <table className='table'>
+                        <thead className='thead'>
                             <tr className="header">
-                            <th>Date</th>
-                            <th>Report Link</th>
+                                <th>Date</th>
+                                <th>Report Link</th>
                             </tr>
                         </thead>
                         <tbody>
                             {pastReports.map((v) => (
                             <tr key={`report${v.version}`}>
-                                <td>{v.visit_date}</td>
-                                <td>
+                                <td className='td'>{v.visit_date.slice(0, 10)}</td>
+                                <td className='td'>
                                     <a href={v.report_link} target="_blank" rel="noopener noreferrer" className='custom-link'>
                                         {v.report_link}
                                     </a>
@@ -220,8 +187,6 @@ const PastReports = () => {
                         </tbody>
                     </table>
                 </div>}
-                <div>
-                </div>
             </div>
         </div>
     )
