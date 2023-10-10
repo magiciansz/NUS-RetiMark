@@ -181,6 +181,28 @@
     }
     .table tr:nth-child(even) td {
         background-color: #e76d2717; /* Background color for even rows */
-      }
+    }
+    .sort-dropdown {
+        display: flex;
+        margin-left: 2.5%;
+        align-items: center;
+    }
+    .sort-dropdown select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-left: 10px;
+        
+    }
+    .sort-dropdown select option {
+        padding: 20px;
+        font-size: 17px;
+        background-color: #fff;
+        color: #333; /* Text color */
+    }
+    .text {
+        font-weight: 600;
+    }
     
 }
