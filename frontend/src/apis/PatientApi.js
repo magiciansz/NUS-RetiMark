@@ -7,19 +7,21 @@ async function createPatient({
   rightEye,
   docNotes,
   report,
+  leftEyeResults,
+  rightEyeResults
 }) {
   const formData = new FormData();
   formData.append('name', patient.name);
   formData.append('date_of_birth', patient.dateOfBirth);
   formData.append('sex', patient.gender);
-  formData.append('left_diabetic_retinopathy_stage', 0);
-  formData.append('right_diabetic_retinopathy_stage', 0);
-  formData.append('left_diabetic_retinopathy_prob', 0);
-  formData.append('right_diabetic_retinopathy_prob', 0);
-  formData.append('left_ocular_prob', 0);
-  formData.append('right_ocular_prob', 0);
-  formData.append('left_glaucoma_prob', 0);
-  formData.append('right_glaucoma_prob', 0);
+  formData.append('left_diabetic_retinopathy_stage', leftEyeResults.diabetic[0]);
+  formData.append('right_diabetic_retinopathy_stage', rightEyeResults.diabetic[0]);
+  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
+  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.diabetic[1]);
+  formData.append('left_ocular_prob', leftEyeResults.amd);
+  formData.append('right_ocular_prob', rightEyeResults.amd);
+  formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
+  formData.append('right_glaucoma_prob', rightEyeResults.glaucoma);
   formData.append('doctor_notes', docNotes || 'NIL');
   formData.append('right_eye_image', rightEye);
   formData.append('left_eye_image', leftEye);
@@ -46,16 +48,18 @@ async function updatePatient({
   rightEye,
   report,
   docNotes,
+  leftEyeResults,
+  rightEyeResults
 }) {
   const formData = new FormData();
-  formData.append('left_diabetic_retinopathy_stage', 0);
-  formData.append('right_diabetic_retinopathy_stage', 0);
-  formData.append('left_diabetic_retinopathy_prob', 0);
-  formData.append('right_diabetic_retinopathy_prob', 0);
-  formData.append('left_ocular_prob', 0);
-  formData.append('right_ocular_prob', 0);
-  formData.append('left_glaucoma_prob', 0);
-  formData.append('right_glaucoma_prob', 0);
+  formData.append('left_diabetic_retinopathy_stage', leftEyeResults.diabetic[0]);
+  formData.append('right_diabetic_retinopathy_stage', rightEyeResults.diabetic[0]);
+  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
+  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.diabetic[1]);
+  formData.append('left_ocular_prob', leftEyeResults.amd);
+  formData.append('right_ocular_prob', rightEyeResults.amd);
+  formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
+  formData.append('right_glaucoma_prob', rightEyeResults.glaucoma);
   formData.append('doctor_notes', docNotes || 'NIL');
   formData.append('right_eye_image', rightEye);
   formData.append('left_eye_image', leftEye);

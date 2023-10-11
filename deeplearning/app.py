@@ -1,13 +1,16 @@
 import src.routes as routes
-import config
 import traceback
 
 from flask import Flask, json
 from flask.blueprints import Blueprint
 from werkzeug.exceptions import HTTPException
-
+from dotenv import load_dotenv
+from flask_cors import CORS
+import os
 
 app = Flask(__name__)
+CORS(app)
+load_dotenv()
 
 @app.errorhandler(Exception)
 def handle_exception(e):
@@ -39,9 +42,9 @@ def handle_bad_request(e):
 
 for blueprint in vars(routes).values():
     if isinstance(blueprint, Blueprint):
-        app.register_blueprint(blueprint, url_prefix=config.APPLICATION_ROOT)
+        app.register_blueprint(blueprint, url_prefix=os.getenv('APPLICATION_ROOT') + os.getenv('API_PATH_ROOT'))
 
 
-@app.route('/health')
+@app.route(os.getenv('APPLICATION_ROOT') + '/health')
 def hello():
     return '<h1>Hello, World!</h1>'

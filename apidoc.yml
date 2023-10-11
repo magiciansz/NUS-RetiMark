@@ -22,6 +22,8 @@ tags:
     description: Patient APIs
   - name: Patient History
     description: Patient History APIs
+  - name: Model
+    description: Model APIs (follow the pure URL)
 
 paths:
   /auth/login:
@@ -289,8 +291,44 @@ paths:
       tags:
         - Patient History
       summary: Get All Patient History
-      description: Get Patient History for all patients, in ascending ID and descending version order
+      description: Get Patient History for patients within any threshold, in ascending ID and descending version order
       parameters:
+        - name: ocular_lower_threshold
+          in: query
+          description: lower threshold for ocular disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: ocular_upper_threshold
+          in: query
+          description: upper threshold for ocular disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: glaucoma_lower_threshold
+          in: query
+          description: lower threshold for glaucoma disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: glaucoma_upper_threshold
+          in: query
+          description: upper threshold for glaucoma disease (0-1)
+          required: true
+          schema:
+            type: number
+        - name: diabetic_retinopathy_lower_threshold
+          in: query
+          description: lower threshold for diabetic retinopathy (0-1)
+          required: true
+          schema:
+            type: number
+        - name: diabetic_retinopathy_upper_threshold
+          in: query
+          description: upper threshold for diabetic retinopathy (0-1)
+          required: true
+          schema:
+            type: number
         - name: timezone
           in: query
           description: timezone to return visit date of patients
@@ -320,7 +358,7 @@ paths:
       tags:
         - Patient History
       summary: Get All Reports for a Patient
-      description: Get reports for a patient, in descending version number
+      description: Get reports for a patient, in specified sort order
       parameters:
         - name: id
           in: path
@@ -328,11 +366,21 @@ paths:
             type: integer
           required: true
           description: ID of patient to get reports
+        - name: sort
+          in: query
+          required: true
+          description: sort order for version numbers
+          schema:
+            type: string
+            enum:
+              - ascending
+              - descending
         - name: timezone
           in: query
           description: timezone to return visit date of patients
           schema:
             type: string
+
       responses:
         "200":
           description: Successfully Retrieved Reports
@@ -358,9 +406,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PatientNotFound"
+  /model-staging/api/v1/model:
+    post:
+      tags:
+        - Model
+      summary: Get Disease Probabilities
+      description: Run model using image and retrieve probabilities
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ModelForm"
+        required: true
+      responses:
+        "200":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelResult"
+        "400":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlaskBadRequest"
 
 components:
   schemas:
+    FlaskBadRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The browser (or proxy) sent a request that this server could not understand."
+    ModelResult:
+      type: object
+      properties:
+        amd:
+          type: string
+          format: number
+          example: 0.5
+        diabetic:
+          type: string
+          format: number
+          example: 0.5
+        glaucoma:
+          type: string
+          format: number
+          example: 0.5
+    ModelForm:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
     PatientHistoryReportResult:
       type: object
       properties:

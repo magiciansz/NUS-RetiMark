@@ -1,14 +1,10 @@
-name: CD (Staging)
+name: Deployment of Flask Server (Staging)
 
 on:
-  pull_request:
-    branches:
-      - develop
-    types: [closed]
+  workflow_dispatch:
 
 jobs:
   build:
-    if: ${{ github.event.pull_request.merged }}
     name: Build Image to ECR & deploy on ECS
     runs-on: ubuntu-latest
     steps:
@@ -31,15 +27,15 @@ jobs:
         run: |
 
       - name: Build, tag, and push image to Amazon ECR
-        working-directory: backend
+        working-directory: deeplearning
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: staging
-          IMAGE_TAG: server-latest
+          IMAGE_TAG: server-flask-latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to ECS
         run: |
-          aws ecs update-service --cluster staging --service staging-server --force-new-deployment
+          aws ecs update-service --cluster staging --service staging-flask-server --force-new-deployment
