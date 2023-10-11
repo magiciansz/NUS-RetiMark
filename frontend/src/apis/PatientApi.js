@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 async function createPatient({
   accessToken,
@@ -8,16 +8,25 @@ async function createPatient({
   docNotes,
   report,
   leftEyeResults,
-  rightEyeResults
+  rightEyeResults,
 }) {
   const formData = new FormData();
   formData.append('name', patient.name);
   formData.append('date_of_birth', patient.dateOfBirth);
   formData.append('sex', patient.gender);
-  formData.append('left_diabetic_retinopathy_stage', leftEyeResults.diabetic[0]);
-  formData.append('right_diabetic_retinopathy_stage', rightEyeResults.diabetic[0]);
+  formData.append(
+    'left_diabetic_retinopathy_stage',
+    leftEyeResults.diabetic[0]
+  );
+  formData.append(
+    'right_diabetic_retinopathy_stage',
+    rightEyeResults.diabetic[0]
+  );
   formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
-  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.diabetic[1]);
+  formData.append(
+    'right_diabetic_retinopathy_prob',
+    rightEyeResults.diabetic[1]
+  );
   formData.append('left_ocular_prob', leftEyeResults.amd);
   formData.append('right_ocular_prob', rightEyeResults.amd);
   formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
@@ -28,7 +37,7 @@ async function createPatient({
   formData.append('report_pdf', report);
   console.log('form data for create patient');
   formData.forEach((value, key) => {
-    console.log("Field:", key, "Value:", value);
+    console.log('Field:', key, 'Value:', value);
   });
 
   return axios.post(
@@ -36,7 +45,7 @@ async function createPatient({
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
-      "Content-Type": "multipart/form-data",
+      'Content-Type': 'multipart/form-data',
     }
   );
 }
@@ -49,13 +58,22 @@ async function updatePatient({
   report,
   docNotes,
   leftEyeResults,
-  rightEyeResults
+  rightEyeResults,
 }) {
   const formData = new FormData();
-  formData.append('left_diabetic_retinopathy_stage', leftEyeResults.diabetic[0]);
-  formData.append('right_diabetic_retinopathy_stage', rightEyeResults.diabetic[0]);
+  formData.append(
+    'left_diabetic_retinopathy_stage',
+    leftEyeResults.diabetic[0]
+  );
+  formData.append(
+    'right_diabetic_retinopathy_stage',
+    rightEyeResults.diabetic[0]
+  );
   formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
-  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.diabetic[1]);
+  formData.append(
+    'right_diabetic_retinopathy_prob',
+    rightEyeResults.diabetic[1]
+  );
   formData.append('left_ocular_prob', leftEyeResults.amd);
   formData.append('right_ocular_prob', rightEyeResults.amd);
   formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
@@ -66,7 +84,7 @@ async function updatePatient({
   formData.append('report_pdf', report);
   console.log('form data for update patient');
   formData.forEach((value, key) => {
-    console.log("Field:", key, "Value:", value);
+    console.log('Field:', key, 'Value:', value);
   });
 
   return axios.patch(
@@ -74,7 +92,7 @@ async function updatePatient({
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
-      "Content-Type": "multipart/form-data",
+      'Content-Type': 'multipart/form-data',
     }
   );
 }
@@ -90,7 +108,6 @@ async function getPastReports({ accessToken, id, sort }) {
 }
 
 async function searchPatient({ accessToken, query }) {
-  console.log('acces token', accessToken);
   return axios.get(
     `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient/search`,
     {
@@ -100,19 +117,9 @@ async function searchPatient({ accessToken, query }) {
   );
 }
 
-async function getHistory({ accessToken }) {
-  return axios.get(
-    `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history?timezone=Asia/Singapore`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }
-  );
-}
-
 export default {
   createPatient,
   updatePatient,
   getPastReports,
   searchPatient,
-  getHistory,
 };

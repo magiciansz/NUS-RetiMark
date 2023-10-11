@@ -329,7 +329,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 placeholder="Search patient"
                                 value={input}
                                 onChange={(e) => handleChange(e.target.value)}
-                                onKeyPress={(e) => {
+                                onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault();
                                     }
