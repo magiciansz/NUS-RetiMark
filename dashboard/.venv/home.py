@@ -478,20 +478,20 @@ def home():
                         st.write(f"**Last Visit Date:** {display_diagnosed_date}")
                         
             with left:
-                        st.subheader("Left Fundus")
-                        left_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'left_eye_image')
-                        st.image(left_img_url, use_column_width="auto")
-                        left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
-                        left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
-                        if (temp_diagnosed_date == "NA"):
-                            left_risk_prev = 0
-                        else:
-                            left_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'left')
-                        stage, risk = st.columns([0.5, 0.5])
-                        with stage:
-                            st.metric("Most Probable Stage", left_stage)
-                        with risk:
-                            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
+                    st.subheader("Left Fundus")
+                    left_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'left_eye_image')
+                    st.image(left_img_url, use_column_width="auto")
+                    left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
+                    left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
+                    if (temp_diagnosed_date == "NA"):
+                        left_risk_prev = 0
+                    else:
+                        left_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'left')
+                    stage, risk = st.columns([0.5, 0.5])
+                    with stage:
+                        st.metric("Most Probable Stage", left_stage)
+                    with risk:
+                        st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
             with right:
                     st.subheader("Right Fundus")
                     right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
@@ -502,7 +502,6 @@ def home():
                         right_risk_prev = 0
                     else:
                         right_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'right')
-                    stage, risk = st.columns([0.5, 0.5])
                     stage, risk = st.columns([0.5, 0.5])
                     with stage:
                         st.metric("Most Probable Stage", right_stage)
