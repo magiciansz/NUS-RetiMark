@@ -6,9 +6,9 @@ import "./home.css";
 import Report from "./report";
 import Modal from "./modal";
 
-import Placeholder from "../../../css/imgs/ai.png";
-import Placeholder2 from "../../../css/imgs/img2.jpg";
-import Placeholder3 from "../../../css/imgs/img3.png";
+import BlurEye from '../../../css/imgs/blur_eye.JPG';
+import CroppedEye from '../../../css/imgs/cropped_eye.JPG';
+import GoodEye from '../../../css/imgs/eye_right.jpeg';
 
 function Home() {
   const [showReport, setShowReport] = useState(false);
@@ -83,16 +83,16 @@ function Home() {
             </div>
             <div className="images">
               <div className="image">
-                <img src={Placeholder} alt="Example" />
-                <div className="req">The image is clear</div>
+                <img src={GoodEye} alt="Example" />
+                <div className="req">Good example. Image is clear and the entire iris is visible.</div>
               </div>
               <div className="image">
-                <img src={Placeholder2} alt="Example" />
-                <div className="req">The eye is in the center of the image</div>
+                <img src={CroppedEye} alt="Example" />
+                <div className="req">Bad example. The entire iris is not visible in the image.</div>
               </div>
               <div className="image">
-                <img src={Placeholder3} alt="Example" />
-                <div className="req">The background is plain</div>
+                <img src={BlurEye} alt="Example" />
+                <div className="req">Bad example. The image is blur.</div>
               </div>
             </div>
           </div>

@@ -311,6 +311,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 type="date"
                                 onChange={(e) => { setUserEdit({ ...userEdit, dateOfBirth: e.target.value }); }}
                                 value={userEdit?.dateOfBirth || ''}
+                                max="1999-12-31"
                                 required
                             />
                         </div>
@@ -328,6 +329,11 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 placeholder="Search patient"
                                 value={input}
                                 onChange={(e) => handleChange(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <div>
                                 {input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
