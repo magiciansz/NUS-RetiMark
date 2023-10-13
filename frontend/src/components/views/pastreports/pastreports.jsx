@@ -19,6 +19,10 @@ const PastReports = () => {
     const handleChange = (value) => {
         setInput(value);
         setKeywords(value)
+        if (pastReports) {
+            setPastReports([]) 
+            setPatient()
+        }
     };
 
 	const clearInput = () => {
@@ -33,22 +37,17 @@ const PastReports = () => {
 	};
 
     const fetchPatients = useCallback(async () => {
-        console.log("running fetch patients")
-        // setFilteredPatients([]);
         const accessTokenData = await getAccessToken();
         if (!accessTokenData) return;
-        console.log("access token in fetch", accessTokenData)
         const requestParams = {
             accessToken: accessTokenData,
         };
-        console.log("keywords", keywords)
         if (keywords) requestParams.query = keywords;
         try {
             const res = await PatientApi.searchPatient(requestParams);
-            console.log("getting results frm search", res.data)
             setFilteredPatients(res.data?.patients);
         } catch (err) {
-        console.error(err);
+            console.error(err);
         }
         
 
@@ -56,7 +55,6 @@ const PastReports = () => {
 
     const handleSearch = async () => {
         const accessToken = await getAccessToken();
-        console.log("acess in past reports", accessToken)
         if (accessToken) {
             const requestParams = {
                 accessToken,
@@ -66,7 +64,6 @@ const PastReports = () => {
             
             try {
                 const res = await PatientApi.getPastReports(requestParams);
-                console.log("res from past reports", res)
                 setPastReports(res.data?.reports)
                 setSortOption('latest')
             } catch (err) {
@@ -93,8 +90,6 @@ const PastReports = () => {
         } else if (selectedOption === 'latest') {
           sortedReports.sort((a, b) => new Date(b.visit_date) - new Date(a.visit_date));
         }
-
-        console.log("new sorted", sortedReports)
       
         setPastReports(sortedReports);
       };
@@ -103,7 +98,6 @@ const PastReports = () => {
         fetchPatients();
     }, [fetchPatients]); 
 
-    console.log("past reports, past reports", pastReports)
     return (
         <div className='past-reports'>
             <div className='info'>
@@ -166,7 +160,7 @@ const PastReports = () => {
                     </select>
                 </div>}
                 
-                {pastReports.length > 0 && <div className='report-table'>
+                {input && pastReports.length > 0 && <div className='report-table'>
                     <table className='table'>
                         <thead className='thead'>
                             <tr className="header">
@@ -180,7 +174,7 @@ const PastReports = () => {
                                 <td className='td'>{v.visit_date.slice(0, 10)}</td>
                                 <td className='td'>
                                     <a href={v.report_link} target="_blank" rel="noopener noreferrer" className='custom-link'>
-                                        {v.report_link}
+                                        {v.report_link.split('/').pop()}
                                     </a>
                                 </td>
                             </tr>
