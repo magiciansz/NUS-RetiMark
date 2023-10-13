@@ -269,7 +269,7 @@ def home():
     def query_stage(dict, id, visit_date, disease, laterality):
         code = encode_disease(disease)
         if (code in ['ocular', 'glaucoma']):
-            return "Unknown"
+            return None
         else:
             stage_col = laterality + '_' + code + '_stage'
             return query_patient_value(dict, id, visit_date, stage_col)
@@ -491,7 +491,10 @@ def home():
                     with stage:
                         st.metric("Most Probable Stage", left_stage)
                     with risk:
-                        st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
+                        if (temp_diagnosed_date != "NA"):
+                            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
+                        else:
+                            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%')
             with right:
                     st.subheader("Right Fundus")
                     right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
@@ -506,7 +509,10 @@ def home():
                     with stage:
                         st.metric("Most Probable Stage", right_stage)
                     with risk:
-                        st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(round((right_risk-right_risk_prev)*100,2))+'%', delta_color="inverse")
+                        if (temp_diagnosed_date != "NA"):
+                            st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(round((right_risk-right_risk_prev)*100,2))+'%', delta_color="inverse")
+                        else:
+                            st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%')
         except TypeError as e:
                 st.text("No data to display")
         except UnboundLocalError as e:
@@ -543,10 +549,12 @@ def home():
             nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
 
             if selected_disease_type=="Diabetic Retinopathy":
+                axis_labels = ("datum.label == '0.00%' ? 'Stage 0': datum.label == '100.00%' ? 'Stage 1': datum.label == '200.00%' ? 'Stage 2' : datum.label == '300.00%' ? 'Stage 3': datum.label == '400.00%' ? 'Stage 4':' '")
                 melted_res['amplified_risk'] = melted_res['stage'] + melted_res['risk']
                 base = alt.Chart(melted_res).mark_line(point=True).encode(
                     alt.X('date:T', axis=alt.Axis(format="%b %Y")),
-                    alt.Y('amplified_risk:Q').axis(format='.2%'),
+                    # alt.Y('amplified_risk:Q').axis(format='.2%'),
+                    alt.Y('amplified_risk:Q', title='Stage, Risk (%)').axis(labelExpr=axis_labels, format='.2%'),
                     alt.Color('laterality').scale(scheme="category10"),
                     # tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
                     tooltip=['date:T', 'stage', alt.Tooltip("risk:Q", format=".2%")]
@@ -554,7 +562,7 @@ def home():
             else:
                 base = alt.Chart(melted_res).mark_line(point=True).encode(
                     alt.X('date:T', axis=alt.Axis(format="%b %Y")),
-                    alt.Y('risk:Q').axis(format='.2%'),
+                    alt.Y('risk:Q', title='Risk (%)').axis(format='.2%'),
                     alt.Color('laterality').scale(scheme="category10"),
                     # tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
                     tooltip=['date:T', 'stage', alt.Tooltip("risk:Q", format=".2%")]
