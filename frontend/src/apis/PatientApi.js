@@ -35,13 +35,9 @@ async function createPatient({
   formData.append('right_eye_image', rightEye);
   formData.append('left_eye_image', leftEye);
   formData.append('report_pdf', report);
-  console.log('form data for create patient');
-  formData.forEach((value, key) => {
-    console.log('Field:', key, 'Value:', value);
-  });
 
   return axios.post(
-    `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient?timezone=Asia/Singapore`,
+    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient?timezone=Asia/Singapore`,
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -82,13 +78,8 @@ async function updatePatient({
   formData.append('right_eye_image', rightEye);
   formData.append('left_eye_image', leftEye);
   formData.append('report_pdf', report);
-  console.log('form data for update patient');
-  formData.forEach((value, key) => {
-    console.log('Field:', key, 'Value:', value);
-  });
-
   return axios.patch(
-    `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient/${id}?timezone=Asia/Singapore`,
+    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient/${id}?timezone=Asia/Singapore`,
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -99,7 +90,7 @@ async function updatePatient({
 
 async function getPastReports({ accessToken, id, sort }) {
   return axios.get(
-    `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient-history/${id}/reports`,
+    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient-history/${id}/reports`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { sort },
@@ -109,7 +100,7 @@ async function getPastReports({ accessToken, id, sort }) {
 
 async function searchPatient({ accessToken, query }) {
   return axios.get(
-    `http://staging-alb-840547905.ap-southeast-1.elb.amazonaws.com/api/v1/patient/search`,
+    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient/search`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { query },
