@@ -171,6 +171,10 @@ def home():
         st.session_state['g_lower'] = 0.0
     if 'g_upper' not in st.session_state:
         st.session_state['g_upper'] = 1.0
+    if 'lock_normal_threshold' not in st.session_state:
+        st.session_state['lock_normal_threshold'] = False
+    if 'lock_disease_threshold' not in st.session_state:
+        st.session_state['lock_disease_threshold'] = False
     
     st.session_state['submitted_login'] = False
 
@@ -295,10 +299,21 @@ def home():
     def submitted_logout():
         st.session_state.submitted_logout = True
     def toggle_reset_thresholds():
+        unlock_all_thresholds()
+        
         if st.session_state.reset_thresholds:
             st.session_state.reset_thresholds=False
         else:
             st.session_state.reset_thresholds=True
+            #Uncomment the below if you would like the filters to be reset every time the button is toggled off
+            # st.session_state.d_lower=0.0
+            # st.session_state.d_upper=1.0
+            # st.session_state.o_lower=0.0
+            # st.session_state.o_upper=1.0
+            # st.session_state.g_lower=0.0
+            # st.session_state.g_upper=1.0
+
+        # set_all_thresholds()
     def set_diabetic_retinopathy_threshold():
         st.session_state.d_lower = d_threshold[0]/100
         st.session_state.d_upper = d_threshold[1]/100
@@ -312,7 +327,23 @@ def home():
         set_diabetic_retinopathy_threshold()
         set_ocular_threshold()
         set_glaucoma_threshold()
-    
+        # unlock_all_thresholds()
+    def lock_normal_threshold():
+        st.session_state.lock_normal_threshold = True
+        st.session_state.lock_disease_threshold = False
+        # set_all_thresholds()
+    def lock_disease_threshold():
+        st.session_state.lock_disease_threshold = True
+        st.session_state.lock_normal_threshold = False
+        # set_all_thresholds()
+    def unlock_normal_threshold():
+        st.session_state.lock_normal_threshold = False
+    def unlock_disease_threshold():
+        st.session_state.lock_disease_threshold = False
+    def unlock_all_thresholds():
+        unlock_normal_threshold()
+        unlock_disease_threshold()
+        # set_all_thresholds()
     def logout():
         ##BEGIN API CALL
         API_ENDPOINT = config['ENDPOINT_URL']+"/auth/logout"
@@ -353,7 +384,7 @@ def home():
         patients_history = get_patient_history(st.session_state.d_lower, st.session_state.d_upper,
                                                st.session_state.o_lower, st.session_state.d_upper,
                                                st.session_state.g_lower, st.session_state.g_upper)
-        if (patients_history==None):
+        if (patients_history==None or patients_history=={}):
             st.session_state.no_data_flag = True
         patient_raw_dict = deepcopy(patients_history)
         #group by id
@@ -386,12 +417,12 @@ def home():
                 pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds)
             with options2:
                 if pre_filter_on:
-                    use_default_disease = st.button('Show default disease thresholds', on_click=set_all_thresholds)
+                    use_default_disease = st.button('Show default disease thresholds', on_click=lock_disease_threshold)
                 else:
                     use_default_disease = st.button('Show default disease thresholds', disabled=True)
             with options3:
                 if pre_filter_on:
-                    use_default_normal = st.button('Show default normal thresholds', on_click=set_all_thresholds)
+                    use_default_normal = st.button('Show default normal thresholds', on_click=lock_normal_threshold)
                 else:
                     use_default_normal = st.button('Show default normal thresholds', disabled=True)
             with confirm:
@@ -403,32 +434,32 @@ def home():
             pre_filter1, pre_filter2, pre_filter3 = st.columns(3)
             with pre_filter1:
                 if pre_filter_on:
-                    if use_default_disease:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (21,100), on_change=set_all_thresholds)
-                    elif use_default_normal:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20), on_change=set_all_thresholds)
+                    if use_default_disease or st.session_state.lock_disease_threshold:
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (20,100))
+                    elif use_default_normal or st.session_state.lock_normal_threshold:
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20))
                     else:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), on_change=set_all_thresholds)
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
                 else:
                     d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), disabled=True)
             with pre_filter2:
                 if pre_filter_on:
-                    if use_default_disease:
-                        o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (21,100), on_change=set_all_thresholds)
-                    elif use_default_normal:
-                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20), on_change=set_all_thresholds)
+                    if use_default_disease or st.session_state.lock_disease_threshold:
+                        o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (20,100))
+                    elif use_default_normal or st.session_state.lock_normal_threshold:
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20))
                     else:
-                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), on_change=set_all_thresholds)
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100))
                 else:
                      o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), disabled=True)
             with pre_filter3:
                 if pre_filter_on:
-                    if use_default_disease:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (21,100), on_change=set_all_thresholds)
-                    elif use_default_normal:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20), on_change=set_all_thresholds)
+                    if use_default_disease  or st.session_state.lock_disease_threshold:
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (20,100))
+                    elif use_default_normal  or st.session_state.lock_normal_threshold:
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20))
                     else:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), on_change=set_all_thresholds)
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100))
                 else:
                     g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), disabled=True)
         with st.expander(label="Search and Filter", expanded=True):
@@ -448,12 +479,14 @@ def home():
                     selected_patient_date_list_flatten = sorted([date[0] for date in selected_patient_date_list], reverse=True)
                     selected_date = st.selectbox(label='Date', options=selected_patient_date_list_flatten, format_func=strip_time_from_isodatetime, help='Select visit date')
             except TypeError as e:
-                st.text("No data to display")
+                st.write("No data to display.")
             except UnboundLocalError as e:
-                st.text=("No data to display")
+                st.write("No data to display.")
         st.session_state['reset_thresholds'] = False
 
         try:
+            # if st.session_state.no_data_flag:
+            #     st.write("No data to display")
 
             info, left, right = st.columns([0.35, 0.275, 0.275])
 
@@ -514,9 +547,9 @@ def home():
                         else:
                             st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%')
         except TypeError as e:
-                st.text("No data to display")
+                st.write("No data to display.")
         except UnboundLocalError as e:
-                st.text=("No data to display")
+                st.write("No data to display.")
         
         st.divider()
         
@@ -616,9 +649,9 @@ def home():
 
             st.altair_chart((base+selectors+points+text+rules+avg_left+avg_right+curr_date.interactive()), theme="streamlit", use_container_width=True)
         except TypeError as e:
-                st.text("No data to display")
+                st.write("No data to display.")
         except UnboundLocalError as e:
-                st.text=("No data to display")
+                st.write("No data to display.")
 
         if (st.session_state.submitted_logout):
             logout()
