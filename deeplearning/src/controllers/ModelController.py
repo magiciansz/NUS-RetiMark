@@ -18,7 +18,6 @@ from torchvision import transforms as T, models
 import cv2 as cv
 from PIL import Image
 import numpy as np
-import json
 import sys
 import types
 
@@ -43,7 +42,7 @@ def importModel(weightsUrl, modelUrl, moduleName="imported_module", className="E
 
 amdModel = importModel(amdWeightsUrl, amdModelUrl)
 glaucomaModel = importModel(glaucomaWeightsUrl, glaucomaModelUrl)
-# diabeticModel = importModel(diabeticWeightsUrl, diabeticModelUrl)
+diabeticModel = importModel(diabeticWeightsUrl, diabeticModelUrl)
 
 def crop_img(image):
     image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -91,14 +90,14 @@ class ModelController(Resource):
             glaucomaOutput_np = glaucomaOutput.numpy()
             output.update({'glaucoma': glaucomaOutput_np.tolist()[0][0]})
 
-            # with torch.no_grad():
-            #     diabeticOutput = diabeticModel(image)
-            # diabeticOutput_np = diabeticOutput.numpy()
-            # output.update({'diabetic': diabeticOutput_np.tolist()[0][0]})
-            output.update({'diabetic': [0, 0.942349932]}) # REMOVE WHEN DIABETIC MODEL IS AVAILABLE
-
-            # output_json = json.dumps(output)
-            # return jsonify(output_json)
+            with torch.no_grad():
+                diabeticOutput = diabeticModel(image)
+            diabeticOutput_np = diabeticOutput.numpy()
+            logits = diabeticOutput_np.tolist()[0]
+            diabetic_probs = nn.functional.softmax(torch.tensor(logits), dim = 0)
+            diabetic_pred = torch.argmax(diabetic_probs).item()
+            diabetic_pred_prob = diabetic_probs[diabetic_pred].item()
+            output.update({'diabetic': [diabetic_pred, diabetic_pred_prob]})
 
             return jsonify(output)
         except Exception as e:
