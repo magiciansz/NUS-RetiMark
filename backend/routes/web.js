@@ -6,6 +6,14 @@ const userRoute = require("./UserRoute");
 const PatientHistoryRoute = require("./PatientHistoryRoute");
 const ApiError = require("../app/middlewares/ApiError");
 const httpStatus = require("http-status");
+const multer = require("multer");
+const storage = multer.diskStorage({
+  destination: "./public/.well-known/pki-validation/", // Change the path to your desired destination
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage });
 
 const defaultRoutes = [
   {
@@ -33,6 +41,14 @@ defaultRoutes.forEach((route) => {
 // health check
 router.get("/health", (req, res) => {
   res.status(200).send("OK");
+});
+
+// upload SSL cert
+router.post("/upload-certificate", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Please upload a file");
+  }
+  res.status(200).send("File Uploaded Successfully");
 });
 
 router.all("*", () => {
