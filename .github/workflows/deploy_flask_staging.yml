@@ -1,9 +1,7 @@
 name: Deployment of Flask Server (Staging)
 
 on:
-  pull_request:
-    branches:
-      - develop
+  workflow_dispatch:
 
 jobs:
   build:
