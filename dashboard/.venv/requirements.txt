@@ -4,5 +4,5 @@ extra_streamlit_components
 numpy
 requests
 pandas
-streamlit
 python-dotenv
+streamlit
