@@ -404,14 +404,14 @@ def home():
     
     main = st.container()
     with main:
-        st.sidebar.image("http://retimark.com/layout/images/common/logo_on.png")
+        st.sidebar.image("./static/retimark-logo_on.png")
         st.sidebar.write(f'Welcome, *{cookie_manager.get(cookie="user_username")}*')
         st.sidebar.button(label='Logout', on_click=submitted_logout, key='logout_button')
         logo, title = st.columns([0.08,0.92])
         with title:
             st.title('RetiMark Fundus Dashboard')
         with logo:
-            st.image("http://retimark.com/layout/images/common/logo_on.png")
+            st.image("./static/retimark-logo_on.png")
 
         # Filters
         with st.expander(label="Filter Risk Thresholds", expanded=False):
