@@ -2,6 +2,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import './navi.css';
 import Cookies from 'js-cookie';
 
+import Logo from '../../css/imgs/retimark-logo.png';
+
+
 const Navi = () => {
     const clearCookies = () => {
 
@@ -14,7 +17,7 @@ const Navi = () => {
         <div className="navi">
             <div className="logo-container">
                 <img
-                    src="http://retimark.com/layout/images/common/logo.png" // Your external image URL
+                    src={Logo}
                     alt="Logo"
                     className="logo"
                 />
