@@ -3,22 +3,13 @@ import React, {
   } from 'react';
 
 import './modal.css';
-import {FaSearch} from "react-icons/fa"
+import {FaAccessibleIcon, FaSearch} from "react-icons/fa"
 
 import PatientApi from '../../../apis/PatientApi';
 import Cookies from 'js-cookie';
 import { getAccessToken } from '../../auth/Auth';
 
-const patients = [
-	{name: 'jiahui', age: '22', gender: 'F'},
-    {name: 'tanjiahui', age: '22', gender: 'F'},
-	{name: 'xianghan', age: '24', gender: 'M'},
-	{name: 'jiajun', age: '24', gender: 'M'},
-	{name: 'glenn', age: '24', gender: 'M'},
-	{name: 'josiah', age: '24', gender: 'M'},
-]
-
-function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage, newPatient}) {
+function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rightEyeImage, newPatient, leftEyeResults, rightEyeResults}) {
     const [userEdit, setUserEdit] = useState({gender: ''});
     const [mode, setMode] = useState('');
     const [input, setInput] = useState("");
@@ -30,24 +21,14 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
     const [errorMessageRightEye, setErrorMessageRightEye] = useState('');
     const [accessToken, setAccessToken] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+    const [keywords, setKeywords] = useState('')
+    const [leftEyeRes, setLeftEyeRes] = useState(null)
+    const [rightEyeRes, setRightEyeRes] = useState(null)
 
-    if (!isOpen) return null;
+    // if (!isOpen) return null;
     // Handle form submission
-
-    const addPatient = async (accessToken, rightEye) => {
-        console.log("running adding patient func")
-        const requestParams = {
-            accessToken,
-            rightEye: rightEye.blob,
-        };
-        try {
-            const res = await PatientApi.createPatient(requestParams);
-            console.log("res from create", res)
-        } catch (err) {
-            console.error(err);
-        }
-    };
+    const showHideClassname = isOpen ? ' show-modal' : ' hide-modal';
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -65,9 +46,35 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         selectedPatient(patient)
         leftEyeImage(leftEye)
         rightEyeImage(rightEye)
+        leftEyeResults(leftEyeRes)
+        rightEyeResults(rightEyeRes)
         clearInputs()
         onClose();
     };
+
+    const fetchPatients = useCallback(async () => {
+        console.log("running fetch patients")
+        // setFilteredPatients([]);
+        const accessTokenData = await getAccessToken();
+        if (!accessTokenData) return;
+        console.log("access token in fetch", accessTokenData)
+        const requestParams = {
+            accessToken: accessTokenData,
+        };
+        console.log("keywords", keywords)
+        if (keywords) requestParams.query = keywords;
+        try {
+            setLoading(true)
+            const res = await PatientApi.searchPatient(requestParams);
+            console.log("getting results frm search", res.data)
+            setFilteredPatients(res.data?.patients);
+            setLoading(false)
+        } catch (err) {
+        console.error(err);
+        }
+        
+
+    }, [keywords]);
 
     const clearInputs = () => {
         setUserEdit({gender: ''})
@@ -81,6 +88,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 
     const handleClose = () => {
         // setUserEdit({ gender: 'male' });
+        console.log("clicking close")
         clearInputs()
         onClose();
         
@@ -110,37 +118,39 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
             const { name, gender, dateOfBirth } = userEdit;
             
             // Calculate age based on date of birth
-            // const dob = new Date(dateOfBirth);
-            // const today = new Date();
-            // const age = today.getFullYear() - dob.getFullYear();
+            const dob = new Date(dateOfBirth);
+            const today = new Date();
+            const age = today.getFullYear() - dob.getFullYear();
         
-            // setPatient({
-            //   name,
-            //   gender,
-            //   age,
-            // })
+            setPatient({
+              name,
+              gender,
+              age,
+              dateOfBirth
+            })
 
-            setPatient(userEdit)
+            // setPatient(userEdit)
         }
         setMode('next');
     };
 
-    const fetchData = (value) => {
-        const results = patients.filter((user) => {
-            return (
-              value &&
-              user &&
-              user.name &&
-              user.name.toLowerCase().includes(value)
-            );
-        });
-        setFilteredPatients(results)
-        console.log("results", results);
-    }
+    // const fetchData = (value) => {
+    //     const results = patients.filter((user) => {
+    //         return (
+    //           value &&
+    //           user &&
+    //           user.name &&
+    //           user.name.toLowerCase().includes(value)
+    //         );
+    //     });
+    //     setFilteredPatients(results)
+    //     console.log("results", results);
+    // }
 
     const handleChange = (value) => {
         setInput(value);
-        fetchData(value);
+        setKeywords(value)
+        // fetchData(value); 
     };
 
 	const clearInput = () => {
@@ -152,7 +162,24 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 		setPatient(selectedPatient);
 		setInput(selectedPatient.name); // Update the search input with the selected patient's name
 		setFilteredPatients([])   
-	};
+        console.log("selected patient", selectedPatient)
+    };
+    
+    const runModels = async (image, eye) => {
+        const formData = new FormData();
+        formData.append('image', image)
+        try {
+            const response = await fetch(`${process.env.REACT_APP_ENDPOINT_URL}/model-staging/api/v1/model`, {
+                method: 'POST',
+                body: formData
+            })
+            const result = await response.json()
+            console.log(result)
+            eye == "left" ? setLeftEyeRes(result) : setRightEyeRes(result)
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const handleFileChange = (event, eye) => {
 		const file = event.target.files[0];
@@ -164,11 +191,11 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                 const height = this.height;
                 
                 // Define your image resolution and dimensions requirements
-                const minWidth = 100; // Minimum width in pixels
-                const minHeight = 100; // Minimum height in pixels
-                const maxWidth = 800; // Maximum width in pixels
-                const maxHeight = 800; // Maximum height in pixels
-                const minDpi = 95; // Minimum DPI
+                const minWidth = 100;
+                const minHeight = 100; 
+                // const maxWidth = 800; 
+                // const maxHeight = 800; 
+                const minDpi = 95; 
             
                 // Calculate DPI based on image dimensions
                 const dpi = Math.round((width / (width * 0.0254)));
@@ -177,9 +204,9 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 
                 if (
                     width >= minWidth &&
-                    height >= minHeight &&
-                    width <= maxWidth &&
-                    height <= maxHeight
+                    height >= minHeight
+                    // width <= maxWidth &&
+                    // height <= maxHeight
                 ) {
                     if (eye === 'left') {
                         setLeftEye(URL.createObjectURL(file));
@@ -188,6 +215,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                         setRightEye(URL.createObjectURL(file));
                         setErrorMessageRightEye("")
                     }
+                    runModels(file, eye)
                 } else {
                     // Image does not meet the requirements
                     console.log("image doesnt fit size")
@@ -220,11 +248,18 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
 
     const bothImagesUploaded = () => {
         return leftEye && rightEye;
-    };
+    };    
+
+    useEffect(() => {   
+        fetchPatients();
+    }, [fetchPatients]); 
+
+    console.log("filtered patients", filteredPatients)
+    console.log("if patient", filteredPatients === true)
 
     return (
-      <div className="modal">
-        <div className="modal-content">
+      <div className={`modal${showHideClassname}`}>
+        <div className={`modal-content${showHideClassname}`}>
             <div className='close-button' onClick={handleClose}>
                 X
             </div>
@@ -276,6 +311,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 type="date"
                                 onChange={(e) => { setUserEdit({ ...userEdit, dateOfBirth: e.target.value }); }}
                                 value={userEdit?.dateOfBirth || ''}
+                                max="1999-12-31"
                                 required
                             />
                         </div>
@@ -293,13 +329,18 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                                 placeholder="Search patient"
                                 value={input}
                                 onChange={(e) => handleChange(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <div>
                                 {input.length === 0 ? <FaSearch id='search-icon' /> : <div className='cross-btn' onClick={() => clearInput()}> X </div>}
                             </div>
                         </div>
                     </div>
-                    <div className='results-list'>
+                    <div className='results-list' style={{ height: filteredPatients.length === 0 ? 'auto' : '200px' }}>
                         {filteredPatients && filteredPatients.map((p, id) => (
                             <div className='search-results' key={id} onClick={() => handlePatientClick(p)}>{p.name}</div>
                         ))}
@@ -310,9 +351,9 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
                             <div>
                                 Name: {patient.name} 
                                 <br/>
-                                Age: {patient.age} 
+                                DOB: {patient.date_of_birth} 
                                 <br/>
-                                Gender: {patient.gender} 
+                                Gender: {patient.sex} 
                             </div>
                             <div className='submit-btn' onClick={switchToNextMode}>
                                 Next

@@ -29,6 +29,7 @@
         margin-top: 1rem;
         max-height: 300px;
         overflow-y: auto;
+        margin-bottom: 20px;
     }
     .search-results {
         padding: 10px 20px;
@@ -45,7 +46,7 @@
         display: flex;
         justify-content: center;
         position: relative;
-        left: -70px;
+        left: -120px;
     }
     .input-wrapper {
         /* width: 100%;
@@ -84,7 +85,7 @@
         border: 1px #e76d27 solid;
         background-color: #e76d27;
         color: white;
-        width: 100px;
+        width: 200px;
         padding: 10px;
         border-radius: 8px; 
         cursor: pointer;
@@ -97,4 +98,111 @@
         justify-content: center;
         align-items: center;
     }
+    .search-btn:hover {
+        background-color: #e76d27c7
+    }
+    .search-btn.disabled {
+        background-color: #ccc; /* Change the background color to gray */
+        cursor: not-allowed; /* Change the cursor to indicate it's not clickable */
+        pointer-events: none; /* Prevent click events on the button */
+        border: none;
+    }
+    .custom-link {
+        text-decoration: none; /* Remove underlines */
+        color: blue; /* Set the normal link color */
+    }
+      
+    .custom-link:hover {
+    text-decoration: underline; /* Add underlines on hover */
+    }
+    .report-table{
+        margin: 20px 0 0 0;
+        background-color: #FFF;
+        border-radius: 3px;
+        overflow: hidden;
+
+        table{
+          width: 100%;
+          border-collapse:collapse;
+            thead{
+                background-color: #f3f7fc;
+            }
+            tr{
+                &:not(.header){
+                cursor: pointer;
+                &:hover{
+                    box-shadow: inset 0px 0px 250px 0px rgba(0,0,0,.1);
+                }
+                }
+                width: 100%;
+                th,td{
+                text-align: center;
+                height: 48px;
+                }
+            }
+        }
+    }
+    .search-results-header {
+        font-size: 30px;
+        font-weight: 600;
+        text-align: center;
+    }
+    .patient-details {
+        border: 2px solid #e76d2775 ;
+        width: 650px;
+        box-shadow: 3px 3px #e76d2775 ;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .patient-container {
+        display: flex;
+        justify-content: center;
+    }
+    .report-table {
+        display: flex;
+        justify-content: center;
+    }
+    .table {
+        width: 95%;
+        border-collapse: collapse;
+        border: 1px solid #e76d27;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .thead {
+        background-color: #e76d27;
+        color: white;
+    }
+    /* .td {
+        border-bottom: 1px solid #e76d2775;
+    } */
+    .table th, .table td {
+        padding: 10px;
+    }
+    .table tr:nth-child(even) td {
+        background-color: #e76d2717; /* Background color for even rows */
+    }
+    .sort-dropdown {
+        display: flex;
+        margin-left: 2.5%;
+        align-items: center;
+    }
+    .sort-dropdown select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 17px;
+        margin-left: 10px;
+        
+    }
+    .sort-dropdown select option {
+        padding: 20px;
+        font-size: 17px;
+        background-color: #fff;
+        color: #333; /* Text color */
+    }
+    .text {
+        font-weight: 600;
+    }
+    
 }

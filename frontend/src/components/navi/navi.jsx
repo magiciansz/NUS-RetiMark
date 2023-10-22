@@ -2,8 +2,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import './navi.css';
 import Cookies from 'js-cookie';
 
+import Logo from '../../css/imgs/retimark-logo.png';
+
+
 const Navi = () => {
     const clearCookies = () => {
+
+        console.log("logging out, removing cookies")
         Cookies.remove('accessToken'); // Clear the access token cookie
         Cookies.remove('refreshToken'); // Clear the refresh token cookie
         // You can remove any other cookies you have here
@@ -12,7 +17,7 @@ const Navi = () => {
         <div className="navi">
             <div className="logo-container">
                 <img
-                    src="http://retimark.com/layout/images/common/logo.png" // Your external image URL
+                    src={Logo}
                     alt="Logo"
                     className="logo"
                 />
