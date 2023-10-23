@@ -419,15 +419,15 @@ def home():
         with st.expander(label="Filter Risk Thresholds", expanded=False):
             options1, options2, options3, confirm = st.columns([0.25, 0.3, 0.3, 0.15])
             with options1:
-                pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds)
+                pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds, help="Turn on risk level filtering feature ")
             with options2:
                 if pre_filter_on:
-                    use_default_disease = st.button('Show default disease thresholds', on_click=lock_disease_threshold)
+                    use_default_disease = st.button('Show default disease thresholds', on_click=lock_disease_threshold, help="Preset sliders to default thresholds associated with high risk")
                 else:
                     use_default_disease = st.button('Show default disease thresholds', disabled=True)
             with options3:
                 if pre_filter_on:
-                    use_default_normal = st.button('Show default normal thresholds', on_click=lock_normal_threshold)
+                    use_default_normal = st.button('Show default normal thresholds', on_click=lock_normal_threshold, help="Preset sliders to default thresholds associated with low risk")
                 else:
                     use_default_normal = st.button('Show default normal thresholds', disabled=True)
             with confirm:
@@ -440,31 +440,31 @@ def home():
             with pre_filter1:
                 if pre_filter_on:
                     if use_default_disease or st.session_state.lock_disease_threshold:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (20,100))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (20,100), help="Drag sliders to desired risk thresholds")
                     elif use_default_normal or st.session_state.lock_normal_threshold:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20), help="Drag sliders to desired risk thresholds")
                     else:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), help="Drag sliders to desired risk thresholds")
                 else:
                     d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), disabled=True)
             with pre_filter2:
                 if pre_filter_on:
                     if use_default_disease or st.session_state.lock_disease_threshold:
-                        o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (20,100))
+                        o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (20,100), help="Drag sliders to desired risk thresholds")
                     elif use_default_normal or st.session_state.lock_normal_threshold:
-                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20))
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20), help="Drag sliders to desired risk thresholds")
                     else:
-                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100))
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), help="Drag sliders to desired risk thresholds")
                 else:
                      o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), disabled=True)
             with pre_filter3:
                 if pre_filter_on:
                     if use_default_disease  or st.session_state.lock_disease_threshold:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (20,100))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (20,100), help="Drag sliders to desired risk thresholds")
                     elif use_default_normal  or st.session_state.lock_normal_threshold:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20), help="Drag sliders to desired risk thresholds")
                     else:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), help="Drag sliders to desired risk thresholds")
                 else:
                     g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), disabled=True)
         with st.expander(label="Search and Filter", expanded=True):
