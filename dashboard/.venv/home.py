@@ -419,7 +419,7 @@ def home():
         with st.expander(label="Filter Risk Thresholds", expanded=False):
             options1, options2, options3, confirm = st.columns([0.25, 0.3, 0.3, 0.15])
             with options1:
-                pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds, help="Turn on risk level filtering feature ")
+                pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds, help="Turn on risk level filtering feature")
             with options2:
                 if pre_filter_on:
                     use_default_disease = st.button('Show default disease thresholds', on_click=lock_disease_threshold, help="Preset sliders to default thresholds associated with high risk")
