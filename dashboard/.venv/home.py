@@ -21,7 +21,7 @@ _DEBUG = False
 
 @st.cache_resource(hash_funcs={"_thread.RLock": lambda _: None})
 def init_router(): 
-    return stx.Router({"/login": login, "/home": home, })
+    return stx.Router({"/login": login, "/home": home, "/.well-known/pki-validation": well_known})
 
 @st.cache_resource(experimental_allow_widgets=True)
 def get_manager():
@@ -70,6 +70,8 @@ def submitted():
 def reset():
     st.session_state.submitted_login = False
 
+def well_known():
+    router.route("login")
 #login function
 def login():
     if 'submitted_login' not in st.session_state:
