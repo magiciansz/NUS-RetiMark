@@ -1,18 +1,16 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import './navi.css';
 import Cookies from 'js-cookie';
 
 import Logo from '../../css/imgs/retimark-logo.png';
 
-
+// Component: Navigation bar 
 const Navi = () => {
     const clearCookies = () => {
-
-        console.log("logging out, removing cookies")
         Cookies.remove('accessToken'); // Clear the access token cookie
         Cookies.remove('refreshToken'); // Clear the refresh token cookie
-        // You can remove any other cookies you have here
-      };
+    };
+
     return (
         <div className="navi">
             <div className="logo-container">

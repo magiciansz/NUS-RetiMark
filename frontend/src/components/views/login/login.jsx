@@ -1,19 +1,15 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { FaSearch } from "react-icons/fa";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import FontAwesome icons
+import React, { useState, useCallback} from "react";
 import Cookies from "js-cookie";
 
 import {
   BrowserRouter as Router,
-  Route,
-  Link,
-  Switch,
   useNavigate,
 } from "react-router-dom";
 import AuthApi from "../../../apis/AuthApi";
 
 import "./login.css";
 
+// Component: Login page
 function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -34,12 +30,8 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Print username and password to the console
     setErrorMessage("");
-    console.log("Username:", formData.username);
-    console.log("Password:", formData.password);
     setFormData({ username: "", password: "" });
-    // Add your login logic here
     await login();
   };
 
@@ -50,43 +42,29 @@ function Login() {
       password: formData.password,
     };
     try {
-      console.log("trying to login");
       const res = await AuthApi.login(requestParams);
-      console.log("res from login", res.data.tokens);
       const { accessToken, refreshToken } = res.data.tokens;
-      // Cookies.set('accessToken', accessToken, { secure: true, sameSite: 'strict' });
-      // Cookies.set('refreshToken', refreshToken, { secure: true, sameSite: 'strict', httpOnly: true });
 
-      // Save the access token and its expiry time to cookies
+      // Save both access and refresh tokens and their  expiry time to cookies
       Cookies.set("accessToken", JSON.stringify(accessToken), {
         secure: true,
         sameSite: "None",
-        expires: new Date(accessToken.expiry), // Convert expiry time to a Date object
+        expires: new Date(accessToken.expiry), 
       });
 
       Cookies.set("refreshToken", JSON.stringify(refreshToken), {
         secure: true,
         sameSite: "None",
-        expires: new Date(refreshToken.expiry), // Convert expiry time to a Date object
+        expires: new Date(refreshToken.expiry), 
       });
-      navigate("/");
 
-      // kiv the httpOnly true below. it doesnt save it in cookies
-      // Cookies.set('refreshToken', refreshToken, {
-      //     secure: true,
-      //     sameSite: 'strict',
-      //     // httpOnly: true,
-      //     expires: new Date(refreshToken.expiry), // Convert expiry time to a Date object
-      // });
+      // Navigate to home page if user successfully logs in
+      navigate("/");
     } catch (err) {
       console.error(err);
       setErrorMessage("Wrong username or password");
     }
   }, [formData]);
-
-  // useEffect(() => {
-  //     login();
-  //   }, [login]);
 
   return (
     <div className="login-page">

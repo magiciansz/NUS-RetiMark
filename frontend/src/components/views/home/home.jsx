@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { FaSearch } from "react-icons/fa";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import React, { useState } from "react";
 
 import "./home.css";
 import Report from "./report";
@@ -10,6 +8,7 @@ import BlurEye from '../../../css/imgs/blur_eye.JPG';
 import CroppedEye from '../../../css/imgs/cropped_eye.JPG';
 import GoodEye from '../../../css/imgs/eye_right.jpeg';
 
+// Component: Home page
 function Home() {
   const [showReport, setShowReport] = useState(false);
   const [patient, setPatient] = useState();
@@ -25,9 +24,7 @@ function Home() {
   };
 
   const closeModal = () => {
-    console.log("Before: isModalOpen", isModalOpen);
     setIsModalOpen(false);
-    console.log("After: isModalOpen", isModalOpen);
   };
 
   const handleShowReport = (value) => {
@@ -61,6 +58,7 @@ function Home() {
   const closeReport = () => {
     setShowReport(false);
   };
+
   return (
     <div className="home-page">
       {!showReport && (
@@ -125,11 +123,6 @@ function Home() {
           rightEyeResults={rightEyeRes}
         />
       )}
-      {/* <div className='prediction-container'>
-				{showReport && <div className='new-prediction' onClick={handleNewPrediction}>
-					Save
-				</div>}
-			</div> */}
     </div>
   );
 }
