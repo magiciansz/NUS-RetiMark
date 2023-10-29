@@ -1,9 +1,9 @@
-import Cookies from "js-cookie";
-import AuthApi from "../../apis/AuthApi";
+import Cookies from 'js-cookie';
+import AuthApi from '../../apis/AuthApi';
 
 // Function to check if the access token has expired
 const isAccessTokenExpired = (accessTokenExpiry) => {
-  if (typeof accessTokenExpiry == "undefined" && accessTokenExpiry == null) {
+  if (typeof accessTokenExpiry == 'undefined' && accessTokenExpiry == null) {
     return true;
   }
   const expiryDate = new Date(accessTokenExpiry);
@@ -13,31 +13,30 @@ const isAccessTokenExpired = (accessTokenExpiry) => {
 
 // Function to handle token refresh
 const handleTokenRefresh = async () => {
-  const refreshTokenData = Cookies.get("refreshToken");
+  const refreshTokenData = Cookies.get('refreshToken');
   if (refreshTokenData) {
     try {
-      // Send a request to your refresh token API to get new tokens
       const parsedRefreshTokenData = JSON.parse(refreshTokenData);
       const refreshToken = parsedRefreshTokenData.token;
       try {
+        // Send a request to refreshToken API to get new access and refresh tokens
         const newTokens = await AuthApi.refreshToken({ refreshToken });
         // Save the new tokens in cookies
         Cookies.set(
-          "accessToken",
+          'accessToken',
           JSON.stringify(newTokens.data.accessToken.token),
           {
             secure: true,
-            sameSite: "None",
+            sameSite: 'None',
             expires: new Date(newTokens.data.accessToken.expiry),
           }
         );
         Cookies.set(
-          "refreshToken",
+          'refreshToken',
           JSON.stringify(newTokens.data.refreshToken.token),
           {
             secure: true,
-            sameSite: "None",
-            //   httpOnly: true,
+            sameSite: 'None',
             expires: new Date(newTokens.data.refreshToken.expiry),
           }
         );
@@ -46,8 +45,7 @@ const handleTokenRefresh = async () => {
         console.error(err);
       }
     } catch (error) {
-      // Handle any errors that occurred during token refresh
-      console.error("Token refresh failed:", error);
+      console.error('Token refresh failed:', error);
       return null; // Signal that token refresh failed
     }
   }
@@ -56,7 +54,7 @@ const handleTokenRefresh = async () => {
 
 // Function to get the valid access token
 const getAccessToken = async () => {
-  const accessTokenData = Cookies.get("accessToken");
+  const accessTokenData = Cookies.get('accessToken');
   if (accessTokenData) {
     const parsedAccessTokenData = JSON.parse(accessTokenData);
     const accessToken = parsedAccessTokenData.token;
@@ -69,16 +67,14 @@ const getAccessToken = async () => {
       if (refreshedAccessToken) {
         return refreshedAccessToken;
       } else {
-        // Token refresh failed or no refresh token available, log the user out
-        // Implement your logout logic here
-        Cookies.remove("accessToken"); // Clear the access token cookie
-        Cookies.remove("refreshToken");
-
+        // Clear the access token cookie
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
         return null;
       }
     }
   } else {
-    console.log("failed??");
+    console.log('Failed to get access token');
   }
 
   return null; // No access token available

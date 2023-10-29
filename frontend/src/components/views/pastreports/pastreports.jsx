@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {FaSearch} from "react-icons/fa"
-import Cookies from 'js-cookie';
 import PatientApi from '../../../apis/PatientApi';
 import { getAccessToken } from '../../auth/Auth'
 import { BrowserRouter as Router, Route, Link, Switch, useNavigate } from 'react-router-dom';
 
 import './pastreports.css';
 
+// Component: Past Reports page
 const PastReports = () => {
     const navigate = useNavigate();
 	const [patient, setPatient] = useState()
@@ -32,7 +32,7 @@ const PastReports = () => {
 
 	const handlePatientClick = (selectedPatient) => {
 		setPatient(selectedPatient);
-		setInput(selectedPatient.name); // Update the search input with the selected patient's name
+		setInput(selectedPatient.name); 
         setFilteredPatients([])     
 	};
 
@@ -49,8 +49,6 @@ const PastReports = () => {
         } catch (err) {
             console.error(err);
         }
-        
-
     }, [keywords]);
 
     const handleSearch = async () => {
@@ -61,7 +59,6 @@ const PastReports = () => {
                 id: patient.id,
                 sort: 'descending',
             };
-            
             try {
                 const res = await PatientApi.getPastReports(requestParams);
                 setPastReports(res.data?.reports)
@@ -70,21 +67,16 @@ const PastReports = () => {
                 console.error(err);
             }
         } else {
-            // change to logout function !! 
             navigate("/login")
             console.log('No valid access token.');
         }
-
-        // setPatient(input);
     };
 
     const handleSortOptionChange = (event) => {
-        console.log("sorting")
         const selectedOption = event.target.value;
         setSortOption(selectedOption);
       
-        // Sort the data based on the selected option
-        const sortedReports = [...pastReports]; // Create a copy of the current reports array
+        const sortedReports = [...pastReports]; 
         if (selectedOption === 'oldest') {
           sortedReports.sort((a, b) => new Date(a.visit_date) - new Date(b.visit_date));
         } else if (selectedOption === 'latest') {
@@ -105,7 +97,6 @@ const PastReports = () => {
 					Past Reports
 				</div>
 				<div className='description'>
-					{/* Access and review comprehensive medical histories for patients by searching for their name, empowering you with vital historical data for making informed healthcare decisions. */}
                     Streamline your patient care with the ability to access and thoroughly review comprehensive medical histories simply by searching for the patient's name. This invaluable feature equips you with essential historical data, offering insights that empower your decision-making in the field of healthcare.
 				</div>
 			</div>
@@ -147,9 +138,7 @@ const PastReports = () => {
                         <div>
                             Sex: {patient.sex}
                         </div>
-                    
                     </div>}
-
                 </div>
 
                 {pastReports.length > 0 && <div className='sort-dropdown'>

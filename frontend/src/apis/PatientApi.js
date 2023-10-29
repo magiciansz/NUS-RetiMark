@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// POST req to create patient
 async function createPatient({
   accessToken,
   patient,
@@ -46,6 +47,7 @@ async function createPatient({
   );
 }
 
+// PATCH req to update patient
 async function updatePatient({
   accessToken,
   id,
@@ -88,6 +90,7 @@ async function updatePatient({
   );
 }
 
+// GET req to retrieve past reports for a particular patient
 async function getPastReports({ accessToken, id, sort }) {
   return axios.get(
     `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient-history/${id}/reports`,
@@ -98,6 +101,7 @@ async function getPastReports({ accessToken, id, sort }) {
   );
 }
 
+// GET req to search for a particular patient
 async function searchPatient({ accessToken, query }) {
   return axios.get(
     `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient/search`,
