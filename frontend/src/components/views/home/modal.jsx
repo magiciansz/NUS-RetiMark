@@ -141,12 +141,15 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
             const img = new Image();
             img.onload = function () {
+                // Checking for dimensions. If any requirements needs to be added, you can
+                // add it below 
                 const width = this.width;
                 const height = this.height;
                 const minWidth = 100;
                 const minHeight = 100; 
                 
-                // Checking if image meets height and width requirements
+                // Checking if image meets height and width requirements.
+                // Add any requirements below 
                 if (
                     width >= minWidth &&
                     height >= minHeight
