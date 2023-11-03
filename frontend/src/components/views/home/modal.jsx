@@ -142,14 +142,18 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
             const img = new Image();
             img.onload = function () {
                 // Checking for dimensions. If any requirements needs to be added, you can
-                // add it below 
+                // add it below. Adding checks for dpi is not possible because dpi depends on the width and height of a user's system.
                 const width = this.width;
                 const height = this.height;
                 const minWidth = 100;
                 const minHeight = 100; 
+
+                // Code below defines max file size. can be adapted for min file size as well.
+                // const maxFileSize = 1 * 1024 * 1024 * 1024; // 1 GB
                 
                 // Checking if image meets height and width requirements.
-                // Add any requirements below 
+                // Add any requirements below. If you want to access file size, you can use file.size
+                // and check it against maxFileSize.
                 if (
                     width >= minWidth &&
                     height >= minHeight
