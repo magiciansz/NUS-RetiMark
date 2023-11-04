@@ -148,14 +148,8 @@ def login():
                 attempt_login(username, password)
                 if (cookie_manager.get(cookie="login_status")):
                     router.route("home")
-                    # If the form is submitted and the email and password are correct,
-                    # clear the form/container and display a success message
+                    #upon successful login, clear the form
                     middle.empty()
-                    st.success("Login successful")
-            # elif (not st.session_state.submitted_login):
-            #     return st.warning("Please enter your credentials")
-            # else:
-            #     st.error("Username/password is incorrect")
     return landing
 
 def home():
