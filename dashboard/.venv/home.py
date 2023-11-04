@@ -135,24 +135,27 @@ def login():
     landing = st.container()
     # Insert a form in the container
     with landing:
-        with st.form("login"):
-            st.markdown("#### Login")
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            success = st.form_submit_button("Login", on_click=submitted)
-            # success = st.form_submit_button("Login", on_click=attempt_login, args=[username, password])
-    if (st.session_state.submitted_login):
-        attempt_login(username, password)
-        if (cookie_manager.get(cookie="login_status")):
-            router.route("home")
-            # If the form is submitted and the email and password are correct,
-            # clear the form/container and display a success message
-            landing.empty()
-            st.success("Login successful")
-    elif (not st.session_state.submitted_login):
-          return st.warning("Please enter your credentials")
-    else:
-        st.error("Username/password is incorrect")
+        #create 3 columns
+        left_space, middle, right_space = st.columns(3)
+        with middle:
+            with st.form("login"):
+                st.markdown("#### Login")
+                username = st.text_input("Username")
+                password = st.text_input("Password", type="password")
+                success = st.form_submit_button("Login", on_click=submitted)
+                # success = st.form_submit_button("Login", on_click=attempt_login, args=[username, password])
+            if (st.session_state.submitted_login):
+                attempt_login(username, password)
+                if (cookie_manager.get(cookie="login_status")):
+                    router.route("home")
+                    # If the form is submitted and the email and password are correct,
+                    # clear the form/container and display a success message
+                    middle.empty()
+                    st.success("Login successful")
+            # elif (not st.session_state.submitted_login):
+            #     return st.warning("Please enter your credentials")
+            # else:
+            #     st.error("Username/password is incorrect")
     return landing
 
 def home():
