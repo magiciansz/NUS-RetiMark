@@ -89,7 +89,7 @@ def login():
         try:
             if (_DEBUG):   
                 st.write("Entered Try block")
-            r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
+            r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data, verify=False)
             # r = requests.post(url=API_ENDPOINT, json=data)
             r.raise_for_status()
 
@@ -199,7 +199,7 @@ def home():
         try:
             if (_DEBUG):   
                 st.write("Entered Try block")
-            r = requests.get(url=API_ENDPOINT, params=PARAMS, headers=HEADERS)
+            r = requests.get(url=API_ENDPOINT, params=PARAMS, headers=HEADERS, verify=False)
             # r = requests.post(url=API_ENDPOINT, json=data)
             r.raise_for_status()
 
@@ -360,7 +360,7 @@ def home():
             if (_DEBUG):   
                 st.write("Entered Try block")
             # r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
-            r = requests.post(url=API_ENDPOINT, headers=HEADERS, json=data)
+            r = requests.post(url=API_ENDPOINT, headers=HEADERS, json=data, verify=False)
             r.raise_for_status()
 
         except requests.exceptions.HTTPError as err:
