@@ -150,18 +150,7 @@ def login():
                     middle.empty()
     
     
-    if (cookie_manager.get(cookie='login_status')):
-        cookie_manager.delete(key='login_status', cookie='login_status')
-    if (cookie_manager.get(cookie='user_username')):
-        cookie_manager.delete(key='user_username', cookie='user_username')
-    if (cookie_manager.get(cookie='access_token')):
-        cookie_manager.delete(key='access_token', cookie='access_token')
-    if (cookie_manager.get(cookie='access_token_expiry_time')):
-        cookie_manager.delete(key='access_token_expiry_time', cookie='access_token_expiry_time')
-    if (cookie_manager.get(cookie='refresh_token')):
-        cookie_manager.delete(key='refresh_token', cookie='refresh_token')
-    if (cookie_manager.get(cookie='refresh_token_expiry_time')):
-        cookie_manager.delete(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time')
+    
     return landing
 
 def home():
@@ -222,6 +211,18 @@ def home():
             # if (error_code==400):
             #     st.error("Please provide a valid username and password")
             if (error_code==401):
+                if (cookie_manager.get(cookie='login_status')):
+                    cookie_manager.delete(key='login_status', cookie='login_status')
+                if (cookie_manager.get(cookie='user_username')):
+                    cookie_manager.delete(key='user_username', cookie='user_username')
+                if (cookie_manager.get(cookie='access_token')):
+                    cookie_manager.delete(key='access_token', cookie='access_token')
+                if (cookie_manager.get(cookie='access_token_expiry_time')):
+                    cookie_manager.delete(key='access_token_expiry_time', cookie='access_token_expiry_time')
+                if (cookie_manager.get(cookie='refresh_token')):
+                    cookie_manager.delete(key='refresh_token', cookie='refresh_token')
+                if (cookie_manager.get(cookie='refresh_token_expiry_time')):
+                    cookie_manager.delete(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time')
                 router.route("login")
                 st.error("Session expired")
             # else:
