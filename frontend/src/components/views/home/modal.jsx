@@ -147,6 +147,7 @@ function Modal({
                 body: formData,
             });
             const result = await response.json();
+            console.log(result)
             if (result === -1) {
                 handleNotEye(eye);
             } else {

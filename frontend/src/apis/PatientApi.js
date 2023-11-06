@@ -15,19 +15,8 @@ async function createPatient({
   formData.append('name', patient.name);
   formData.append('date_of_birth', patient.dateOfBirth);
   formData.append('sex', patient.gender);
-  formData.append(
-    'left_diabetic_retinopathy_stage',
-    leftEyeResults.diabetic[0]
-  );
-  formData.append(
-    'right_diabetic_retinopathy_stage',
-    rightEyeResults.diabetic[0]
-  );
-  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
-  formData.append(
-    'right_diabetic_retinopathy_prob',
-    rightEyeResults.diabetic[1]
-  );
+  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.amd);
+  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.amd);
   formData.append('left_ocular_prob', leftEyeResults.amd);
   formData.append('right_ocular_prob', rightEyeResults.amd);
   formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
@@ -59,19 +48,8 @@ async function updatePatient({
   rightEyeResults,
 }) {
   const formData = new FormData();
-  formData.append(
-    'left_diabetic_retinopathy_stage',
-    leftEyeResults.diabetic[0]
-  );
-  formData.append(
-    'right_diabetic_retinopathy_stage',
-    rightEyeResults.diabetic[0]
-  );
-  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
-  formData.append(
-    'right_diabetic_retinopathy_prob',
-    rightEyeResults.diabetic[1]
-  );
+  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic);
+  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.diabetic);
   formData.append('left_ocular_prob', leftEyeResults.amd);
   formData.append('right_ocular_prob', rightEyeResults.amd);
   formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
