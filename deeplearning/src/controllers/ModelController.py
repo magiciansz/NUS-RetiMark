@@ -71,7 +71,6 @@ def preprocess_img(input):
 
 class ModelController(Resource):
     def post(self):
-        """ Create an user based on the sent information """
         image = request.files['image']
 
         if not image:
@@ -83,12 +82,6 @@ class ModelController(Resource):
         try:
             output = {}
             image = preprocess_img(image)
-
-            with torch.no_grad():
-                verificationOutput = verificationModel(image)
-            verification_np = verificationOutput.numpy()
-            if verification_np.tolist()[0][0] < 0.5:
-                return -1
 
             with torch.no_grad():
                 amdOutput = amdModel(image)
@@ -109,3 +102,23 @@ class ModelController(Resource):
         except Exception as e:
             print(e)
 
+class VerifyController(Resource):
+    def post(self):
+        image = request.files['image']
+
+        if not image:
+            abort(400, description = 'Please enter an image')
+
+        if not image.mimetype.startswith('image/'):
+            abort(400, description = 'The image has to be of jpeg or png.')
+        
+        try:
+            image = preprocess_img(image)
+
+            with torch.no_grad():
+                verificationOutput = verificationModel(image)
+            verification_np = verificationOutput.numpy()
+            return verification_np.tolist()[0][0] < 0.5
+
+        except Exception as e:
+            print(e)
