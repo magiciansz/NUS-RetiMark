@@ -9,9 +9,7 @@ describe("Patient Model", () => {
     let sex = "M";
     let left_eye_image = "tests3bucket.com";
     let right_eye_image = "tests3bucket.com";
-    let left_diabetic_retinopathy_stage = 1;
     let left_diabetic_retinopathy_prob = 0.56;
-    let right_diabetic_retinopathy_stage = 3;
     let right_diabetic_retinopathy_prob = 0.11;
     let left_ocular_prob = 0.25;
     let right_ocular_prob = 0.05;
@@ -26,9 +24,7 @@ describe("Patient Model", () => {
         sex: sex,
         left_eye_image: left_eye_image,
         right_eye_image: right_eye_image,
-        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
         left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
-        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
         right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
@@ -47,9 +43,7 @@ describe("Patient Model", () => {
         sex: sex,
         left_eye_image: left_eye_image,
         right_eye_image: right_eye_image,
-        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
         left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
-        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
         right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
@@ -70,9 +64,7 @@ describe("Patient Model", () => {
         date_of_birth: date_of_birth,
         sex: sex,
         name: name,
-        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
         left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
-        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
         right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
@@ -85,9 +77,7 @@ describe("Patient Model", () => {
         name: name,
         date_of_birth: date_of_birth,
         sex: sex,
-        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
         left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
-        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
         right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
@@ -108,9 +98,7 @@ describe("Patient Model", () => {
         sex: sex,
         left_eye_image: left_eye_image,
         right_eye_image: right_eye_image,
-        left_diabetic_retinopathy_stage: left_diabetic_retinopathy_stage,
         left_diabetic_retinopathy_prob: left_diabetic_retinopathy_prob,
-        right_diabetic_retinopathy_stage: right_diabetic_retinopathy_stage,
         right_diabetic_retinopathy_prob: right_diabetic_retinopathy_prob,
         left_ocular_prob: left_ocular_prob,
         right_ocular_prob: right_ocular_prob,
@@ -137,28 +125,8 @@ describe("Patient Model", () => {
       await expect(patient.validate()).rejects.toThrow();
     });
 
-    test("should throw validation error if left_diabetic_retinopathy_stage is not between 0 to 4", async () => {
-      patient.set("left_diabetic_retinopathy_stage", "5");
-      await expect(patient.validate()).rejects.toThrow();
-    });
-
-    test("should throw validation error if left_diabetic_retinopathy_stage is not an integer", async () => {
-      patient.set("left_diabetic_retinopathy_stage", "3.53");
-      await expect(patient.validate()).rejects.toThrow();
-    });
-
     test("should throw validation error if left_diabetic_retinopathy_prob is not a probability between 0 to 1", async () => {
       patient.set("left_diabetic_retinopathy_prob", "1.5");
-      await expect(patient.validate()).rejects.toThrow();
-    });
-
-    test("should throw validation error if right_diabetic_retinopathy_stage is not between 0 to 4", async () => {
-      patient.set("right_diabetic_retinopathy_stage", "5");
-      await expect(patient.validate()).rejects.toThrow();
-    });
-
-    test("should throw validation error if right_diabetic_retinopathy_stage is not an integer", async () => {
-      patient.set("right_diabetic_retinopathy_stage", "3.53");
       await expect(patient.validate()).rejects.toThrow();
     });
 

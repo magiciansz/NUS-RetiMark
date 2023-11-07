@@ -31,9 +31,7 @@ const addPatient = async (body, files, timezone = "UTC") => {
         date_of_birth: body.date_of_birth,
         sex: body.sex,
         name: body.name,
-        left_diabetic_retinopathy_stage: body.left_diabetic_retinopathy_stage,
         left_diabetic_retinopathy_prob: body.left_diabetic_retinopathy_prob,
-        right_diabetic_retinopathy_stage: body.right_diabetic_retinopathy_stage,
         right_diabetic_retinopathy_prob: body.right_diabetic_retinopathy_prob,
         left_ocular_prob: body.left_ocular_prob,
         right_ocular_prob: body.right_ocular_prob,
@@ -54,9 +52,7 @@ const updatePatient = async (id, body, files, timezone = "UTC") => {
   const patient = await getPatientByID(id);
   const urls = await uploadPatientFiles(patient, files);
   await patient.update({
-    left_diabetic_retinopathy_stage: body.left_diabetic_retinopathy_stage,
     left_diabetic_retinopathy_prob: body.left_diabetic_retinopathy_prob,
-    right_diabetic_retinopathy_stage: body.right_diabetic_retinopathy_stage,
     right_diabetic_retinopathy_prob: body.right_diabetic_retinopathy_prob,
     left_ocular_prob: body.left_ocular_prob,
     right_ocular_prob: body.right_ocular_prob,

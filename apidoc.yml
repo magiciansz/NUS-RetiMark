@@ -566,15 +566,9 @@ components:
             right_eye_image:
               type: string
               example: "tests3bucket.com"
-            left_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             left_diabetic_retinopathy_prob:
               type: number
               example: 0.56
-            right_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             right_diabetic_retinopathy_prob:
               type: number
               example: 0.11
@@ -608,15 +602,9 @@ components:
         right_eye_image:
           type: string
           format: binary
-        left_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         left_diabetic_retinopathy_prob:
           type: number
           example: 0.56
-        right_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         right_diabetic_retinopathy_prob:
           type: number
           example: 0.11
@@ -682,15 +670,9 @@ components:
               right_eye_image:
                 type: string
                 example: "tests3bucket.com"
-              left_diabetic_retinopathy_stage:
-                type: integer
-                example: 1
               left_diabetic_retinopathy_prob:
                 type: number
                 example: 0.56
-              right_diabetic_retinopathy_stage:
-                type: integer
-                example: 1
               right_diabetic_retinopathy_prob:
                 type: number
                 example: 0.11
@@ -783,15 +765,9 @@ components:
             right_eye_image:
               type: string
               example: "tests3bucket.com"
-            left_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             left_diabetic_retinopathy_prob:
               type: number
               example: 0.56
-            right_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             right_diabetic_retinopathy_prob:
               type: number
               example: 0.11
@@ -834,15 +810,9 @@ components:
         right_eye_image:
           type: string
           format: binary
-        left_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         left_diabetic_retinopathy_prob:
           type: number
           example: 0.56
-        right_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         right_diabetic_retinopathy_prob:
           type: number
           example: 0.11

@@ -12,9 +12,7 @@ const afterCreateUpdateHandler = async (record, transaction) => {
       sex: record.sex,
       left_eye_image: record.left_eye_image,
       right_eye_image: record.right_eye_image,
-      left_diabetic_retinopathy_stage: record.left_diabetic_retinopathy_stage,
       left_diabetic_retinopathy_prob: record.left_diabetic_retinopathy_prob,
-      right_diabetic_retinopathy_stage: record.right_diabetic_retinopathy_stage,
       right_diabetic_retinopathy_prob: record.right_diabetic_retinopathy_prob,
       left_ocular_prob: record.left_ocular_prob,
       right_ocular_prob: record.right_ocular_prob,
@@ -90,30 +88,12 @@ const Patient = sequelize.define(
         },
       },
     },
-    left_diabetic_retinopathy_stage: {
-      type: DataTypes.TINYINT,
-      validate: {
-        isInt: {
-          min: 0,
-          max: 4,
-        },
-      },
-    },
     left_diabetic_retinopathy_prob: {
       type: DataTypes.FLOAT,
       validate: {
         isFloat: {
           min: 0.0,
           max: 1.0,
-        },
-      },
-    },
-    right_diabetic_retinopathy_stage: {
-      type: DataTypes.TINYINT,
-      validate: {
-        isInt: {
-          min: 0,
-          max: 4,
         },
       },
     },
