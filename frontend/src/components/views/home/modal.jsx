@@ -124,7 +124,7 @@ function Modal({ isOpen, onClose, showReport, selectedPatient, leftEyeImage, rig
         const formData = new FormData();
         formData.append('image', image)
         try {
-            const response = await fetch(`${process.env.REACT_APP_ENDPOINT_URL}/model-staging/api/v1/model`, {
+            const response = await fetch(`${process.env.REACT_APP_FLASK_ENDPOINT_URL}/model-staging/api/v1/model`, {
                 method: 'POST',
                 body: formData
             })
