@@ -45,13 +45,6 @@ const validateCreatePatient = [
       return (value === "M") | (value === "F");
     })
     .withMessage("sex has to be either M or F."),
-  body("left_diabetic_retinopathy_stage")
-    .not()
-    .isEmpty()
-    .withMessage("left_diabetic_retinopathy_stage cannot be empty")
-    .bail()
-    .isInt({ min: 0, max: 4 })
-    .withMessage("left_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
   body("left_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
@@ -59,13 +52,6 @@ const validateCreatePatient = [
     .bail()
     .isFloat({ min: 0.0, max: 1.0 })
     .withMessage("left_diabetic_retinopathy_prob has to be betweeen 0 and 1"),
-  body("right_diabetic_retinopathy_stage")
-    .not()
-    .isEmpty()
-    .withMessage("right_diabetic_retinopathy_stage cannot be empty")
-    .bail()
-    .isInt({ min: 0, max: 4 })
-    .withMessage("right_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
   body("right_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
@@ -121,13 +107,6 @@ const validateUpdatePatient = [
       return true;
     })
     .withMessage("timezone is not valid"),
-  body("left_diabetic_retinopathy_stage")
-    .not()
-    .isEmpty()
-    .withMessage("left_diabetic_retinopathy_stage cannot be empty")
-    .bail()
-    .isInt({ min: 0, max: 4 })
-    .withMessage("left_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
   body("left_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
@@ -135,13 +114,6 @@ const validateUpdatePatient = [
     .bail()
     .isFloat({ min: 0.0, max: 1.0 })
     .withMessage("left_diabetic_retinopathy_prob has to be betweeen 0 and 1"),
-  body("right_diabetic_retinopathy_stage")
-    .not()
-    .isEmpty()
-    .withMessage("right_diabetic_retinopathy_stage cannot be empty")
-    .bail()
-    .isInt({ min: 0, max: 4 })
-    .withMessage("right_diabetic_retinopathy_stage has to be betweeen 0 and 4"),
   body("right_diabetic_retinopathy_prob")
     .not()
     .isEmpty()
