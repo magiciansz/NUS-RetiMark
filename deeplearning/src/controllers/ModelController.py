@@ -118,7 +118,7 @@ class VerifyController(Resource):
             with torch.no_grad():
                 verificationOutput = verificationModel(image)
             verification_np = verificationOutput.numpy()
-            return verification_np.tolist()[0][0] < 0.5
+            return verification_np.tolist()[0][0] > 0.5
 
         except Exception as e:
             print(e)
