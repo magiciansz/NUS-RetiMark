@@ -154,7 +154,7 @@ function Report({
             <div className="sub-header">Results</div>
             <br />
             Probability of Diabetic Retinopathy: <br />
-            Left: {(leftEyeResults.diabetic[1] * 100).toFixed(1)}% Stage {leftEyeResults.diabetic[0]} | Right: {(rightEyeResults.diabetic[1] * 100).toFixed(1)}% Stage {rightEyeResults.diabetic[0]}
+            Left: {(leftEyeResults.diabetic * 100).toFixed(1)}% | Right: {(rightEyeResults.diabetic * 100).toFixed(1)}%
             <br />
             <br />
             Probability of Age-related Macular Degeneration: <br />
