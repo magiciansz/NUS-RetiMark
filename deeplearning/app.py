@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 import os
 
+from src.routes.ModelRoute import MODEL_BLUEPRINT, VERIFY_BLUEPRINT
+
 app = Flask(__name__)
 CORS(app)
 load_dotenv()
@@ -40,9 +42,8 @@ def handle_bad_request(e):
     response.content_type = "application/json"
     return response
 
-for blueprint in vars(routes).values():
-    if isinstance(blueprint, Blueprint):
-        app.register_blueprint(blueprint, url_prefix="/model-staging/api/v1")
+app.register_blueprint(MODEL_BLUEPRINT, url_prefix="/model-staging/api/v1")
+app.register_blueprint(VERIFY_BLUEPRINT, url_prefix="/model-staging/api/v1")
 
 
 @app.route('/model-staging' + '/health')
