@@ -101,7 +101,7 @@ function Report({
             const res = newPatient
               ? await PatientApi.createPatient(requestParams)
               : await PatientApi.updatePatient(requestParams);
-            console.log("Res from API", res);
+            // console.log("Res from API", res);
             setModalMessage("Successfully saved!");
           } catch (err) {
             // Display different message in the modal based on the error code

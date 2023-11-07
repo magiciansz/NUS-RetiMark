@@ -15,8 +15,8 @@ function Modal({
     leftEyeImage,
     rightEyeImage,
     newPatient,
-    leftEyeResults,
-    rightEyeResults,
+    leftEyeFile,
+    rightEyeFile,
 }) {
     const [userEdit, setUserEdit] = useState({ gender: "" });
     const [mode, setMode] = useState("");
@@ -28,8 +28,8 @@ function Modal({
     const [errorMessageLeftEye, setErrorMessageLeftEye] = useState("");
     const [errorMessageRightEye, setErrorMessageRightEye] = useState("");
     const [keywords, setKeywords] = useState("");
-    const [leftEyeRes, setLeftEyeRes] = useState(null);
-    const [rightEyeRes, setRightEyeRes] = useState(null);
+    const [leftEyeRaw, setLeftEyeRaw] = useState(null);
+    const [rightEyeRaw, setRightEyeRaw] = useState(null);
 
     const showHideClassname = isOpen ? " show-modal" : " hide-modal";
 
@@ -39,8 +39,8 @@ function Modal({
         selectedPatient(patient);
         leftEyeImage(leftEye);
         rightEyeImage(rightEye);
-        leftEyeResults(leftEyeRes);
-        rightEyeResults(rightEyeRes);
+        leftEyeFile(leftEyeRaw);
+        rightEyeFile(rightEyeRaw);
         clearInputs();
         onClose();
     };
@@ -126,32 +126,27 @@ function Modal({
 
     const handleNotEye = (eye) => {
         if (eye === "left") {
-            setLeftEye(null);
             setErrorMessageLeftEye(
-                "Image uploaded doesn't seem to be an eye. Please upload another image."
+                "Eye not detected. Consider uploading another image."
             );
         } else {
-            setRightEye(null);
             setErrorMessageRightEye(
-                "Image uploaded doesn't seem to be an eye. Please upload another image."
+                "Eye not detected. Consider uploading another image."
             );
         }
     };
 
-    const runModels = async (image, eye) => {
+    const verifyEye = async (image, eye) => {
         const formData = new FormData();
         formData.append("image", image);
         try {
-            const response = await fetch(`${process.env.REACT_APP_FLASK_ENDPOINT_URL}/model-staging/api/v1/model`, {
+            const response = await fetch(`${process.env.REACT_APP_FLASK_ENDPOINT_URL}/model-staging/api/v1/verify`, {
                 method: 'POST',
                 body: formData
             })
             const result = await response.json()
-            console.log(result)
-            if (result === -1) {
+            if (!result) {
                 handleNotEye(eye);
-            } else {
-                eye == "left" ? setLeftEyeRes(result) : setRightEyeRes(result);
             }
         } catch (error) {
             console.error(error);
@@ -179,12 +174,14 @@ function Modal({
                 if (width >= minWidth && height >= minHeight) {
                     if (eye === "left") {
                         setLeftEye(URL.createObjectURL(file));
+                        setLeftEyeRaw(file)
                         setErrorMessageLeftEye("");
                     } else {
                         setRightEye(URL.createObjectURL(file));
+                        setRightEyeRaw(file)
                         setErrorMessageRightEye("");
                     }
-                    runModels(file, eye);
+                    verifyEye(file, eye);
                 } else {
                     // Image does not meet the requirements, show error message according to which eye doesnt meet requirements
                     event.target.value = "";
