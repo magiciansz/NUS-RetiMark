@@ -142,11 +142,11 @@ function Modal({
         const formData = new FormData();
         formData.append("image", image);
         try {
-            const response = await fetch(`${process.env.REACT_APP_ENDPOINT_URL}/model-staging/api/v1/model`, {
-                method: "POST",
-                body: formData,
-            });
-            const result = await response.json();
+            const response = await fetch(`${process.env.REACT_APP_FLASK_ENDPOINT_URL}/model-staging/api/v1/model`, {
+                method: 'POST',
+                body: formData
+            })
+            const result = await response.json()
             console.log(result)
             if (result === -1) {
                 handleNotEye(eye);

@@ -4,19 +4,9 @@ sequelize
   //.sync({force : true})
   .sync()
   .then(() => {
-    app.listen(process.env.DOCKER_PORT);
+    app.listen(process.env.PORT);
     //pending set timezone
-    console.log(
-      "App listening on port " +
-        process.env.DOCKER_PORT +
-        " within the container"
-    );
-    console.log(
-      "The port " +
-        process.env.DOCKER_PORT +
-        " is mapped to local port " +
-        process.env.LOCAL_PORT
-    );
+    console.log("Listening on Port" + process.env.PORT);
   })
   .catch((err) => {
     console.log(err);

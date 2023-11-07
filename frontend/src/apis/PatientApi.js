@@ -27,7 +27,7 @@ async function createPatient({
   formData.append('report_pdf', report);
 
   return axios.post(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient?timezone=Asia/Singapore`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient?timezone=Asia/Singapore`,
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -59,7 +59,7 @@ async function updatePatient({
   formData.append('left_eye_image', leftEye);
   formData.append('report_pdf', report);
   return axios.patch(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient/${id}?timezone=Asia/Singapore`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient/${id}?timezone=Asia/Singapore`,
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -71,7 +71,7 @@ async function updatePatient({
 // GET req to retrieve past reports for a particular patient
 async function getPastReports({ accessToken, id, sort }) {
   return axios.get(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient-history/${id}/reports`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient-history/${id}/reports`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { sort },
@@ -82,7 +82,7 @@ async function getPastReports({ accessToken, id, sort }) {
 // GET req to search for a particular patient
 async function searchPatient({ accessToken, query }) {
   return axios.get(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient/search`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient/search`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { query },
