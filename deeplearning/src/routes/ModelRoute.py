@@ -9,5 +9,5 @@ from ..controllers.ModelController import ModelController, VerifyController
 MODEL_BLUEPRINT = Blueprint("model", __name__)
 Api(MODEL_BLUEPRINT).add_resource( ModelController, "/model")
 
-MODEL_BLUEPRINT = Blueprint("verify", __name__)
-Api(MODEL_BLUEPRINT).add_resource( VerifyController, "/verify")
+VERIFY_BLUEPRINT = Blueprint("verify", __name__)
+Api(VERIFY_BLUEPRINT).add_resource( VerifyController, "/verify")
