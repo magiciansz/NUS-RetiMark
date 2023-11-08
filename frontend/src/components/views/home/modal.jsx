@@ -136,18 +136,18 @@ function Modal({
         }
     };
 
-    const triggerError = (event, eye) => {
+    const triggerInvalidImage = (event, eye) => {
         // Image does not meet the requirements, show error message according to which eye doesnt meet requirements
         event.target.value = "";
         if (eye === "left") {
             setLeftEye(null);
             setErrorMessageLeftEye(
-                "Image of left eye doesn't follow the requirements. Please upload another image."
+                "Image of left eye is invalid. Please upload another image."
             );
         } else {
             setRightEye(null);
             setErrorMessageRightEye(
-                "Image of right eye doesn't follow the requirements. Please upload another image."
+                "Image of right eye is invalid. Please upload another image."
             );
         }
     }
@@ -164,7 +164,7 @@ function Modal({
             if (!result) {
                 handleNotEye(eye);
             } else if (result === -1) {
-                triggerError(event, eye)
+                triggerInvalidImage(event, eye)
             }
         } catch (error) {
             console.error(error);
@@ -201,7 +201,19 @@ function Modal({
                     }
                     verifyEye(file, event, eye);
                 } else {
-                    triggerError(event, eye)
+                    // Image does not meet the requirements, show error message according to which eye doesnt meet requirements
+                    event.target.value = "";
+                    if (eye === "left") {
+                        setLeftEye(null);
+                        setErrorMessageLeftEye(
+                            "Image of left eye doesn't follow the requirements. Please upload another image."
+                        );
+                    } else {
+                        setRightEye(null);
+                        setErrorMessageRightEye(
+                            "Image of right eye doesn't follow the requirements. Please upload another image."
+                        );
+                    }
                 }
             };
             img.src = URL.createObjectURL(file);
