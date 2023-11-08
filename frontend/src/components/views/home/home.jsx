@@ -7,6 +7,7 @@ import Modal from "./modal";
 import Basketball from '../../../css/imgs/basketball.jpeg';
 import CroppedEye from '../../../css/imgs/cropped_eye.JPG';
 import GoodEye from '../../../css/imgs/eye_right.jpeg';
+import Loading from '../../../css/imgs/loading.png'
 
 // Component: Home page
 function Home() {
@@ -18,10 +19,12 @@ function Home() {
 	const [isNewPatient, setIsNewPatient] = useState(false);
 	const [leftEyeRes, setLeftEyeRes] = useState(null);
   const [rightEyeRes, setRightEyeRes] = useState(null);
+  const [loading, setLoading] = useState(false)
 
   const runModels = async (image, eye) => {
     const formData = new FormData();
     formData.append("image", image);
+    setLoading(true)
     try {
         const response = await fetch(`${process.env.REACT_APP_FLASK_ENDPOINT_URL}/model-staging/api/v1/model`, {
             method: 'POST',
@@ -32,6 +35,7 @@ function Home() {
     } catch (error) {
         console.error(error);
     }
+    setLoading(false)
 };
 
   const openModal = () => {
@@ -127,6 +131,10 @@ function Home() {
           />
         </div>
       )}
+      {loading && <div className='loading-report'>
+        <img src={Loading} alt="loading" className='loading-img'/>
+        <p className='loading-msg'>Loading Report</p>
+      </div>}
       {showReport && (
         leftEyeRes && rightEyeRes &&
         <Report
