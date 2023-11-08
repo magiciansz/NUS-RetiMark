@@ -19,6 +19,8 @@ After login, they will be redirected to the predictor page which is the home pag
 Subsequently, a report with the risk probability for each of the three sight-threatening eye diseases will be generated. Users are able to (1) Add a doctor's note so that the user can record important observations and notes derived from the report (2) Download the report as a PDF file (3) Save the report into our database so that it can be accessed in the Past Reports tab
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/03bc5857-ca58-4526-ba76-11719969483e)
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/42d06ab6-2048-47b5-ad93-575b41bc9515)
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/708e87f1-06c1-46d8-9baa-a1a437cf7663)
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/7e759e79-48ef-4886-b26a-b4fd229bbcd2)
 
 
 
