@@ -136,7 +136,23 @@ function Modal({
         }
     };
 
-    const verifyEye = async (image, eye) => {
+    const triggerError = (event, eye) => {
+        // Image does not meet the requirements, show error message according to which eye doesnt meet requirements
+        event.target.value = "";
+        if (eye === "left") {
+            setLeftEye(null);
+            setErrorMessageLeftEye(
+                "Image of left eye doesn't follow the requirements. Please upload another image."
+            );
+        } else {
+            setRightEye(null);
+            setErrorMessageRightEye(
+                "Image of right eye doesn't follow the requirements. Please upload another image."
+            );
+        }
+    }
+
+    const verifyEye = async (image, event, eye) => {
         const formData = new FormData();
         formData.append("image", image);
         try {
@@ -147,6 +163,8 @@ function Modal({
             const result = await response.json()
             if (!result) {
                 handleNotEye(eye);
+            } else if (result === -1) {
+                triggerError(event, eye)
             }
         } catch (error) {
             console.error(error);
@@ -181,21 +199,9 @@ function Modal({
                         setRightEyeRaw(file)
                         setErrorMessageRightEye("");
                     }
-                    verifyEye(file, eye);
+                    verifyEye(file, event, eye);
                 } else {
-                    // Image does not meet the requirements, show error message according to which eye doesnt meet requirements
-                    event.target.value = "";
-                    if (eye === "left") {
-                        setLeftEye(null);
-                        setErrorMessageLeftEye(
-                            "Image of left eye doesn't follow the requirements. Please upload another image."
-                        );
-                    } else {
-                        setRightEye(null);
-                        setErrorMessageRightEye(
-                            "Image of right eye doesn't follow the requirements. Please upload another image."
-                        );
-                    }
+                    triggerError(event, eye)
                 }
             };
             img.src = URL.createObjectURL(file);
