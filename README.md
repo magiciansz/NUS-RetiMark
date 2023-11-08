@@ -8,11 +8,22 @@ Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorith
 
 ## Web App
 
-We created a web app that serves as a diagnostic evaluation platform to generate a risk probability for each of the three sight-threatening eye diseases using the deep learning models.
-The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. After login, they will be redirected to the predictor page which is the home page. They can click on start, and select if they are uploading an image for a new patient or an existing patient.
-![image](https://i.ibb.co/xHtygny/Screenshot-2023-11-08-at-12-04-31-PM.png)
+We created a web app that serves as a diagnostic evaluation platform to generate a risk probability for each of the three sight-threatening eye diseases (AMD, Glaucoma, and Diabetic Retinopathy) using our deep learning models.
 
+The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. 
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/7b0abcf7-cd08-4de5-94e9-50172c1546d9)
+
+After login, they will be redirected to the predictor page which is the home page. On this predictor page, users can upload two images (left eye and right eye), tag it to a new patient or an existing patient, and get the risk probabilities for each of the images. 
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/a3a873fe-facf-4355-816a-b545dd8bc15a)
+
+Subsequently, a report with the risk probability for each of the three sight-threatening eye diseases will be generated. Users are able to (1) Add a doctor's note so that the user can record important observations and notes derived from the report (2) Download the report as a PDF file (3) Save the report into our database so that it can be accessed in the Past Reports tab
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/03bc5857-ca58-4526-ba76-11719969483e)
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/42d06ab6-2048-47b5-ad93-575b41bc9515)
+
+
+
+
+Here is a demo of the web application:
 
 
 ## Dashboard
