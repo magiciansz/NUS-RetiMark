@@ -122,7 +122,7 @@ To enable Continuous Deployment through Github Actions, we provide a `deploy_sta
 
 ### API Documentation
 
-This project comes with an `apidoc.yml` file, which contains documentation for all our APIs. Copy the yml file contents into [Swagger](editor.swagger.io) to view it.
+This project comes with an `apidoc.yml` file, which contains documentation for all our APIs. Copy the yml file contents into [Swagger](https://editor.swagger.io/) to view it.
 
 ## Built With
 
