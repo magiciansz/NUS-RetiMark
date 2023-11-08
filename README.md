@@ -2,7 +2,7 @@
 
 ## About
 
-![image](https://www.berlinerkolleg.com/sites/default/files/styles/profil_logo_xl/public/webform/nuslogo_0.jpg?itok=n62l8QkW)
+![image](https://www.nus.edu.sg/images/default-source/identity-images/NUS_logo_full-horizontal.jpg)
 
 Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases. Our solution comprises of three components, namely our deep learning models, a dashboard and a web application.
 
