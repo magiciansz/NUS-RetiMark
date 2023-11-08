@@ -86,7 +86,7 @@ You will need the following things properly installed on your computer.
 - cd into `./deeplearning`, and run `pip install -r requirements.txt`.
 - run `flask run --port 8000`
 
-#### Setup and run the Web App frontend
+### Setup and run the Web App frontend
 
 - cd into `./frontend`, and run `npm install`.
 - Open the `./frontend/.env-example` file on a text editor, and create a .env file in the same directory (if it hasn't been created). Copy the code from .env-example and fill up the environment variables accordingly:
@@ -94,7 +94,7 @@ You will need the following things properly installed on your computer.
   - `REACT_APP_FLASK_ENDPOINT_URL`: URL of Flask backend
 - run `npm run start`. The web app listens on port 3000.
 
-#### Setup and run the dashboard frontend
+### Setup and run the dashboard frontend
 
 - cd into `./dashboard/.venv`, and run `pip install -r requirements.txt`.
 - run `streamlit run home.py`. The dashboard listens on port 8501.
