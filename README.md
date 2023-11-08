@@ -121,6 +121,8 @@ You will need the following things properly installed on your computer.
 ### Setup and run the Dashboard frontend
 
 - cd into `./dashboard/.venv`, and run `pip install -r requirements.txt`.
+- Open the `./dashboard/.env-example` file on a text editor, and create a .env file in the ./dashboard/.venv folder (if it hasn't been created). Copy the code from .env-example and fill up the environment variables accordingly:
+  - `EXPRESS_ENDPOINT_URL`: URL of Express backend
 - run `streamlit run home.py`. The dashboard listens on port 8501.
 
 ## Testing (For Express Backend)
@@ -142,7 +144,7 @@ To enable Continuous Integration through Github Actions, we provide a `test_stag
 
 ### Continuous Deployment
 
-To enable Continuous Deployment through Github Actions, we provide a `deploy_staging.yml` file in the `.github/workflows/` directory. The workflow is designed to run automatically each time a pull request is merged into develop. It then builds the express backend image, pushes it to AWS ECR and initiates a re-deployment of our staging server on AWS ECR.
+To enable Continuous Deployment through Github Actions, we provide a `deploy_staging.yml` file in the `.github/workflows/` directory. The workflow is designed to run automatically each time a pull request is merged into develop. It then builds the express backend image, pushes it to AWS ECR and initiates a re-deployment of our staging server on AWS ECR. Please remember to add in your AWS Access Key and Secret Access ID to GitHub Secrets to run this pipeline.
 
 ### API Documentation
 
@@ -157,6 +159,8 @@ This project comes with an `apidoc.yml` file, which contains documentation for a
 - [MySQL](https://www.mysql.com/)
 - [PyTorch](https://pytorch.org/)
 - [Docker](https://www.docker.com/)
+- [Sequelize](https://sequelize.org/)
+- [Jest](https://jestjs.io/)
 - [Amazon Web Services](https://aws.amazon.com/)
 
 ## Authors
