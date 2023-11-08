@@ -12,6 +12,9 @@ We created a web app that serves as a diagnostic evaluation platform to generate
 The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. After login, they will be redirected to the predictor page which is the home page. They can click on start, and select if they are uploading an image for a new patient or an existing patient.
 ![image](https://i.ibb.co/xHtygny/Screenshot-2023-11-08-at-12-04-31-PM.png)
 
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/a3a873fe-facf-4355-816a-b545dd8bc15a)
+
+
 ## Dashboard
 
 We created a patient fundus dashboard that consolidates relevant patient data and medical images, which provides a comprehensive view of each patient's medical history and current condition.
