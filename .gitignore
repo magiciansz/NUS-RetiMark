@@ -50,6 +50,6 @@ tmp_email/
 .envrc
 .tool-versions
 
-#secrets manager for streamlit dashboard
-/dashboard/.venv/.streamlit/secrets.toml
-/dashboard/.venv/.env
+#test data for streamlit dashboard
+/dashboard/fundus-images/
+/dashboard/test_data/
