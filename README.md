@@ -1,240 +1,144 @@
 # NUS-Retimark
 
 ## About
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/24ad58ac-3699-440c-a1cf-691e94e679fe)
 
-Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases.
+![image](https://www.nus.edu.sg/images/default-source/identity-images/NUS_logo_full-horizontal.jpg)
 
-For continuous integration, a [Github Action](https://github.com/features/actions) configuration `.github/workflows/main.yml` is included.
+Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases. Our solution comprises of three components, namely our deep learning models, a dashboard and a web application.
 
-Also, includes a Render.com `render.yaml` and a working Django `production.py` settings, enabling easy deployments with ['Deploy to Render' button](https://render.com/docs/deploy-to-render). The `render.yaml` includes the following:
-- PostgreSQL, for DB
-- Redis, for Celery
+## Web App
 
-This is a good starting point for modern Python/JavaScript web projects.
+We created a [web app](https://uat-webapp-397744269.ap-southeast-1.elb.amazonaws.com) that serves as a diagnostic evaluation platform to generate a risk probability for each of the three sight-threatening eye diseases using the deep learning models.
+The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. After login, they will be redirected to the predictor page which is the home page. They can click on start, and select if they are uploading an image for a new patient or an existing patient.
+![image](https://i.ibb.co/xHtygny/Screenshot-2023-11-08-at-12-04-31-PM.png)
 
-## Project bootstrap [![main](https://github.com/chocoelho/django-react-boilerplate/actions/workflows/main.yml/badge.svg)](https://github.com/chocoelho/django-react-boilerplate/actions/workflows/main.yml) [![Known Vulnerabilities](https://snyk.io/test/github/vintasoftware/django-react-boilerplate/badge.svg)](https://snyk.io/test/github/vintasoftware/django-react-boilerplate)
-- [ ] Make sure you have Python 3.11 installed
-- [ ] Install Django with `pip install django`, to have the `django-admin` command available.
-- [ ] Open the command line and go to the directory you want to start your project in.
-- [ ] Start your project using:
-    ```
-    django-admin startproject theprojectname --extension py,yml,json --name Procfile,Dockerfile,docker-compose.yml,README.md,.env.example,.gitignore,Makefile,render.yaml --template=https://github.com/vintasoftware/django-react-boilerplate/archive/boilerplate-release.zip
-    ```
-    Alternatively, you may start the project in the current directory by placing a `.` right after the project name, using the following command:
-    ```
-    django-admin startproject theprojectname . --extension py,yml,json --name Procfile,Dockerfile,docker-compose.yml,README.md,.env.example,.gitignore,Makefile,render.yaml --template=https://github.com/vintasoftware/django-react-boilerplate/archive/boilerplate-release.zip
-    ```
-In the next steps, always remember to replace theprojectname with your project's name
-- [ ] Above: don't forget the `--extension` and `--name` params!
-- [ ] Change the first line of README to the name of the project
-- [ ] Add an email address to the `ADMINS` settings variable in `{{project_name}}/backend/{{project_name}}/settings/base.py`
-- [ ] Change the `SERVER_EMAIL` to the email address used to send e-mails in `{{project_name}}/backend/{{project_name}}/settings/production.py`
+## Dashboard
 
-After completing ALL of the above, remove this `Project bootstrap` section from the project README. Then follow `Running` below.
+We created a [patient fundus dashboard](http://uat-dashboard-1038223109.ap-southeast-1.elb.amazonaws.com/?nav=%2Flogin) that consolidates relevant patient data and medical images, which provides a comprehensive view of each patient's medical history and current condition.
+The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. Upon successful login, he will be redirected to the main dashboard page, which contains a holistic view of patient fundus data.
+![image](https://i.ibb.co/dJb7MxR/Screenshot-2023-11-08-at-11-56-28-AM.png)
+Firstly, the filters at the top of the page allow users to filter for the patient of interest, disease type as well as date of visit. Each filter can be set by selecting from a series of drop down values, or directly searching for the values. Each filter comes with a helpful tooltip to guide users towards entering the correct input value.
+Once the filters are set, the patient’s clinical data will be shown below. The data is retrieved from the AWS database, which includes fields like the patient’s age, sex and doctor’s notes. More importantly, his fundus images are displayed here as well, alongside the risk value generated by the machine learning model.
 
-## Running
-### Tools
-- Setup [editorconfig](http://editorconfig.org/), [prospector](https://prospector.landscape.io/en/master/) and [ESLint](http://eslint.org/) in the text editor you will use to develop.
+Below, a risk trend line chart shows the historical changes of a patient’s disease risk levels. Separated by the left and right eye. The line chart is responsive to scroll and zoom in the horizontal direction and can also be viewed in full screen.
+![image](https://i.ibb.co/FqLrT6X/Screenshot-2023-11-08-at-11-59-22-AM.png)
 
-### Setup
-- Inside the `backend` folder, do the following:
-  - Create a copy of `{{project_name}}/settings/local.py.example`:  
-  `cp {{project_name}}/settings/local.py.example {{project_name}}/settings/local.py`
-  - Create a copy of `.env.example`:
-  `cp .env.example .env`
+## Deep Learning
+
+## Setup
+
+### Prerequisites
+
+You will need the following things properly installed on your computer.
+
+- MySQL Workbench
 
 ### If you are using Docker:
-- Open the `/backend/.env` file on a text editor and uncomment the line `DATABASE_URL=postgres://{{project_name}}:password@db:5432/{{project_name}}`
-- Open a new command line window and go to the project's directory
-- Run the initial setup:
-  `make docker_setup`
-- Create the migrations for `users` app:  
-  `make docker_makemigrations`
-- Run the migrations:
-  `make docker_migrate`
-- Run the project:
-  `make docker_up`
-- Access `http://localhost:8000` on your browser and the project should be running there
-  - When you run `make docker_up`, some containers are spinned up (frontend, backend, database, etc) and each one will be running on a different port
-  - The container with the React app uses port 3000. However, if you try accessing it on your browser, the app won't appear there and you'll probably see a blank page with the "Cannot GET /" error
-  - This happens because the container responsible for displaying the whole application is the Django app one (running on port 8000). The frontend container is responsible for providing a bundle with its assets for [django-webpack-loader](https://github.com/django-webpack/django-webpack-loader) to consume and render them on a Django template
-- To access the logs for each service, run:
-  `make docker_logs <service name>` (either `backend`, `frontend`, etc)
-- To stop the project, run:
-  `make docker_down`
 
-#### Adding new dependencies
+- In the main project directory, duplicate the `.env-example` file into `.env` and fill up the environment variables accordingly:
+  - `TOKEN_SECRET`: secret used for verifying / signing JWTs
+  - `TOKEN_ACCESS_EXPIRATION_MINUTES`: Validity of Access Tokens (in minutes)
+  - `TOKEN_REFRESH_EXPIRATION_HOURS`: Validity of Refresh Tokens (in hours)
+  - `MYSQLDB_USERNAME`: Username used to log in to database (root)
+  - `MYSQLDB_ROOT_PASSWORD`: Password used to log in to database
+  - `MYSQLDB_DATABASE`: Name of database
+  - `AWS_ACCESS_KEY_ID`: Access Key ID for AWS Account (for AWS interactions)
+  - `AWS_SECRET_ACCESS_KEY`: Secret Access key for AWS Account (for AWS interactions)
+  - `AWS_BUCKET`: Name of Bucket used to store patient images
+  - `EXPRESS_NODE_ENV`: Development environment of Express backend Note: using TEST causes the express server to use localstack to store images (since we mock AWS interactions during testing). This variable also affects the directory where patient images are stored on S3.
 - Open a new command line window and go to the project's directory
-- Update the dependencies management files by performing any number of the following steps:
-  - To add a new **frontend** dependency, run `npm install <package name> --save`
-    > The above command will update your `package.json`, but won't make the change effective inside the container yet
-  - To add a new **backend** dependency, run `docker compose run backend --rm bash` to open an interactive shell and then run `poetry add {dependency}` to add the dependency. If the dependency should be only available for development user append `-G dev` to the command.
-  - After updating the desired file(s), run `make docker_update_dependencies` to update the containers with the new dependencies
-  > The above command will stop and re-build the containers in order to make the new dependencies effective
+- In docker-compose.yml, replace docker.host.internal under the web-app service with your own local IP. Query it using `ipconfig getifaddr en0`
+- Run the project:
+  `docker-compose --project-name "[project-name]" --env-file .env up -d`
+- Access `http://localhost:3000` for the web app, and `http://localhost:8501` for the dashboard.
+  - When you run `docker-compose --project-name "[project-name]" --env-file .env up -d`, some containers are spinned up (frontend, backend, database, etc) and each one will be running on a different port
+- To stop the project, run `docker-compose stop`, or delete the containers in your Docker console.
 
 ### If you are not using Docker:
-#### Setup and run the frontend app
-- Open a new command line window and go to the project's directory
-- `npm install`
-- `npm run start`
-  - This is used to serve the frontend assets to be consumed by [django-webpack-loader](https://github.com/django-webpack/django-webpack-loader) and not to run the React application as usual, so don't worry if you try to check what's running on port 3000 and see an error on your browser
 
-#### Setup the backend app
-- Open the `/backend/.env` file on a text editor and do one of the following:
-  - If you wish to use SQLite locally, uncomment the line `DATABASE_URL=sqlite:///backend/db.sqlite3`
-  - If you wish to use PostgreSQL locally, uncomment and edit the line `DATABASE_URL=postgres://{{project_name}}:password@db:5432/{{project_name}}` in order to make it correctly point to your database URL
-    - The url format is the following: `postgres://USER:PASSWORD@HOST:PORT/NAME`
-  - If you wish to use another database engine locally, add a new `DATABASE_URL` setting for the database you wish to use
-    - Please refer to [dj-database-url](https://github.com/jacobian/dj-database-url#url-schema) on how to configure `DATABASE_URL` for commonly used engines
-- Open a new command line window and go to the project's directory
-- run `poetry install`
+### Database Setup
 
-#### Run the backend app
-- With the virtualenv enabled, go to the `backend` directory
-- Create the migrations for `users` app: 
-  `poetry run python manage.py makemigrations`
-- Run the migrations:
-  `poetry run python manage.py migrate`
-- Run the project:
-  `poetry run python manage.py runserver`
-- Open a browser and go to `http://localhost:8000` to see the project running
+- When running the express backend server, Sequelize automatically creates tables in MySQL based on the tables defined.
+- For manual creation, locate the following folder `./backend/database` and execute the sql scripts `retimark_db.sql`.
 
-#### Setup Celery
-- `poetry run python manage.py celery`
+### Setup and run the Express backend
 
-#### Mailhog
-- For development, we use Mailhog to test our e-mail workflows, since it allows us to inspect the messages to validate they're correctly built
-  - Docker users already have it setup and running once they start the project
-  - For non-Docker users, please have a look [here](https://github.com/mailhog/MailHog#installation) for instructions on how to setup Mailhog on specific environments
-> The project expects Mailhog SMTP server to be running on port 1025, you may alter that by changing `EMAIL_PORT` on settings
+- cd into `./backend`, and run `npm install`.
+- Open the `./backend/.env-example` file on a text editor, and create a .env file in the same directory (if it hasn't been created). Copy the code from .env-example and fill up the environment variables accordingly:
 
+  - `PORT`: port to expose the express backend server
+  - `TOKEN_SECRET`: secret used for verifying / signing JWTs
+  - `TOKEN_ACCESS_EXPIRATION_MINUTES`: Validity of Access Tokens (in minutes)
+  - `TOKEN_REFRESH_EXPIRATION_HOURS`: Validity of Refresh Tokens (in hours)
+  - `DB_HOST`: IP Address of endpoint hosting the database (127.0.0.1 if running locally)
+  - `DB_PORT`: Port of database that is exposed for incoming TCP connections
+  - `DB_USERNAME`: Username used to log in to database
+  - `DB_PASSWORD`: Password used to log in to database
+  - `AWS_ACCESS_KEY_ID`: Access Key ID for AWS Account (for AWS interactions)
+  - `AWS_SECRET_ACCESS_KEY`: Secret Access key for AWS Account (for AWS interactions)
+  - `AWS_BUCKET`: Name of Bucket used to store patient images
+  - `NODE_ENV`: Development environment of Express backend Note: using TEST causes the express server to use localstack to store images (since we mock AWS interactions during testing). This variable also affects the directory where patient images are stored on S3.
 
-### Testing
-`make test`
+- run `npm start`
 
-Will run django tests using `--keepdb` and `--parallel`. You may pass a path to the desired test module in the make command. E.g.:
+### Setup and run the Flask backend
 
-`make test someapp.tests.test_views`
+- cd into `./deeplearning`, and run `pip install -r requirements.txt`.
+- run `flask run --port 8000`
 
-### Adding new pypi libs
-To add a new **backend** dependency, run `poetry add {dependency}`. If the dependency should be only available for development user append `-G dev` to the command. 
+#### Setup and run the Web App frontend
 
-## Github Actions
+- cd into `./frontend`, and run `npm install`.
+- Open the `./frontend/.env-example` file on a text editor, and create a .env file in the same directory (if it hasn't been created). Copy the code from .env-example and fill up the environment variables accordingly:
+  - `REACT_APP_EXPRESS_ENDPOINT_URL`: URL of Express backend
+  - `REACT_APP_FLASK_ENDPOINT_URL`: URL of Flask backend
+- run `npm run start`. The web app listens on port 3000.
 
-To enable Continuous Integration through Github Actions, we provide a `proj_main.yml` file. To connect it to Github you need to rename it to `main.yml` and move it to the `.github/workflows/` directory. 
+#### Setup and run the dashboard frontend
 
-You can do it with the following commands:
+- cd into `./dashboard/.venv`, and run `pip install -r requirements.txt`.
+- run `streamlit run home.py`. The dashboard listens on port 8501.
 
-```bash
-mkdir -p .github/workflows
-mv proj_main.yml .github/workflows/main.yml
-```
+## Testing (For Express Backend)
 
-## Deployment 
-### Setup
-This project comes with an `render.yaml` file, which can be used to create an app on Render.com from a GitHub repository.
+- cd into `./backend`
+- Please install [localstack](https://github.com/localstack/localstack) on your endpoint, and run `localstack start -d`.
 
-Before deploying, please make sure you've generated an up-to-date `poetry.lock` file containing the Python dependencies. This is necessary even if you've used Docker for local runs. Do so by following [these instructions](#setup-the-backend-app).
+To run all tests, run `npm test`. This runs the entire test suite based on the test files declared in the `./test` folder
 
-After setting up the project, you can init a repository and push it on GitHub. If your repository is public, you can use the following button:
+To run a specific test file, run `npm test -- tests/integration/patient.test.js`
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+## Github Actions (For Express Backend)
 
-If you are in a private repository, access the following link replacing `$YOUR_REPOSITORY_LINK$` with your repository link.
+We automate testing and deployments of our express backend during code changes. We do not test and deploy other services as the entire pipeline would be extremely time-consuming, for each code change made.
 
-- `https://render.com/deploy?repo=$YOUR_REPOSITORY_LINK$`
+### Continuous Integration
 
-Remember to fill the `ALLOWED_HOSTS` with the URL of your app, the default on Render.com is `appname.onrender.com`. Replace `appname` with your Render.com app name.
+To enable Continuous Integration through Github Actions, we provide a `test_staging.yml` file in the `.github/workflows/` directory. The workflow is designed to run automatically each time a pull request is raised in develop, ensuring that the code changes do not break any API logic in our express backend.
 
-### Configuring Celery
+### Continuous Deployment
 
-As there aren't free plans for Workers in Render.com, the configuration for Celery workers/beat will be commented by default in the `render.yaml`. This means celery won't be available by default. 
+To enable Continuous Deployment through Github Actions, we provide a `deploy_staging.yml` file in the `.github/workflows/` directory. The workflow is designed to run automatically each time a pull request is merged into develop. It then builds the express backend image, pushes it to AWS ECR and initiates a re-deployment of our staging server on AWS ECR.
 
-Uncommenting the worker configuration lines on `render.yaml` will imply in costs.
+### API Documentation
 
-### SendGrid
+This project comes with an `apidoc.yml` file, which contains documentation for all our APIs. Copy the yml file contents into [Swagger](editor.swagger.io) to view it.
 
-To enable sending emails from your application you'll need to have a valid SendGrid account and also a valid verified sender identity. After finishing the validation process you'll be able to generate the API credentials and define the `SENDGRID_USERNAME` and `SENDGRID_PASSWORD` envvars on Render.com. 
+## Built With
 
-These variables are required for your application to work on Render.com since it's pre-configured to automatically email admins when the application is unable to handle errors gracefully. 
+- [Streamlit](https://streamlit.io/)
+- [React](https://react.dev/)
+- [Express](https://expressjs.com/)
+- [Flask](https://flask.palletsprojects.com/en/3.0.x/)
+- [MySQL](https://www.mysql.com/)
+- [PyTorch](https://pytorch.org/)
+- [Docker](https://www.docker.com/)
+- [AWS](https://aws.amazon.com/)
 
-### Sentry
+## Authors
 
-[Sentry](https://sentry.io) is already set up on the project. For production, add `SENTRY_DSN` environment variable on Render.com, with your Sentry DSN as the value.
-
-You can test your Sentry configuration by deploying the boilerplate with the sample page and clicking on the corresponding button.
-
-### Sentry source maps for JS files
-
-The `render_build.sh` script has a step to push Javascript source maps to Sentry, however some environment variables need to be set on Render.com.
-
-The environment variables that need to be set are:
-
-- `SENTRY_ORG` - Name of the Sentry Organization that owns your Sentry Project.
-- `SENTRY_PROJECT_NAME` - Name of the Sentry Project.
-- `SENTRY_API_KEY` - Sentry API key that needs to be generated on Sentry. [You can find or create authentication tokens within Sentry](https://sentry.io/api/).
-
-After enabling dyno metadata and setting the environment variables, your next Render.com Deploys will create a release on Sentry where the release name is the commit SHA, and it will push the source maps to it.
-
-## Linting
-- Manually with `poetry run prospector` and `npm run lint` on project root.
-- During development with an editor compatible with prospector and ESLint.
-
-## Pre-commit hooks
-- Run `poetry run pre-commit install` to enable the hook into your git repo. The hook will run automatically for each commit.
-- Run `git commit -m "Your message" -n` to skip the hook if you need.
-
-## Opinionated Settings
-Some settings defaults were decided based on Vinta's experiences. Here's the rationale behind them:
-
-### `CELERY_ACKS_LATE = True`
-We believe Celery tasks should be idempotent. So for us it's safe to set `CELERY_ACKS_LATE = True` to ensure tasks will be re-queued after a worker failure. Check Celery docs on ["Should I use retry or acks_late?"](https://docs.celeryproject.org/en/latest/faq.html#should-i-use-retry-or-acks-late) for more info.
-
-## Features Catalogue
-
-### Frontend
-- `react` for building interactive UIs
-- `react-dom` for rendering the UI
-- `react-router` for page navigation
-- `webpack` for bundling static assets
-- `webpack-bundle-tracker` for providing the bundled assets to Django
-- Styling
-  - `bootstrap` for providing responsive stylesheets
-  - `react-bootstrap` for providing components built on top of Bootstrap CSS without using plugins
-  - `sass` for providing compatibility with SCSS files
-- State management and backend integration
-  - `axios` for performing asynchronous calls
-  - `cookie` for easy integration with Django using the `csrftoken` cookie
-  - `@reduxjs/toolkit` for easy state management across the application with the whole toolkit including devtools for inspecting and debugging Redux via browser and ability to run thunks for interacting with the Redux store through asynchronous logic
-  - `connected-react-router` for integrating Redux with React Router
-  - `history` for providing browser history to Connected React Router
-  - `react-redux` for integrating React with Redux
-  - Utilities
-  - `lodash` for general utility functions
-  - `classnames` for easy working with complex CSS class names on components
-  - `prop-types` for improving QoL while developing providing basic type-checking for React props
-  - `react-refresh` for improving QoL while developing through automatic browser refreshing
-
-### Backend
-- `django` for building backend logic using Python
-- `djangorestframework` for building a REST API on top of Django
-- `django-webpack-loader` for rendering the bundled frontend assets
-- `django-js-reverse` for easy handling of Django URLs on JS
-- `psycopg2` for using PostgreSQL database
-- `sentry-sdk` for error monitoring
-- `python-decouple` for reading environment variables on settings files
-- `celery` for background worker tasks
-- `django-debreach` for additional protection against BREACH attack
-- `whitenoise` and `brotlipy` for serving static assets
-
-## Contributing
-
-If you wish to contribute to this project, please first discuss the change you wish to make via an [issue](https://github.com/vintasoftware/django-react-boilerplate/issues).
-
-Check our [contributing guide](https://github.com/vintasoftware/django-react-boilerplate/blob/master/CONTRIBUTING.md) to learn more about our development process and how you can test your changes to the boilerplate.
-
-## Commercial Support
-[![alt text](https://avatars2.githubusercontent.com/u/5529080?s=80&v=4 "Vinta Logo")](https://www.vinta.com.br/)
-
-This project is maintained by [Vinta Software](https://www.vinta.com.br/) and is used in products of Vinta's clients. We are always looking for exciting work, so if you need any commercial support, feel free to get in touch: contact@vinta.com.br
+- Ng Xiang Han - [GitHub](https://github.com/magiciansz)
+- Seah Jia Jun - [GitHub](https://github.com/jiajun-seah)
+- Tan Jia Hui - [GitHub](https://github.com/jiahuitan36)
+- Glenn Bjorn Chia - [GitHub](https://github.com/glennbjorn)
+- Josiah Foo - [GitHub](https://github.com/josiahfoo99)
