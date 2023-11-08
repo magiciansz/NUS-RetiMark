@@ -8,13 +8,13 @@ Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorith
 
 ## Web App
 
-We created a [web app](https://uat-webapp-397744269.ap-southeast-1.elb.amazonaws.com) that serves as a diagnostic evaluation platform to generate a risk probability for each of the three sight-threatening eye diseases using the deep learning models.
+We created a web app that serves as a diagnostic evaluation platform to generate a risk probability for each of the three sight-threatening eye diseases using the deep learning models.
 The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. After login, they will be redirected to the predictor page which is the home page. They can click on start, and select if they are uploading an image for a new patient or an existing patient.
 ![image](https://i.ibb.co/xHtygny/Screenshot-2023-11-08-at-12-04-31-PM.png)
 
 ## Dashboard
 
-We created a [patient fundus dashboard](http://uat-dashboard-1038223109.ap-southeast-1.elb.amazonaws.com/?nav=%2Flogin) that consolidates relevant patient data and medical images, which provides a comprehensive view of each patient's medical history and current condition.
+We created a patient fundus dashboard that consolidates relevant patient data and medical images, which provides a comprehensive view of each patient's medical history and current condition.
 The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. Upon successful login, he will be redirected to the main dashboard page, which contains a holistic view of patient fundus data.
 ![image](https://i.ibb.co/dJb7MxR/Screenshot-2023-11-08-at-11-56-28-AM.png)
 Firstly, the filters at the top of the page allow users to filter for the patient of interest, disease type as well as date of visit. Each filter can be set by selecting from a series of drop down values, or directly searching for the values. Each filter comes with a helpful tooltip to guide users towards entering the correct input value.
