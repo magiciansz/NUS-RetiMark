@@ -36,7 +36,6 @@ function Login() {
   };
 
   const login = useCallback(async () => {
-    console.log("running login");
     const requestParams = {
       username: formData.username,
       password: formData.password,
