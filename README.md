@@ -2,18 +2,17 @@
 
 ## About
 
-![image](https://logosdownload.com/logo/national-university-of-singapore--logo-1024.png)
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/77622894/6999c6b8-ab01-44f3-9e73-065fcae330fd)
 
 Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases. Our solution comprises of three components, namely our deep learning models, a dashboard and a web application.
 
 ## Web App
 We created a web app that serves as a diagnostic evaluation platform to generate a risk probability for each of the three sight-threatening eye diseases (AMD, Glaucoma, and Diabetic Retinopathy) using our deep learning models.
-### Demo
-#### Login Page
+### Login Page
 The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. 
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/7b0abcf7-cd08-4de5-94e9-50172c1546d9)
 
-#### Predictor Page
+### Predictor Page
 After login, they will be redirected to the predictor page which is the home page. On this predictor page, users can upload two images (left eye and right eye), tag it to a new patient or an existing patient, and get the risk probabilities for each of the images. 
 
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/a3a873fe-facf-4355-816a-b545dd8bc15a)
@@ -23,7 +22,7 @@ Subsequently, a report with the risk probability for each of the three sight-thr
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/708e87f1-06c1-46d8-9baa-a1a437cf7663)
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/7e759e79-48ef-4886-b26a-b4fd229bbcd2)
 
-#### Past Reports Page
+### Past Reports Page
 The past reports page displays all the past reports from previous visits for the searched patient. Users to sort the reports by date in either ascending or descending order. By default, the reports are sorted in descending order (‘Latest to Oldest’)
 
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/b6105e60-e591-4800-9e62-fc0436027b1a)
@@ -32,20 +31,19 @@ The past reports page displays all the past reports from previous visits for the
 ## Dashboard
 The fundus dashboard is developed using the Streamlit library in Python. The purpose of the dashboard is to consolidate relevant patient data and medical images and to provide a comprehensive view of each patient's medical history and current condition. The fundus dashboard is a client-facing application which showcases the risk prediction from the deep learning model results.
 
-### Demo
-#### Login Page
+### Login Page
 The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further.
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/77622894/04acc98c-22b3-47e5-91ea-62aea527fcf6)
 
-#### Filters
+### Filters
 Users are able to toggle on the risk level filter to subset the data into "diseased" and "normal" patient fundus images. Additionally, users can filter for a patient, disease type and visit date to view relevant patient info.
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/77622894/3da567ef-7e24-482e-b7a5-049419900c3e)
 
-#### Patient Info
+### Patient Info
 In the main dashboard page, users will be able to view relevant patient info, such as age, sex, doctor's notes and last visit date, accompanied by their fundus images. The risk levels of having the disease for each eye is also displayed here.
 <img width="1128" alt="image" src="https://github.com/magiciansz/NUS-RetiMark/assets/77622894/f16add87-c193-4e28-b69a-e9be705318db">
 
-#### Risk Trend Line Chart
+### Risk Trend Line Chart
 The risk trend line chart shows the historical changes of a patient’s disease risk levels, separated by the left and right eye. The line chart is responsive to scroll and zoom in the horizontal direction and can also be viewed in full screen.
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/77622894/d2bd32fd-d83b-4435-80a6-ae6ec55b138a)
 
