@@ -129,6 +129,7 @@ You will need the following things properly installed on your computer.
 
 - cd into `./backend`
 - Please install [localstack](https://github.com/localstack/localstack) on your endpoint, and run `localstack start -d`.
+- Create a S3 bucket by running `aws s3 mb s3://{BUCKET_NAME} --endpoint-url http://localhost:4566`
 
 To run all tests, run `npm test`. This runs the entire test suite based on the test files declared in the `./test` folder
 
