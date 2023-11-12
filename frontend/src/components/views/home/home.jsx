@@ -133,9 +133,8 @@ function Home() {
       )}
       {loading && <div className='loading-report'>
         <img src={Loading} alt="loading" className='loading-img'/>
-        <p className='loading-msg'>Loading Report</p>
       </div>}
-      {showReport && (
+      {!loading && showReport && (
         leftEyeRes && rightEyeRes &&
         <Report
           patient={patient}
