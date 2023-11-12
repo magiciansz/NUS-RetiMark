@@ -431,6 +431,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FlaskBadRequest"
+  /model-staging/api/v1/verify:
+    post:
+      tags:
+        - Model
+      summary: Check if image is an eye
+      description: Run binary classification model using image and verify if it is an image
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ModelForm"
+        required: true
+      responses:
+        "200":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        "400":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlaskBadRequest"
 
 components:
   schemas:
