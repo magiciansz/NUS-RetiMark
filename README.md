@@ -31,6 +31,8 @@ The risk trend line chart shows the historical changes of a patient’s disease 
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/77622894/d2bd32fd-d83b-4435-80a6-ae6ec55b138a)
 
 ## Web App
+You may view a recorded walkthrough of the web application here: [Link to demo](https://drive.google.com/file/d/1fIn7AsVwY-3tuq9yZ6plZbJZV83U3lv1/view)
+
 We created a web app that serves as a diagnostic evaluation platform to generate a risk probability for each of the three sight-threatening eye diseases (AMD, Glaucoma, and Diabetic Retinopathy) using our deep learning models.
 ### Login Page
 The entry point for users is the login page. Here, users will be prompted to enter their credentials in order to proceed further. 
