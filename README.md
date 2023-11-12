@@ -7,6 +7,48 @@
 Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases. Our solution comprises of three components, namely our deep learning models, a dashboard and a web application.
 
 ## Deep Learning
+The deep learning models were developed using the PyTorch library. The deep learning model was trained on Kaggle datasets for [age-related macular degeneration](https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k), [glaucoma](https://www.kaggle.com/datasets/arnavjain1/glaucoma-datasets) and [diabetic retinopathy](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/data). The deep learning model aims to provide accurate predictions of a patient's eye condition by taking retinal fundus images as inputs and producing a risk percentage as output.
+
+### Training the Model
+The model has already been trained, and predictions can be made from the web application. However, should you choose to retrain the model, you might want to take note of the following instructions.
+
+To retrain the model with local images, please refer to [retimark-x-capstone-glaucoma-final.ipynb](deeplearning/notebooks/retimark-x-capstone-diabetic-retinopathy-final.ipynb) for how to train the model on your local machine. 
+Most notably, the filepaths will likely have to be changed according to your local file structure. The end result should be that the train_df variable should be a Pandas dataframe with two columns, filepath and label. Filepath should refer to the file path of each image on your local machine, with label being their corresponding labels.
+
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/edcfc874-b1a7-457e-9059-e4157e121bd0)
+
+
+### Performance Evaluation
+After the model is trained, the notebook will output several graphs indicating the performance of the model, with metrics such as loss and recall score. The model's hyperparameters and architecture can then be tuned accordingly to optimize model performance.
+
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/569a8f86-29c5-43be-ab7d-d9ab1912c458)
+
+### Model Architecture
+To train our model, we used transfer learning by using a pretrained ResNet model. 
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/e8800fe0-df55-493f-bb44-4eba78ca7964)
+
+
+You can tune the ResNet model accordingly to increase or decrease the complexity of the model by changing the following line. Some ResNet models are more commonly used, such as ResNet18, ResNet34, ResNet50, and ResNet101, but this list is not exhaustive.
+
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/1a27a60d-5a47-4fda-b0a7-aa9564878773)
+
+
+While ResNet already has its own convolutional layers in the model architecture, you may choose to increase or decrease the complexity of the model by adjusting the model architecture as displayed here as well.
+
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/060f2c41-8de2-4e09-a552-9dd12ae1d46e)
+
+
+### Hyperparameter Tuning
+To tune model performance, you can consider tuning the following hyperparameters.
+
+Learning rate, indicated by lr=1e-3 in the image below, affects how quickly the model is able to pick up on patterns in the data. Increasing learning rate may lead to overfitting, while decreasing learning rate may lead to underfitting and cause the model to converge more slowly.
+Weight decay (weight_decay=1e-3) represents the level of L2 regularization used in training the model. Increasing this value may help to address overfitting, and decreasing it may help to address underfitting.
+
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/6b946c40-0e07-4c84-9121-2e83d6d1143a)
+
+Dropout can also be adjusted in the model architecture shown below. Dropout controls the percentage of data that will have its weights randomly set to zero. To address overfitting, you can try increasing dropout. To address underfitting, you can try decreasing dropout. Generally, it is recommended to start training the model with an initial value of 0.3-0.5 and tune accordingly from there.
+
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/060f2c41-8de2-4e09-a552-9dd12ae1d46e)
 
 ## Dashboard
 
