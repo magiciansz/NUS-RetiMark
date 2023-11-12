@@ -142,7 +142,8 @@ To run a specific test file, run `npm test -- tests/integration/patient.test.js`
 
 ## Github Actions (For Express Backend)
 
-We automate testing and deployments of our express backend during code changes. We do not test and deploy other services as the entire pipeline would be extremely time-consuming, for each code change made.
+We automate testing and deployments of our Express backend during code changes. We do not test and deploy other services as the entire pipeline would be extremely time-consuming, for each code change made.
+We also introduce automated version caching, which automates release notes and archiving of version files.
 
 ### Continuous Integration
 
@@ -150,8 +151,20 @@ To enable Continuous Integration through Github Actions, we provide a `test_stag
 
 ### Continuous Deployment
 
-To enable Continuous Deployment through Github Actions, we provide a `deploy_staging.yml` file in the `.github/workflows/` directory. The workflow is designed to run automatically each time a pull request is merged into develop. It then builds the express backend image, pushes it to AWS ECR and initiates a re-deployment of our staging server on AWS ECR. Please remember to add in your AWS Access Key and Secret Access ID to GitHub Secrets to run this pipeline.
+To enable Continuous Deployment through Github Actions, we provide a `deploy_staging.yml` file in the `.github/workflows/` directory. The workflow is designed to run automatically each time a pull request is merged into develop. It then builds the Express backend image, pushes it to AWS ECR and initiates a re-deployment of our staging server on AWS ECR. Please remember to add in your AWS Access Key and Secret Access ID to GitHub Secrets to run this pipeline.
 
+We also provide a `deploy_flask_staging.yml` file in the `.github/workflows/` directory. This workflow has to be run manually, and it serves to build the Flask backend image and push it to AWS ECR. As building the image takes considerable time, we did not integrate this into our CI/CD process which runs for every pull request into develop. Instead, we allow developers to run it manually.
+
+### Automated Version Caching
+
+To enable automated version caching each time the develop branch is merged into main, we provide a `release.yml` in the `.github/workflows/` directory. This workflow has to be run manually. It automatically compiles all changes made based on pull request titles and summarizes them in the release notes, together with a .zip file archiving all source code for the release.
+
+![Screenshot 2023-11-12 at 4 15 02 PM](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/9aa1abf0-ffa5-4117-8f8a-2ffa40efd5ee)
+![Screenshot 2023-11-12 at 4 16 14 PM](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/b87a6ce8-2b30-4318-be47-6e98ea56d90b)
+![image](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/401bdb75-5244-4604-923b-6e4fe4739157)
+
+
+ The automatic capturing of release notes based on pull request titles follows the format defined in the [semantic-release](https://github.com/semantic-release/semantic-release) package.
 ### API Documentation
 
 This project comes with an `apidoc.yml` file, which contains documentation for all our APIs. Copy the yml file contents into [Swagger](https://editor.swagger.io/) to view it.
