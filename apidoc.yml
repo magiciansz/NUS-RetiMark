@@ -431,6 +431,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FlaskBadRequest"
+  /model-staging/api/v1/verify:
+    post:
+      tags:
+        - Model
+      summary: Check if image is an eye
+      description: Run binary classification model using image and verify if it is an image
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ModelForm"
+        required: true
+      responses:
+        "200":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        "400":
+          description: Search Results obtained.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlaskBadRequest"
 
 components:
   schemas:
@@ -566,15 +592,9 @@ components:
             right_eye_image:
               type: string
               example: "tests3bucket.com"
-            left_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             left_diabetic_retinopathy_prob:
               type: number
               example: 0.56
-            right_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             right_diabetic_retinopathy_prob:
               type: number
               example: 0.11
@@ -608,15 +628,9 @@ components:
         right_eye_image:
           type: string
           format: binary
-        left_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         left_diabetic_retinopathy_prob:
           type: number
           example: 0.56
-        right_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         right_diabetic_retinopathy_prob:
           type: number
           example: 0.11
@@ -682,15 +696,9 @@ components:
               right_eye_image:
                 type: string
                 example: "tests3bucket.com"
-              left_diabetic_retinopathy_stage:
-                type: integer
-                example: 1
               left_diabetic_retinopathy_prob:
                 type: number
                 example: 0.56
-              right_diabetic_retinopathy_stage:
-                type: integer
-                example: 1
               right_diabetic_retinopathy_prob:
                 type: number
                 example: 0.11
@@ -783,15 +791,9 @@ components:
             right_eye_image:
               type: string
               example: "tests3bucket.com"
-            left_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             left_diabetic_retinopathy_prob:
               type: number
               example: 0.56
-            right_diabetic_retinopathy_stage:
-              type: integer
-              example: 1
             right_diabetic_retinopathy_prob:
               type: number
               example: 0.11
@@ -834,15 +836,9 @@ components:
         right_eye_image:
           type: string
           format: binary
-        left_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         left_diabetic_retinopathy_prob:
           type: number
           example: 0.56
-        right_diabetic_retinopathy_stage:
-          type: integer
-          example: 1
         right_diabetic_retinopathy_prob:
           type: number
           example: 0.11

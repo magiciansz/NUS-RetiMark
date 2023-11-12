@@ -1,19 +1,17 @@
 import React, {
-    useState, useEffect, useCallback, useRef, useNavigate 
+    useState
   } from 'react';
 import './doc-notes.css';
-import {FaSearch} from "react-icons/fa"
 
+// Component: Doctor's Notes modal
 function Modal({ isOpen, onClose, doctorNotes }) {
     const [notes, setNotes] = useState('');
 
     if (!isOpen) return null;
 
     const handleClose = () => {
-        // setUserEdit({ gender: 'male' });
         setNotes('')
         onClose();
-    
     };
 
     const handleNotesChange = (e) => {
@@ -35,12 +33,9 @@ function Modal({ isOpen, onClose, doctorNotes }) {
             <h3 className="section-title">Add Doctor's Notes</h3>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    {/* <label htmlFor="doctorNotes">Doctor's Notes</label> */}
                     <textarea
                         id="doctorNotes"
                         name="doctorNotes"
-                        // rows="7"
-                        // cols="70"
                         value={notes}
                         onChange={handleNotesChange}
                         placeholder="Add doctor's notes here..."

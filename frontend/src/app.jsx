@@ -3,8 +3,7 @@ import Navi from './components/navi/navi';
 import PastReports from './components/views/pastreports/pastreports';
 import Login from './components/views/login/login';
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import AuthRoute from './components/auth/AuthRoute';
 

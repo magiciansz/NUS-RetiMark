@@ -17,11 +17,12 @@ st.set_page_config(
     layout="wide"
 )
 
+#Set this to True when debugging, as it will allow you to view all cookies, perform page navigation and print status messages
 _DEBUG = False
 
 @st.cache_resource(hash_funcs={"_thread.RLock": lambda _: None})
 def init_router(): 
-    return stx.Router({"/login": login, "/home": home, })
+    return stx.Router({"/login": login, "/home": home})
 
 @st.cache_resource(experimental_allow_widgets=True)
 def get_manager():
@@ -69,18 +70,17 @@ def submitted():
     st.session_state.submitted_login = True
 def reset():
     st.session_state.submitted_login = False
-
 #login function
 def login():
     if 'submitted_login' not in st.session_state:
         st.session_state['submitted_login'] = False
-                                                               
+                         
     def attempt_login(username, password):
         ##BEGIN API CALL
         # tz_string = datetime.datetime.now().astimezone().tzinfo
         tz_string = get_region_from_UTC_offset(datetime.datetime.now().astimezone().tzname())
         cookie_manager.set(key='time_zone', cookie='time_zone', val=tz_string)
-        API_ENDPOINT = config['ENDPOINT_URL']+"/auth/login"
+        API_ENDPOINT = config['EXPRESS_ENDPOINT_URL']+"/api/v1/auth/login"
         PARAMS = {'timezone':tz_string}
         data = {
             "username":username,
@@ -89,7 +89,7 @@ def login():
         try:
             if (_DEBUG):   
                 st.write("Entered Try block")
-            r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
+            r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data, verify=False)
             # r = requests.post(url=API_ENDPOINT, json=data)
             r.raise_for_status()
 
@@ -128,29 +128,29 @@ def login():
             cookie_manager.set(key='login_status', cookie='login_status', val=True)
             return True
         ##END API CALL
-        
+    
     # Create an empty container
     landing = st.container()
     # Insert a form in the container
     with landing:
-        with st.form("login"):
-            st.markdown("#### Login")
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            success = st.form_submit_button("Login", on_click=submitted)
-            # success = st.form_submit_button("Login", on_click=attempt_login, args=[username, password])
-    if (st.session_state.submitted_login):
-        attempt_login(username, password)
-        if (cookie_manager.get(cookie="login_status")):
-            router.route("home")
-            # If the form is submitted and the email and password are correct,
-            # clear the form/container and display a success message
-            landing.empty()
-            st.success("Login successful")
-    elif (not st.session_state.submitted_login):
-          return st.warning("Please enter your credentials")
-    else:
-        st.error("Username/password is incorrect")
+        #create 3 columns
+        left_space, middle, right_space = st.columns(3)
+        with middle:
+            with st.form("login"):
+                st.markdown("#### Login")
+                username = st.text_input("Username")
+                password = st.text_input("Password", type="password")
+                success = st.form_submit_button("Login", on_click=submitted)
+                # success = st.form_submit_button("Login", on_click=attempt_login, args=[username, password])
+            if (st.session_state.submitted_login):
+                attempt_login(username, password)
+                if (cookie_manager.get(cookie="login_status")):
+                    router.route("home")
+                    #upon successful login, clear the form
+                    middle.empty()
+    
+    
+    
     return landing
 
 def home():
@@ -183,7 +183,7 @@ def home():
 
     def get_patient_history(d_lower, d_upper, o_lower, o_upper, g_lower, g_upper):
         ##BEGIN API CALL
-        API_ENDPOINT = config['ENDPOINT_URL']+"/patient-history"
+        API_ENDPOINT = config['EXPRESS_ENDPOINT_URL']+"/api/v1/patient-history"
         PARAMS = {
             'timezone':cookie_manager.get(cookie="time_zone"),
             'diabetic_retinopathy_lower_threshold':d_lower,
@@ -199,7 +199,7 @@ def home():
         try:
             if (_DEBUG):   
                 st.write("Entered Try block")
-            r = requests.get(url=API_ENDPOINT, params=PARAMS, headers=HEADERS)
+            r = requests.get(url=API_ENDPOINT, params=PARAMS, headers=HEADERS, verify=False)
             # r = requests.post(url=API_ENDPOINT, json=data)
             r.raise_for_status()
 
@@ -211,8 +211,20 @@ def home():
             # if (error_code==400):
             #     st.error("Please provide a valid username and password")
             if (error_code==401):
+                if (cookie_manager.get(cookie='login_status')):
+                    cookie_manager.delete(key='login_status', cookie='login_status')
+                if (cookie_manager.get(cookie='user_username')):
+                    cookie_manager.delete(key='user_username', cookie='user_username')
+                if (cookie_manager.get(cookie='access_token')):
+                    cookie_manager.delete(key='access_token', cookie='access_token')
+                if (cookie_manager.get(cookie='access_token_expiry_time')):
+                    cookie_manager.delete(key='access_token_expiry_time', cookie='access_token_expiry_time')
+                if (cookie_manager.get(cookie='refresh_token')):
+                    cookie_manager.delete(key='refresh_token', cookie='refresh_token')
+                if (cookie_manager.get(cookie='refresh_token_expiry_time')):
+                    cookie_manager.delete(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time')
+                router.route("login")
                 st.error("Session expired")
-                logout()
             # else:
             #     st.error("Oops, something went wrong, please contact your administrator: " + str(err))
         else:
@@ -272,14 +284,6 @@ def home():
         for entry in record_list:
             result.append([entry.get(col) for col in col_list])
         return result
-
-    def query_stage(dict, id, visit_date, disease, laterality):
-        code = encode_disease(disease)
-        if (code in ['ocular', 'glaucoma']):
-            return None
-        else:
-            stage_col = laterality + '_' + code + '_stage'
-            return query_patient_value(dict, id, visit_date, stage_col)
 
     def query_risk(dict, id, visit_date, disease, laterality):
         code = encode_disease(disease)
@@ -349,7 +353,7 @@ def home():
         # set_all_thresholds()
     def logout():
         ##BEGIN API CALL
-        API_ENDPOINT = config['ENDPOINT_URL']+"/auth/logout"
+        API_ENDPOINT = config['EXPRESS_ENDPOINT_URL']+"/api/v1/auth/logout"
         HEADERS = {
             "Authorization": "Bearer " + cookie_manager.get(cookie='access_token')
         }
@@ -360,7 +364,7 @@ def home():
             if (_DEBUG):   
                 st.write("Entered Try block")
             # r = requests.post(url=API_ENDPOINT, params=PARAMS, json=data)
-            r = requests.post(url=API_ENDPOINT, headers=HEADERS, json=data)
+            r = requests.post(url=API_ENDPOINT, headers=HEADERS, json=data, verify=False)
             r.raise_for_status()
 
         except requests.exceptions.HTTPError as err:
@@ -370,16 +374,15 @@ def home():
         else:
             if (_DEBUG):
                 st.write("Entered Else block")
-            cookie_manager.set(key='login_status', cookie='login_status', val=False)
+            
             st.session_state.submitted_logout = False
-            router.route('login')
+            cookie_manager.delete(key='login_status', cookie='login_status')
             cookie_manager.delete(key='user_username', cookie='user_username')
             cookie_manager.delete(key='access_token', cookie='access_token')
             cookie_manager.delete(key='access_token_expiry_date', cookie='access_token_expiry_time')
             cookie_manager.delete(key='refresh_token', cookie='refresh_token')
             cookie_manager.delete(key='refresh_token_expiry_time', cookie='refresh_token_expiry_time')
-
-            return True
+            router.route('login')
         ##END API CALL
 
     #retrieving data from database
@@ -417,15 +420,15 @@ def home():
         with st.expander(label="Filter Risk Thresholds", expanded=False):
             options1, options2, options3, confirm = st.columns([0.25, 0.3, 0.3, 0.15])
             with options1:
-                pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds)
+                pre_filter_on = st.toggle('Filter by risk values', on_change=toggle_reset_thresholds, help="Turn on risk level filtering feature")
             with options2:
                 if pre_filter_on:
-                    use_default_disease = st.button('Show default disease thresholds', on_click=lock_disease_threshold)
+                    use_default_disease = st.button('Show default disease thresholds', on_click=lock_disease_threshold, help="Preset sliders to default thresholds associated with high risk")
                 else:
                     use_default_disease = st.button('Show default disease thresholds', disabled=True)
             with options3:
                 if pre_filter_on:
-                    use_default_normal = st.button('Show default normal thresholds', on_click=lock_normal_threshold)
+                    use_default_normal = st.button('Show default normal thresholds', on_click=lock_normal_threshold, help="Preset sliders to default thresholds associated with low risk")
                 else:
                     use_default_normal = st.button('Show default normal thresholds', disabled=True)
             with confirm:
@@ -438,31 +441,31 @@ def home():
             with pre_filter1:
                 if pre_filter_on:
                     if use_default_disease or st.session_state.lock_disease_threshold:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (20,100))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (20,100), help="Drag sliders to desired risk thresholds")
                     elif use_default_normal or st.session_state.lock_normal_threshold:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,20), help="Drag sliders to desired risk thresholds")
                     else:
-                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100))
+                        d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), help="Drag sliders to desired risk thresholds")
                 else:
                     d_threshold = st.slider("Risk of Diabetic Retinopathy:", 0, 100, (0,100), disabled=True)
             with pre_filter2:
                 if pre_filter_on:
                     if use_default_disease or st.session_state.lock_disease_threshold:
-                        o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (20,100))
+                        o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (20,100), help="Drag sliders to desired risk thresholds")
                     elif use_default_normal or st.session_state.lock_normal_threshold:
-                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20))
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,20), help="Drag sliders to desired risk thresholds")
                     else:
-                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100))
+                         o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), help="Drag sliders to desired risk thresholds")
                 else:
                      o_threshold = st.slider("Risk of Age-related Macular Degeneration:", 0, 100, (0,100), disabled=True)
             with pre_filter3:
                 if pre_filter_on:
                     if use_default_disease  or st.session_state.lock_disease_threshold:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (20,100))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (20,100), help="Drag sliders to desired risk thresholds")
                     elif use_default_normal  or st.session_state.lock_normal_threshold:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,20), help="Drag sliders to desired risk thresholds")
                     else:
-                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100))
+                        g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), help="Drag sliders to desired risk thresholds")
                 else:
                     g_threshold = st.slider("Risk of Glaucoma:", 0, 100, (0,100), disabled=True)
         with st.expander(label="Search and Filter", expanded=True):
@@ -517,38 +520,30 @@ def home():
                     st.subheader("Left Fundus")
                     left_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'left_eye_image')
                     st.image(left_img_url, use_column_width="auto")
-                    left_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
                     left_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'left')
                     if (temp_diagnosed_date == "NA"):
                         left_risk_prev = 0
                     else:
                         left_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'left')
-                    stage, risk = st.columns([0.5, 0.5])
-                    with stage:
-                        st.metric("Most Probable Stage", left_stage)
-                    with risk:
-                        if (temp_diagnosed_date != "NA"):
-                            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
-                        else:
-                            st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%')
+                    
+                    if (temp_diagnosed_date != "NA"):
+                        st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%', str(round((left_risk-left_risk_prev)*100,2))+'%', delta_color="inverse")
+                    else:
+                        st.metric("Left Eye Risk", str(round(left_risk*100,2))+'%')
             with right:
                     st.subheader("Right Fundus")
                     right_img_url = query_patient_value(patient_dict, selected_patient_id, selected_date, 'right_eye_image')
                     st.image(right_img_url, use_column_width="auto")
-                    right_stage = query_stage(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
                     right_risk = query_risk(patient_dict, selected_patient_id, selected_date, selected_disease_type, 'right')
                     if (temp_diagnosed_date == "NA"):
                         right_risk_prev = 0
                     else:
                         right_risk_prev = query_risk(patient_dict, selected_patient_id, temp_diagnosed_date, selected_disease_type, 'right')
-                    stage, risk = st.columns([0.5, 0.5])
-                    with stage:
-                        st.metric("Most Probable Stage", right_stage)
-                    with risk:
-                        if (temp_diagnosed_date != "NA"):
-                            st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(round((right_risk-right_risk_prev)*100,2))+'%', delta_color="inverse")
-                        else:
-                            st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%')
+                    
+                    if (temp_diagnosed_date != "NA"):
+                        st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%', str(round((right_risk-right_risk_prev)*100,2))+'%', delta_color="inverse")
+                    else:
+                        st.metric("Right Eye Risk", str(round(right_risk*100,2))+'%')
         except TypeError as e:
                 st.write("No data to display.")
         except UnboundLocalError as e:
@@ -562,47 +557,28 @@ def home():
             #extract date, stage, risk value L, risk value R, image L, image R
             risk_l_col = "left_" + encode_disease(selected_disease_type) + "_prob"
             risk_r_col = "right_" + encode_disease(selected_disease_type) + "_prob"
-            if selected_disease_type=="Diabetic Retinopathy":
-                stage_l_col = "left_" + encode_disease(selected_disease_type) + "_stage"
-                stage_r_col = "right_" + encode_disease(selected_disease_type) + "_stage"
-            else:
-                stage_l_col = "Unknown"
-                stage_r_col = "Unknown"
 
-            chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', stage_l_col, stage_r_col, risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
+            chart_data = query_patient_multiple(patient_dict, selected_patient_id, ['visit_date', risk_l_col, risk_r_col, 'left_eye_image', 'right_eye_image'])
 
-            df = pd.DataFrame(chart_data, columns = ['date', 'stage_l', 'stage_r', 'risk_l', 'risk_r', 'image_l', 'image_r'])
+            df = pd.DataFrame(chart_data, columns = ['date','risk_l', 'risk_r', 'image_l', 'image_r'])
             melted_df = df.melt(id_vars=['date'], value_vars=['risk_l', 'risk_r'], var_name='laterality', value_name='risk')
             melted_df2 = df.melt(id_vars=['date'], value_vars=['image_l', 'image_r'], var_name='laterality', value_name='image')
-            melted_df3 = df.melt(id_vars=['date'], value_vars=['stage_l', 'stage_r'], var_name='laterality', value_name='stage')
             melted_df['laterality'] = melted_df['laterality'].map(lambda x: x[-1])
             melted_df2['laterality'] = melted_df2['laterality'].map(lambda x: x[-1])
-            melted_df3['laterality'] = melted_df3['laterality'].map(lambda x: x[-1])
-            melted_res = melted_df.merge(melted_df2, on=['date', 'laterality']).merge(melted_df3, on=['date', 'laterality'])
+            melted_res = melted_df.merge(melted_df2, on=['date', 'laterality'])
             melted_res['laterality'] = melted_df['laterality'].map(lambda x: 'left' if x == 'l' else 'right')
 
             # Create a selection that chooses the nearest point & selects based on x-value
             nearest = alt.selection_point(nearest=True, on='mouseover', fields=['date'], empty=False)
 
-            if selected_disease_type=="Diabetic Retinopathy":
-                axis_labels = ("datum.label == '0.00%' ? 'Stage 0': datum.label == '100.00%' ? 'Stage 1': datum.label == '200.00%' ? 'Stage 2' : datum.label == '300.00%' ? 'Stage 3': datum.label == '400.00%' ? 'Stage 4':' '")
-                melted_res['amplified_risk'] = melted_res['stage'] + melted_res['risk']
-                base = alt.Chart(melted_res).mark_line(point=True).encode(
-                    alt.X('date:T', axis=alt.Axis(format="%b %Y")),
-                    # alt.Y('amplified_risk:Q').axis(format='.2%'),
-                    alt.Y('amplified_risk:Q', title='Stage, Risk (%)').axis(labelExpr=axis_labels, format='.2%'),
-                    alt.Color('laterality').scale(scheme="category10"),
-                    # tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
-                    tooltip=['date:T', 'stage', alt.Tooltip("risk:Q", format=".2%")]
-                )
-            else:
-                base = alt.Chart(melted_res).mark_line(point=True).encode(
+            base = alt.Chart(melted_res).mark_line(point=True).encode(
                     alt.X('date:T', axis=alt.Axis(format="%b %Y")),
                     alt.Y('risk:Q', title='Risk (%)').axis(format='.2%'),
                     alt.Color('laterality').scale(scheme="category10"),
                     # tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%"), 'image']
-                    tooltip=['date:T', 'stage', alt.Tooltip("risk:Q", format=".2%")]
-                )
+                    tooltip=['date:T', alt.Tooltip("risk:Q", format=".2%")]
+            )
+                
 
             selectors = alt.Chart(melted_res).mark_point().encode(
                 x='date:T',

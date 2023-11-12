@@ -172,4 +172,17 @@
         display: flex;
         justify-content: center;
     }
+    .loading-report {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-top: 100px;
+    }
+    .loading-msg {
+        font-weight: 500;
+    }
+    .loading-img {
+        width: 10%;
+    }
 }

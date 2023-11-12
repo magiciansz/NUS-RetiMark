@@ -21,6 +21,8 @@ import numpy as np
 import sys
 import types
 
+verificationWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/validation_state_dict.pth'
+verificationModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/ValidationClassifier.py'
 amdWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/amd_state_dict.pth'
 amdModelUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/AmdClassifier.py'
 glaucomaWeightsUrl = 'https://retimark-flask-models.s3.ap-southeast-1.amazonaws.com/glaucoma_state_dict.pth'
@@ -40,6 +42,7 @@ def importModel(weightsUrl, modelUrl, moduleName="imported_module", className="E
     model.eval()
     return model
 
+verificationModel = importModel(verificationWeightsUrl, verificationModelUrl)
 amdModel = importModel(amdWeightsUrl, amdModelUrl)
 glaucomaModel = importModel(glaucomaWeightsUrl, glaucomaModelUrl)
 diabeticModel = importModel(diabeticWeightsUrl, diabeticModelUrl)
@@ -68,7 +71,6 @@ def preprocess_img(input):
 
 class ModelController(Resource):
     def post(self):
-        """ Create an user based on the sent information """
         image = request.files['image']
 
         if not image:
@@ -80,6 +82,7 @@ class ModelController(Resource):
         try:
             output = {}
             image = preprocess_img(image)
+
             with torch.no_grad():
                 amdOutput = amdModel(image)
             amdOutput_np = amdOutput.numpy()
@@ -93,13 +96,30 @@ class ModelController(Resource):
             with torch.no_grad():
                 diabeticOutput = diabeticModel(image)
             diabeticOutput_np = diabeticOutput.numpy()
-            logits = diabeticOutput_np.tolist()[0]
-            diabetic_probs = nn.functional.softmax(torch.tensor(logits), dim = 0)
-            diabetic_pred = torch.argmax(diabetic_probs).item()
-            diabetic_pred_prob = diabetic_probs[diabetic_pred].item()
-            output.update({'diabetic': [diabetic_pred, diabetic_pred_prob]})
+            output.update({'diabetic': diabeticOutput_np.tolist()[0][0]})
 
             return jsonify(output)
         except Exception as e:
             print(e)
 
+class VerifyController(Resource):
+    def post(self):
+        image = request.files['image']
+
+        if not image:
+            abort(400, description = 'Please enter an image')
+
+        if not image.mimetype.startswith('image/'):
+            abort(400, description = 'The image has to be of jpeg or png.')
+        
+        try:
+            image = preprocess_img(image)
+
+            with torch.no_grad():
+                verificationOutput = verificationModel(image)
+            verification_np = verificationOutput.numpy()
+            return verification_np.tolist()[0][0] > 0.5
+
+        except Exception as e:
+            print(e)
+            return -1

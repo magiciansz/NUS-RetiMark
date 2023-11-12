@@ -1,19 +1,15 @@
-import React, {
-    useState, useEffect, useCallback, useRef, useNavigate 
-  } from 'react';
+import React from 'react';
 import './save-modal.css';
-import {FaSearch} from "react-icons/fa"
 import Check from '../../../css/imgs/checked.png'
 import Cross from '../../../css/imgs/cancel.png'
 import Loading from '../../../css/imgs/loading.png'
 
+// Component: modal that shows when user wants to save the report 
 function SaveModal({ isOpen, onClose, modalMessage}) {
-
     if (!isOpen) return null;
 
     const handleClose = () => {
         onClose();
-    
     };
 
     const handleSubmit = (e) => {

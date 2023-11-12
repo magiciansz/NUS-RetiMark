@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// POST req to create patient
 async function createPatient({
   accessToken,
   patient,
@@ -14,19 +15,8 @@ async function createPatient({
   formData.append('name', patient.name);
   formData.append('date_of_birth', patient.dateOfBirth);
   formData.append('sex', patient.gender);
-  formData.append(
-    'left_diabetic_retinopathy_stage',
-    leftEyeResults.diabetic[0]
-  );
-  formData.append(
-    'right_diabetic_retinopathy_stage',
-    rightEyeResults.diabetic[0]
-  );
-  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
-  formData.append(
-    'right_diabetic_retinopathy_prob',
-    rightEyeResults.diabetic[1]
-  );
+  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.amd);
+  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.amd);
   formData.append('left_ocular_prob', leftEyeResults.amd);
   formData.append('right_ocular_prob', rightEyeResults.amd);
   formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
@@ -37,7 +27,7 @@ async function createPatient({
   formData.append('report_pdf', report);
 
   return axios.post(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient?timezone=Asia/Singapore`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient?timezone=Asia/Singapore`,
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -46,6 +36,7 @@ async function createPatient({
   );
 }
 
+// PATCH req to update patient
 async function updatePatient({
   accessToken,
   id,
@@ -57,19 +48,8 @@ async function updatePatient({
   rightEyeResults,
 }) {
   const formData = new FormData();
-  formData.append(
-    'left_diabetic_retinopathy_stage',
-    leftEyeResults.diabetic[0]
-  );
-  formData.append(
-    'right_diabetic_retinopathy_stage',
-    rightEyeResults.diabetic[0]
-  );
-  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic[1]);
-  formData.append(
-    'right_diabetic_retinopathy_prob',
-    rightEyeResults.diabetic[1]
-  );
+  formData.append('left_diabetic_retinopathy_prob', leftEyeResults.diabetic);
+  formData.append('right_diabetic_retinopathy_prob', rightEyeResults.diabetic);
   formData.append('left_ocular_prob', leftEyeResults.amd);
   formData.append('right_ocular_prob', rightEyeResults.amd);
   formData.append('left_glaucoma_prob', leftEyeResults.glaucoma);
@@ -79,7 +59,7 @@ async function updatePatient({
   formData.append('left_eye_image', leftEye);
   formData.append('report_pdf', report);
   return axios.patch(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient/${id}?timezone=Asia/Singapore`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient/${id}?timezone=Asia/Singapore`,
     formData,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -88,9 +68,10 @@ async function updatePatient({
   );
 }
 
+// GET req to retrieve past reports for a particular patient
 async function getPastReports({ accessToken, id, sort }) {
   return axios.get(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient-history/${id}/reports`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient-history/${id}/reports`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { sort },
@@ -98,9 +79,10 @@ async function getPastReports({ accessToken, id, sort }) {
   );
 }
 
+// GET req to search for a particular patient
 async function searchPatient({ accessToken, query }) {
   return axios.get(
-    `${process.env.REACT_APP_ENDPOINT_URL}/api/v1/patient/search`,
+    `${process.env.REACT_APP_EXPRESS_ENDPOINT_URL}/api/v1/patient/search`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: { query },

@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-// import { useSelector } from 'react-redux';
-import { Link } from "react-router-dom";
+import React, { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Modal from "./doc-notes";
@@ -10,6 +8,7 @@ import PatientApi from "../../../apis/PatientApi";
 
 import "./report.css";
 
+// Component: Report generated which consists of patient details, uploaded images, and risk probabilities
 function Report({
   patient,
   leftEyeImage,
@@ -25,14 +24,11 @@ function Report({
   const [openSaveModal, setOpenSaveModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("Saving In Progress");
 
-  console.log("patient in report", newPatient);
   const handleDownloadPDF = () => {
     if (reportRef.current) {
       html2canvas(reportRef.current).then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]); // Use canvas dimensions for PDF
-
-        // Add the captured image to the PDF
+        const pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]); 
         pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
 
         // Save the PDF
@@ -66,16 +62,12 @@ function Report({
   };
 
   const handleSave = async () => {
-    // First, capture the content of the report as a PDF
-    console.log("saving report");
     setModalMessage("Saving In Progress");
     setOpenSaveModal(true);
     if (reportRef.current) {
       html2canvas(reportRef.current).then(async (canvas) => {
         const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]); // Use canvas dimensions for PDF
-
-        // Add the captured image to the PDF
+        const pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]);
         pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
 
         // Convert the PDF to a blob
@@ -84,7 +76,6 @@ function Report({
         // Now, send the PDF blob to the API
         const accessTokenData = await getAccessToken();
         if (accessTokenData) {
-          console.log("theres access token", accessTokenData);
           const rightEyeBlob = await fetch(rightEyeImage).then((response) =>
             response.blob()
           );
@@ -104,19 +95,16 @@ function Report({
           };
           try {
             if (!newPatient) {
-              // Include the 'id' field conditionally
+              // Include the 'id' field if its an existing patient
               requestParams.id = patient.id;
             }
-            console.log("request params", requestParams);
-            // const res = await PatientApi.createPatient(requestParams);
             const res = newPatient
               ? await PatientApi.createPatient(requestParams)
               : await PatientApi.updatePatient(requestParams);
-            console.log("res from create in save report", res);
+            // console.log("Res from API", res);
             setModalMessage("Successfully saved!");
           } catch (err) {
-            console.log("failed to call endpoint");
-            // last error is 404 error from update patient
+            // Display different message in the modal based on the error code
             if (err.response.data.status === 401) {
               setModalMessage("Save failed. Authentication failed.");
             } else if (err.response.data.status === 409) {
@@ -134,10 +122,7 @@ function Report({
         }
       });
     }
-    // onSave();
   };
-
-  console.log("patient detials", patient);
 
   return (
     <div>
@@ -169,7 +154,7 @@ function Report({
             <div className="sub-header">Results</div>
             <br />
             Probability of Diabetic Retinopathy: <br />
-            Left: {(leftEyeResults.diabetic[1] * 100).toFixed(1)}% Stage {leftEyeResults.diabetic[0]} | Right: {(rightEyeResults.diabetic[1] * 100).toFixed(1)}% Stage {rightEyeResults.diabetic[0]}
+            Left: {(leftEyeResults.diabetic * 100).toFixed(1)}% | Right: {(rightEyeResults.diabetic * 100).toFixed(1)}%
             <br />
             <br />
             Probability of Age-related Macular Degeneration: <br />

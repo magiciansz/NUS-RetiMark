@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { FaSearch } from "react-icons/fa";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import React, { useState } from "react";
 
 import "./home.css";
 import Report from "./report";
 import Modal from "./modal";
 
-import BlurEye from '../../../css/imgs/blur_eye.JPG';
+import Basketball from '../../../css/imgs/basketball.jpeg';
 import CroppedEye from '../../../css/imgs/cropped_eye.JPG';
 import GoodEye from '../../../css/imgs/eye_right.jpeg';
+import Loading from '../../../css/imgs/loading.png'
 
+// Component: Home page
 function Home() {
   const [showReport, setShowReport] = useState(false);
   const [patient, setPatient] = useState();
@@ -19,15 +19,31 @@ function Home() {
 	const [isNewPatient, setIsNewPatient] = useState(false);
 	const [leftEyeRes, setLeftEyeRes] = useState(null);
   const [rightEyeRes, setRightEyeRes] = useState(null);
+  const [loading, setLoading] = useState(false)
+
+  const runModels = async (image, eye) => {
+    const formData = new FormData();
+    formData.append("image", image);
+    setLoading(true)
+    try {
+        const response = await fetch(`${process.env.REACT_APP_FLASK_ENDPOINT_URL}/model-staging/api/v1/model`, {
+            method: 'POST',
+            body: formData
+        })
+        const result = await response.json()
+        eye == "left" ? setLeftEyeRes(result) : setRightEyeRes(result);
+    } catch (error) {
+        console.error(error);
+    }
+    setLoading(false)
+};
 
   const openModal = () => {
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    console.log("Before: isModalOpen", isModalOpen);
     setIsModalOpen(false);
-    console.log("After: isModalOpen", isModalOpen);
   };
 
   const handleShowReport = (value) => {
@@ -49,18 +65,19 @@ function Home() {
   const newPatient = (value) => {
     setIsNewPatient(value);
 	};
-	
-	const leftEyeResults = (value) => {
-    setLeftEyeRes(value);
-  };
-
-  const rightEyeResults = (value) => {
-    setRightEyeRes(value);
-  };
 
   const closeReport = () => {
     setShowReport(false);
   };
+
+  const leftEyeFile = (value) => {
+    runModels(value, 'left')
+  }
+
+  const rightEyeFile = (value) => {
+    runModels(value, 'right')
+  }
+
   return (
     <div className="home-page">
       {!showReport && (
@@ -91,8 +108,8 @@ function Home() {
                 <div className="req">Bad example. The entire iris is not visible in the image.</div>
               </div>
               <div className="image">
-                <img src={BlurEye} alt="Example" />
-                <div className="req">Bad example. The image is blur.</div>
+                <img src={Basketball} alt="Example" />
+                <div className="req">Bad example. The image uploaded is not an image of an eye.</div>
               </div>
             </div>
           </div>
@@ -108,28 +125,27 @@ function Home() {
             selectedPatient={selectedPatient}
             leftEyeImage={leftEyeImage}
             rightEyeImage={rightEyeImage}
-						newPatient={newPatient}
-						leftEyeResults={leftEyeResults}
-            rightEyeResults={rightEyeResults}
+            newPatient={newPatient}
+            leftEyeFile={leftEyeFile}
+            rightEyeFile={rightEyeFile}
           />
         </div>
       )}
-      {showReport && (
+      {loading && <div className='loading-report'>
+        <img src={Loading} alt="loading" className='loading-img'/>
+      </div>}
+      {!loading && showReport && (
+        leftEyeRes && rightEyeRes &&
         <Report
           patient={patient}
           leftEyeImage={leftEye}
           rightEyeImage={rightEye}
           onSave={closeReport}
-					newPatient={isNewPatient}
-					leftEyeResults={leftEyeRes}
+          newPatient={isNewPatient}
+          leftEyeResults={leftEyeRes}
           rightEyeResults={rightEyeRes}
-        />
+          /> 
       )}
-      {/* <div className='prediction-container'>
-				{showReport && <div className='new-prediction' onClick={handleNewPrediction}>
-					Save
-				</div>}
-			</div> */}
     </div>
   );
 }
