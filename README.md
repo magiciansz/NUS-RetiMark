@@ -157,6 +157,9 @@ We also provide a `deploy_flask_staging.yml` file in the `.github/workflows/` di
 
 ### Automated Version Caching
 
+![Screenshot 2023-11-12 at 4 33 29 PM](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/8f22ebad-4408-4a02-bde2-96f2b48a2409)
+
+
 To enable automated version caching each time the develop branch is merged into main, we provide a `release.yml` in the `.github/workflows/` directory. This workflow has to be run manually. It automatically compiles all changes made based on pull request titles:
 
 ![Screenshot 2023-11-12 at 4 15 02 PM](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/9aa1abf0-ffa5-4117-8f8a-2ffa40efd5ee)
@@ -169,6 +172,8 @@ The changes are then summarised in the release notes.  The automatic capturing o
 A .zip file is generated as well, which archives all source code for the release.
 
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/80561550/401bdb75-5244-4604-923b-6e4fe4739157)
+
+
 
 
 ### API Documentation
