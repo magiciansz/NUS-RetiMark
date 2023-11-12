@@ -29,6 +29,9 @@ The past reports page displays all the past reports from previous visits for the
 ![image](https://github.com/magiciansz/NUS-RetiMark/assets/60168038/8b1cd704-6f7f-42eb-99a5-701eb2a9c2ce)
 
 ## Dashboard
+
+You may view a recorded walkthrough of the fundus dashboard here: [Link to demo](https://drive.google.com/file/d/1KbLMYrM_48Y2hQpifzG17TRcp9udF9a1/view)
+
 The fundus dashboard is developed using the Streamlit library in Python. The purpose of the dashboard is to consolidate relevant patient data and medical images and to provide a comprehensive view of each patient's medical history and current condition. The fundus dashboard is a client-facing application which showcases the risk prediction from the deep learning model results.
 
 ### Login Page
