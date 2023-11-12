@@ -5,15 +5,21 @@ import { getAccessToken } from './Auth';
 // Component: Routes that require authorisation 
 const AuthRoute = () => {
     const [accessToken, setAccessToken] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchAccessToken() {
             const token = await getAccessToken();
             setAccessToken(token);
+            setLoading(false);
         }
 
         fetchAccessToken();
     }, []);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         accessToken ? <Outlet/> : <Navigate to="/login"/>
