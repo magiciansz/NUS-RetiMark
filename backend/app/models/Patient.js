@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../../config/database");
-
+// test
 const afterCreateUpdateHandler = async (record, transaction) => {
   await sequelize.models.PatientHistory.create(
     {
