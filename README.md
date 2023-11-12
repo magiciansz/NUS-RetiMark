@@ -7,75 +7,42 @@
 Hi! We are a group of NUS Students working with RetiMark, harnessing AI algorithms to develop a cutting-edge solution that accurately assesses the risk of various eye diseases. Our solution comprises of three components, namely our deep learning models, a dashboard and a web application.
 
 ## Deep Learning
-The deep learning models were developed using the PyTorch library. The deep learning model was trained on Kaggle datasets for [age-related macular degeneration](https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k), [glaucoma](https://www.kaggle.com/datasets/arnavjain1/glaucoma-datasets) and [diabetic retinopathy](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/data). The deep learning model aims to provide accurate predictions of a patient's eye condition by taking retinal fundus images as inputs and producing a risk percentage as output.
+The deep learning models aim to predict the presence of three eye conditions from eye fundus images. The deep learning models were developed using the PyTorch library. The models were trained on Kaggle datasets for [age-related macular degeneration](https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k), [glaucoma](https://www.kaggle.com/datasets/arnavjain1/glaucoma-datasets) and [diabetic retinopathy](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/data). 
 
 ### Model Architecture
-To train our model, we used transfer learning by using a pretrained ResNet model. We opted to use a pretrained model as it comes initialised with weights based on a significantly larger dataset than what we have access to, and would allow us to make use of transfer learning to train our model on the retinal fundus imaging datasets.
 
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/e8800fe0-df55-493f-bb44-4eba78ca7964)
+The models were trained using three prominent deep learning architectures, namely VGG, ResNet, and Inception. Each of these architectures come with its unique characteristics and design philosophies. We wanted to capitalise on transfer learning in all three architectures, as they have been pre-trained on massive datasets like ImageNet, enabling them to capture a broad range of features. Experimentation was definitely key to our model training. By testing multiple architectures, we could iteratively refine our models based on the performance metrics. 
 
+Ultimately, we concluded that the ResNet architecture produced the best results for all three datasets. 
 
-ResNet already has its own convolutional layers in the model architecture. From our testing, adding additional convolutional and pooling layers in the model architecture did not seem to improve performance, so we opted to keep the additional model architecture in our code simpler. If we needed to make the model more or less complex, we did so by changing the number of convolutional layers and experimented with other numbers of convolutional layers such as ResNet18 and ResNet50. Ultimately, we settled on ResNet34 as it seemed to yield the best results from many different sets of parameter tuning.
-
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/060f2c41-8de2-4e09-a552-9dd12ae1d46e)
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/1a27a60d-5a47-4fda-b0a7-aa9564878773)
+|Model|Finalised Architecture|
+|---|---|
+|Age-related Macular Degeneration|ResNet50|
+|Glaucoma|ResNet50|
+|Diabetic Retinopathy|ResNet18|
 
 ### Hyperparameter Tuning
-To tune model performance, we decided to focus on 3 hyperparameters.
+To tune model performance, we focused on three hyperparameters.
 
-Learning rate controls the step size required for a model to reach the minimum loss function. Learning rate is one of the key hyperparameters that is often tuned when optimizing model performance, and has an impact on the loss curve. Since our aim was to find a set of hyperparameters that showed a loss curve with a good fit instead of overfitting, we opted to tune learning rate.
+The learning rate controls the step size during optimization, necessary to reach the minimum loss function. It is a very crucial hyperparameter to adjust when balancing between underfitting and overfitting the model.
 
-Weight decay was chosen as well since the model was initially overfitting. The model training initially showed high training recall scores but low validation scores, suggesting that the model might be overfitting by overgeneralizing on training data. The fluctuating validation loss scores further confirmed this. Weight decay helps to prevent overfitting by discouraging the model from assigning excessively large weights to features. By penalizing large weights, weight decay encourages the model to generalize better to unseen data, ensuring the model's perforamnce on new, previously unseen examples.
+Adding and adjusting the dropout layers and dropout rate is key. It is an L1 regularization technique implemented in the model architecture to curb overreliance on specific neurons, building a more robust and resilient model against noise and overfitting.
 
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/6b946c40-0e07-4c84-9121-2e83d6d1143a)
+Lastly, we also fine-tuned the weight decay parameter, applying L2 regularization to prevent overfitting and enhance the generalization capabilities of our models. Weight decay helps to prevent overfitting by discouraging the model from assigning excessively large weights to features. By penalizing large weights, weight decay encourages the model to generalize better to unseen data, ensuring the model's performance on new, previously unseen examples.
 
-Dropout is a regularization technique used to prevent overfitting by randomly setting a proportion of neural network neurons to zero during training. Similar to our process for weight decay, we noticed that the model tended to overfit as indicated by increasing validation loss and poor performance on validation data. As such, we opted to increase dropout, which allows the model to become more robust and generalize better to unseen data.
+|Model|Learning Rate|Weight Decay|
+|---|---|---|
+|Age-related Macular Degeneration|0.0001|0.0001|
+|Glaucoma|0.00001|0.005|
+|Diabetic Retinopathy|0.001|0.001|
 
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/060f2c41-8de2-4e09-a552-9dd12ae1d46e)
-
-### AMD Results
-##### Loss
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/e424dc9c-c7d3-4b76-b100-f23e9ae86242)
-##### Recall
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/c88c7768-7bdc-4bd4-84d1-2e748cb355a7)
-##### Accuracy
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/e4242efd-331b-4160-9c5b-8e1904ea88cf)
-##### Precision
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/e600476b-87ab-43be-855d-dc10083ed529)
-##### F1 Score
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/92c0c50f-325d-4b0b-971e-60dec90e6765)
-##### AUC
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/65c2adf8-cd79-459f-b48f-ebf7d1182214)
-
-
-### Glaucoma Results
-##### Loss
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/6808e524-5352-4ba9-aa80-34f577925432)
-##### Recall
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/be320c4e-b3fc-4924-8e3b-33f137f8dce1)
-##### Accuracy
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/fc2a839b-4817-45cf-8274-e513cbd7a28e)
-##### Precision
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/86e1aba1-da23-498b-840c-cbd352634881)
-##### F1 Score
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/e8f8eac4-09c6-42f0-9637-a1650c172a06)
-##### AUC
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/578df2b8-8297-45ba-a49d-89474d882880)
-
-### Diabetic Retinopathy Results
-##### Loss
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/663ab337-8020-46f0-a3e2-6209e416a4f4)
-##### Recall
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/88663175-9534-4836-87f6-260c0df31c5a)
-##### Accuracy
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/3b9ba4b7-1f80-4abf-bd05-5295fb923b21)
-##### Precision
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/bc46f747-c6e2-4b9c-8d6e-b76d8cb259f0)
-##### F1 Score
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/64f8bb3b-dd5c-4bfc-a860-6c816febbfee)
-##### AUC
-![image](https://github.com/magiciansz/NUS-RetiMark/assets/90398774/b2f6ddc7-038b-4dbd-8248-2c700a24686b)
-
+### Results
+We decided to focus on sensitivity, also known as the recall score, as the performance metric when iteratively refining our models. Given the potentially severe consequences of a misdiagnosis, we recognise the importance of minimising false negatives, as it can potentially put the patient’s health at risk. 
+|Model|Validation Recall Score|
+|---|---|
+|Age-related Macular Degeneration|0.982|
+|Glaucoma|0.951|
+|Diabetic Retinopathy|0.958|
 
 ## Dashboard
 
